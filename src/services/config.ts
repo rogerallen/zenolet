@@ -26,7 +26,8 @@ export interface ZenoletConfig {
 
 export async function loadZenoletConfig(): Promise<ZenoletConfig> {
   try {
-    const res = await fetch('/zenolet.config.json');
+    const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+    const res = await fetch(`${base}zenolet.config.json`);
     if (!res.ok) return {};
     return await res.json();
   } catch (err) {

@@ -1,11 +1,11 @@
 const CACHE_NAME = 'zenolet-v1';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/zenolet.config.json',
-  '/catalog.json',
-  '/manifest.json',
-  '/icon.svg'
+  './',
+  './index.html',
+  './zenolet.config.json',
+  './catalog.json',
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (event) => {

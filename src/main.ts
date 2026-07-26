@@ -168,7 +168,8 @@ async function init() {
 
   // Register PWA Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
+    const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+    navigator.serviceWorker.register(`${base}sw.js`).catch((err) => {
       console.warn('[Zenolet PWA] SW registration failed:', err);
     });
   }
