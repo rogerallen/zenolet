@@ -174,6 +174,17 @@ export function renderTimeline(
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0 || totalPagesSpreads <= 1) return;
 
+  const progressTrack = document.getElementById('progress-track');
+  if (progressTrack) {
+    progressTrack.onclick = (e: MouseEvent) => {
+      const rect = progressTrack.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
+      onJumpToSpread(targetSpread);
+    };
+  }
+
   const beginDot = document.createElement('div');
   beginDot.className = 'timeline-dot begin-dot';
   beginDot.style.left = '0%';
