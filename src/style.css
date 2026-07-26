@@ -505,32 +505,81 @@ a:hover {
   color: var(--text-secondary);
 }
 
-/* Horizontal Column Reader Viewport */
-.reader-viewport {
-  flex: 1;
+/* Horizontal Column Reader Layout */
+.reader-container {
+  width: 100%;
   height: calc(100vh - var(--header-height) - var(--footer-height));
-  overflow-x: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.reader-viewport {
+  width: 100%;
+  height: 100%;
+  overflow-x: scroll;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   position: relative;
   user-select: text;
   cursor: grab;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.reader-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .reader-viewport.active {
   cursor: grabbing;
 }
 
-.reader-content {
+.snap-points {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.snap-target {
+  height: 100%;
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+.reader-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 40px 0;
+  pointer-events: auto;
+  z-index: 2;
+
+  column-fill: auto;
+  column-gap: 0;
+  
   font-family: var(--font-serif);
   line-height: 1.7;
   color: var(--text-primary);
-  column-fill: auto;
-  column-gap: 5vw;
+}
+
+.reader-content > * {
+  padding-left: 40px;
+  padding-right: 40px;
   box-sizing: border-box;
-  padding: 40px 5vw;
+}
+
+@media (max-width: 768px) {
+  .reader-content > * {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 .reader-content h1, .reader-content h2, .reader-content h3 {
@@ -547,20 +596,6 @@ a:hover {
 
 .reader-content p:first-of-type {
   text-indent: 0;
-}
-
-.snap-points {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  display: flex;
-  pointer-events: none;
-}
-
-.snap-target {
-  height: 100%;
-  scroll-snap-align: start;
 }
 
 /* Timeline Footer */
