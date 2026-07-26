@@ -1,0 +1,16 @@
+{
+  "short_name": "Zenolet",
+  "name": "Zenolet Reader — Serverless Micro-Library",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#fbf0d9",
+  "theme_color": "#8f2d14",
+  "display": "standalone",
+  "orientation": "any"
+}

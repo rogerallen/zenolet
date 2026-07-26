@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zenolet — Micro-Library & Horizontal Gutenberg Reader</title>
+  <meta name="description" content="Serverless, privacy-first, horizontal page-flowing PWA for reading top 1,000 Project Gutenberg classics." />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#8f2d14" />
+</head>
+<body>
+  <div id="app">
+    <!-- Initial Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Initializing Zenolet Micro-Library...</p>
+    </div>
+
+    <!-- Library Bookshelf View -->
+    <div id="library-view" class="view">
+      <header id="curator-header-container" class="library-header"></header>
+
+      <div class="library-toolbar">
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search top 1,000 classics by title, author, or genre..." />
+          </div>
+          <button id="discover-btn" class="btn-primary">
+            <span>🌐</span> Discover Gutenberg
+          </button>
+        </div>
+        <div id="genre-pills-container" class="genre-pills-scroll"></div>
+      </div>
+
+      <main class="bookshelf-container">
+        <div class="bookshelf-meta-row">
+          <span id="book-count">Loading catalog...</span>
+          <span id="offline-badge" style="font-size: 0.85rem;">⚡ Serverless & Sovereign</span>
+        </div>
+        <div id="bookshelf-grid" class="bookshelf-grid"></div>
+      </main>
+    </div>
+
+    <!-- Horizontal Reader View -->
+    <div id="reader-view" class="view hidden">
+      <header class="reader-header">
+        <div class="reader-header-left">
+          <button id="back-button" class="btn-icon" title="Return to Bookshelf">
+            <span>←</span> Bookshelf
+          </button>
+          <div class="reader-book-meta">
+            <h2 id="reader-book-title" class="reader-book-title">Book Title</h2>
+            <p id="reader-book-author" class="reader-book-author">Author</p>
+          </div>
+        </div>
+
+        <div class="reader-header-right" style="display: flex; gap: 10px; align-items: center;">
+          <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)">
+            <span>📱</span> Read on Phone
+          </button>
+          <button id="settings-toggle" class="btn-icon" title="Reading Settings">
+            <span>⚙️</span> Settings
+          </button>
+        </div>
+      </header>
+
+      <!-- Settings Dropdown Panel -->
+      <div id="settings-panel" class="settings-panel">
+        <div class="settings-group">
+          <span class="settings-label">Theme</span>
+          <div class="theme-options">
+            <button class="theme-btn" data-theme="paper">Paper</button>
+            <button class="theme-btn" data-theme="sepia">Sepia</button>
+            <button class="theme-btn" data-theme="charcoal">Charcoal</button>
+            <button class="theme-btn" data-theme="night">Night</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <span class="settings-label">Font Size</span>
+          <div class="font-controls">
+            <button id="font-decrease" class="btn-font">A-</button>
+            <span id="font-size-display" style="font-weight: 600;">18px</span>
+            <button id="font-increase" class="btn-font">A+</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <span class="settings-label">Layout Columns</span>
+          <div class="layout-options">
+            <button class="layout-btn" data-columns="auto">Auto</button>
+            <button class="layout-btn" data-columns="1">1 Col</button>
+            <button class="layout-btn" data-columns="2">2 Col</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Horizontal Multi-Column Viewport -->
+      <div id="reader-viewport" class="reader-viewport">
+        <div id="snap-points" class="snap-points"></div>
+        <article id="reader-content" class="reader-content"></article>
+      </div>
+
+      <!-- Timeline Footer -->
+      <footer class="reader-footer">
+        <div class="timeline-row">
+          <span id="active-chapter-indicator" class="active-chapter-indicator">Chapter 1</span>
+          <div id="progress-track" class="progress-track">
+            <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+            <div id="timeline-ticks" class="timeline-ticks"></div>
+          </div>
+          <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- QR Code Mobile Handoff Modal Overlay -->
+    <div id="qr-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Read on Mobile</h3>
+          <button id="qr-close" class="btn-close">&times;</button>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+          Scan this QR code with your phone camera to seamlessly transfer your exact book and reading position:
+        </p>
+        <div class="qr-canvas-wrapper">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+        <input type="text" id="qr-url-input" class="qr-url-input" readonly />
+      </div>
+    </div>
+
+    <!-- Discover Gutenberg Modal Overlay -->
+    <div id="discover-overlay" class="modal-overlay"></div>
+    <aside id="discover-panel" class="discover-panel">
+      <header class="discover-header">
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem;">Project Gutenberg Catalog</h3>
+        <button id="discover-close" class="btn-close">&times;</button>
+      </header>
+      <div class="discover-body">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="discover-search-input" class="search-input" placeholder="Search Project Gutenberg repository..." />
+        </div>
+        <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
