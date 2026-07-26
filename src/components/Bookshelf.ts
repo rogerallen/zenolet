@@ -1,7 +1,6 @@
-// --- Bookshelf Component for Zenolet ---
 import type { CatalogBook } from '../services/catalog.js';
 import type { CuratorConfig } from '../services/config.js';
-import { getStoredProgress } from '../services/storage.js';
+import { getStoredProgress, type BookMetadata } from '../services/storage.js';
 
 export function escapeHtml(str: string): string {
   return str
@@ -157,6 +156,66 @@ export function renderBookshelf(
       if (book) {
         onToggleOffline(book);
       }
+    });
+  });
+}
+
+export function renderCachedBooksShelf(
+  gridContainer: HTMLDivElement,
+  countBadge: HTMLSpanElement,
+  cachedBooks: BookMetadata[],
+  maxLimit: number,
+  onOpenBook: (bookId: string) => void,
+  onRemoveBook: (bookId: string) => void
+): void {
+  countBadge.textContent = `${cachedBooks.length} / ${maxLimit} cached`;
+
+  if (cachedBooks.length === 0) {
+    gridContainer.innerHTML = `
+      <div class="cached-empty-placeholder">
+        <span>📖 No books saved for offline reading yet. Click 📥 on any title below to store up to ${maxLimit} books locally.</span>
+      </div>
+    `;
+    return;
+  }
+
+  gridContainer.innerHTML = cachedBooks
+    .map((book) => {
+      const progressFraction = getStoredProgress(book.id);
+      let progressPct = '';
+      if (progressFraction !== null && progressFraction > 0) {
+        const pct = Math.round(progressFraction * 100);
+        progressPct = `<span class="cached-progress-badge">${pct}% read</span>`;
+      }
+
+      return `
+        <div class="cached-book-card" data-book-id="${escapeHtml(book.id)}">
+          <div class="cached-book-header">
+            <h4 class="cached-book-title">${escapeHtml(book.title)}</h4>
+            <button class="btn-remove-cached" data-book-id="${escapeHtml(book.id)}" title="Remove from offline cache">&times;</button>
+          </div>
+          <p class="cached-book-author">by ${escapeHtml(book.author)}</p>
+          <div class="cached-book-footer">
+            <span class="cached-status">✓ Offline</span>
+            ${progressPct}
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+
+  gridContainer.querySelectorAll('.cached-book-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = card.getAttribute('data-book-id');
+      if (id) onOpenBook(id);
+    });
+  });
+
+  gridContainer.querySelectorAll('.btn-remove-cached').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-book-id');
+      if (id) onRemoveBook(id);
     });
   });
 }

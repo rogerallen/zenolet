@@ -9,10 +9,12 @@ import {
   getStoredBookOffline,
   removeBookOffline,
   getDownloadedBookSet,
+  getDownloadedMetadataList,
   getStoredProgress,
-  restoreBookProgressByFraction
+  restoreBookProgressByFraction,
+  MAX_OFFLINE_BOOKS
 } from './services/storage.ts';
-import { renderCuratorHeader, renderGenrePills, renderBookshelf } from './components/Bookshelf.ts';
+import { renderCuratorHeader, renderGenrePills, renderBookshelf, renderCachedBooksShelf } from './components/Bookshelf.ts';
 import {
   setTheme,
   setFontSize,
@@ -61,6 +63,8 @@ const DOM = {
   libraryView: document.getElementById('library-view') as HTMLDivElement,
   readerView: document.getElementById('reader-view') as HTMLDivElement,
   curatorHeader: document.getElementById('curator-header-container') as HTMLDivElement,
+  cachedBooksGrid: document.getElementById('cached-books-grid') as HTMLDivElement,
+  cachedCountBadge: document.getElementById('cached-count-badge') as HTMLSpanElement,
   genrePills: document.getElementById('genre-pills-container') as HTMLDivElement,
   bookshelfGrid: document.getElementById('bookshelf-grid') as HTMLDivElement,
   bookCount: document.getElementById('book-count') as HTMLSpanElement,
@@ -171,6 +175,35 @@ async function init() {
 }
 
 function updateBookshelfView() {
+  const cachedMeta = getDownloadedMetadataList();
+
+  renderCachedBooksShelf(
+    DOM.cachedBooksGrid,
+    DOM.cachedCountBadge,
+    cachedMeta,
+    MAX_OFFLINE_BOOKS,
+    (bookId) => {
+      const book = allBooks.find((b) => b.id === bookId) || {
+        id: bookId,
+        title: `Book #${bookId}`,
+        author: 'Project Gutenberg',
+        subjects: ['Cached'],
+        downloads: 0
+      };
+      openBook(book);
+    },
+    async (bookId) => {
+      const book = allBooks.find((b) => b.id === bookId);
+      if (book) {
+        await toggleOfflineBook(book);
+      } else {
+        await removeBookOffline(bookId);
+        downloadedBooks.delete(bookId);
+        updateBookshelfView();
+      }
+    }
+  );
+
   const filtered = filterCatalog(allBooks, searchQuery, currentGenre);
   renderBookshelf(
     filtered,

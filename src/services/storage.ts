@@ -14,7 +14,7 @@ export interface BookDetails {
 }
 
 export const BOOK_CACHE_NAME = 'zenolet-books-v1';
-export const MAX_OFFLINE_BOOKS = 10;
+export const MAX_OFFLINE_BOOKS = 8;
 
 // --- Offline Book Storage (Cache API) ---
 export async function saveBookOffline(book: BookMetadata, data: BookDetails): Promise<void> {
