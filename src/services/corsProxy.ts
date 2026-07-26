@@ -19,3 +19,18 @@ export function buildProxyUrl(targetUrl: string, proxyUrlSetting?: string): stri
     return `${baseProxy}${encodeURIComponent(targetUrl)}`;
   }
 }
+
+export function getGutenbergCandidateUrls(bookId: string, rawHtmlUrl?: string): string[] {
+  const candidates: string[] = [];
+
+  // Direct CDN paths (bypasses 302 redirects like ebooks/1695.html.images)
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images.html`);
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}.html`);
+  candidates.push(`https://www.gutenberg.org/files/${bookId}/${bookId}-h/${bookId}-h.htm`);
+
+  if (rawHtmlUrl && !candidates.includes(rawHtmlUrl)) {
+    candidates.push(rawHtmlUrl);
+  }
+
+  return candidates;
+}

@@ -2,7 +2,7 @@ import './style.css';
 import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
 import { fetchCatalog, filterCatalog, extractPopularGenres, type CatalogBook } from './services/catalog.ts';
-import { buildProxyUrl } from './services/corsProxy.ts';
+import { buildProxyUrl, getGutenbergCandidateUrls } from './services/corsProxy.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
@@ -194,16 +194,29 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
     if (offlineData) {
       rawContent = offlineData.content;
     } else {
-      // 2. Fetch via CORS Proxy
-      let fetchUrl = book.htmlUrl;
-      if (!fetchUrl) {
-        fetchUrl = `https://www.gutenberg.org/files/${book.id}/${book.id}-h/${book.id}-h.htm`;
-      }
-      const proxiedUrl = buildProxyUrl(fetchUrl, config.proxyUrl);
+      // 2. Fetch via candidate static URLs (bypassing 302 redirects)
+      const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
+      let lastErr: Error | null = null;
 
-      const res = await fetch(proxiedUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      rawContent = await res.text();
+      for (const candidate of candidateUrls) {
+        try {
+          const proxiedUrl = buildProxyUrl(candidate, config.proxyUrl);
+          const res = await fetch(proxiedUrl);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.length > 200) {
+              rawContent = text;
+              break;
+            }
+          }
+        } catch (err) {
+          lastErr = err as Error;
+        }
+      }
+
+      if (!rawContent) {
+        throw lastErr || new Error(`Could not load text for book #${book.id}`);
+      }
     }
 
     // Process & Render Content
@@ -263,11 +276,24 @@ async function toggleOfflineBook(book: CatalogBook) {
   } else {
     DOM.loading.classList.remove('hidden');
     try {
-      let fetchUrl = book.htmlUrl || `https://www.gutenberg.org/files/${book.id}/${book.id}-h/${book.id}-h.htm`;
-      const proxiedUrl = buildProxyUrl(fetchUrl, config.proxyUrl);
-      const res = await fetch(proxiedUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const content = await res.text();
+      const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
+      let content = '';
+
+      for (const candidate of candidateUrls) {
+        try {
+          const proxiedUrl = buildProxyUrl(candidate, config.proxyUrl);
+          const res = await fetch(proxiedUrl);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.length > 200) {
+              content = text;
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!content) throw new Error('Failed to fetch offline content');
 
       await saveBookOffline(book, { metadata: book, content });
       downloadedBooks.add(book.id);
