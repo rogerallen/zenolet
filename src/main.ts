@@ -74,6 +74,10 @@ const DOM = {
   settingsPanel: document.getElementById('settings-panel') as HTMLDivElement,
   shareBtn: document.getElementById('share-btn') as HTMLButtonElement,
 
+  // Reader Navigation Arrows
+  prevPageBtn: document.getElementById('prev-page-btn') as HTMLButtonElement,
+  nextPageBtn: document.getElementById('next-page-btn') as HTMLButtonElement,
+
   // Reader Viewport
   readerViewport: document.getElementById('reader-viewport') as HTMLDivElement,
   readerContent: document.getElementById('reader-content') as HTMLElement,
@@ -409,6 +413,28 @@ function setupEventListeners() {
           openBook({ id, title, author, subjects: ['Imported'], downloads: 0, htmlUrl });
         });
       }, 400);
+    }
+  });
+
+  // Navigation Arrow Button Clicks
+  DOM.prevPageBtn.addEventListener('click', () => {
+    DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'smooth' });
+  });
+  DOM.nextPageBtn.addEventListener('click', () => {
+    DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'smooth' });
+  });
+
+  // Keyboard Shortcuts (Arrow Left/Right, Space)
+  document.addEventListener('keydown', (e) => {
+    if (readerState.currentView !== 'reader') return;
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'smooth' });
+    } else if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'smooth' });
     }
   });
 

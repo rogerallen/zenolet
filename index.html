@@ -97,12 +97,22 @@
         </div>
       </div>
 
-      <!-- Reader Container & Viewport -->
-      <main class="reader-container">
-        <div id="reader-viewport" class="reader-viewport">
-          <div id="snap-points" class="snap-points"></div>
-          <article id="reader-content" class="reader-content"></article>
+      <!-- Reader Main Area with Floating Navigation Arrows -->
+      <main id="reader-main" class="reader-main">
+        <button id="prev-page-btn" class="nav-arrow nav-arrow-left" aria-label="Previous Page" title="Previous Page (←)">
+          <span>‹</span>
+        </button>
+
+        <div id="reader-container" class="reader-container">
+          <div id="reader-viewport" class="reader-viewport">
+            <div id="snap-points" class="snap-points"></div>
+            <article id="reader-content" class="reader-content"></article>
+          </div>
         </div>
+
+        <button id="next-page-btn" class="nav-arrow nav-arrow-right" aria-label="Next Page" title="Next Page (→)">
+          <span>›</span>
+        </button>
       </main>
 
       <!-- Timeline Footer -->
