@@ -2,7 +2,7 @@ import './style.css';
 import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
 import { fetchCatalog, filterCatalog, extractPopularGenres, type CatalogBook } from './services/catalog.ts';
-import { buildProxyUrl, getGutenbergCandidateUrls } from './services/corsProxy.ts';
+import { getGutenbergCandidateUrls, fetchWithProxyFallback, processBookHtml } from './services/corsProxy.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
@@ -226,26 +226,24 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
 
   try {
     let rawContent = '';
+    let bookSourceUrl = `https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}-images.html`;
 
     // 1. Try Offline Cache API first
     const offlineData = await getStoredBookOffline(book.id);
     if (offlineData) {
       rawContent = offlineData.content;
     } else {
-      // 2. Fetch via candidate static URLs (bypassing 302 redirects)
+      // 2. Fetch via candidate static URLs & proxy fallbacks
       const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
       let lastErr: Error | null = null;
 
       for (const candidate of candidateUrls) {
         try {
-          const proxiedUrl = buildProxyUrl(candidate, config.proxyUrl);
-          const res = await fetch(proxiedUrl);
-          if (res.ok) {
-            const text = await res.text();
-            if (text && text.length > 200) {
-              rawContent = text;
-              break;
-            }
+          const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
+          if (text && text.length > 200) {
+            rawContent = text;
+            bookSourceUrl = candidate;
+            break;
           }
         } catch (err) {
           lastErr = err as Error;
@@ -257,9 +255,9 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
       }
     }
 
-    // Process & Render Content
+    // Process & Render Content (including relative image URL proxy rewriting)
     if (rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')) {
-      DOM.readerContent.innerHTML = sanitizeBookHtml(rawContent);
+      DOM.readerContent.innerHTML = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
     } else {
       DOM.readerContent.innerHTML = await marked.parse(rawContent);
     }
@@ -296,17 +294,6 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
   }
 }
 
-function sanitizeBookHtml(rawHtml: string): string {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rawHtml, 'text/html');
-
-  // Strip headers, scripts, styles, boilerplate
-  doc.querySelectorAll('script, style, iframe, header, footer').forEach((node) => node.remove());
-
-  const bodyContent = doc.body ? doc.body.innerHTML : rawHtml;
-  return bodyContent;
-}
-
 async function toggleOfflineBook(book: CatalogBook) {
   if (downloadedBooks.has(book.id)) {
     await removeBookOffline(book.id);
@@ -316,24 +303,23 @@ async function toggleOfflineBook(book: CatalogBook) {
     try {
       const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
       let content = '';
+      let bookSourceUrl = `https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}-images.html`;
 
       for (const candidate of candidateUrls) {
         try {
-          const proxiedUrl = buildProxyUrl(candidate, config.proxyUrl);
-          const res = await fetch(proxiedUrl);
-          if (res.ok) {
-            const text = await res.text();
-            if (text && text.length > 200) {
-              content = text;
-              break;
-            }
+          const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
+          if (text && text.length > 200) {
+            content = text;
+            bookSourceUrl = candidate;
+            break;
           }
         } catch (_) {}
       }
 
       if (!content) throw new Error('Failed to fetch offline content');
 
-      await saveBookOffline(book, { metadata: book, content });
+      const processedContent = processBookHtml(content, bookSourceUrl, config.proxyUrl);
+      await saveBookOffline(book, { metadata: book, content: processedContent });
       downloadedBooks.add(book.id);
     } catch (err) {
       alert(`Could not download "${book.title}" for offline reading.`);
