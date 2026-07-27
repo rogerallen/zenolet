@@ -1,14 +1,14 @@
 {
-  "siteTitle": "Alexandria Micro-Library",
+  "siteTitle": "Roger's Zenolet Library",
   "curator": {
-    "name": "Roger Allen",
-    "avatar": "https://github.com/rogerallen.png",
-    "bio": "A personal micro-library of timeless literature and early sci-fi classics.",
-    "link": "https://github.com/rogerallen"
+      "name": "Roger Allen",
+      "avatar": "https://github.com/rogerallen.png",
+      "bio": "A personal micro-library of 1,000 timeless classics.",
+      "link": "https://github.com/rogerallen"
   },
   "defaultTheme": "sepia",
   "fontSize": 18,
   "layoutColumns": "auto",
-  "proxyUrl": "https://corsproxy.io/?",
+  "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev",
   "customBooks": []
 }
