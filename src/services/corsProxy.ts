@@ -97,6 +97,12 @@ export function processBookHtml(
         }
         const proxiedSrc = buildProxyUrl(absUrl, proxyUrlSetting);
         img.setAttribute('src', proxiedSrc);
+        img.removeAttribute('width');
+        img.removeAttribute('height');
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = 'calc(100vh - 160px)';
+        img.style.height = 'auto';
+        img.style.objectFit = 'contain';
       } catch (err) {
         console.warn('[Zenolet Image] Resolution error for src:', src, err);
       }

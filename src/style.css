@@ -796,6 +796,32 @@ a:hover {
   text-indent: 0;
 }
 
+.reader-content img {
+  max-width: 100% !important;
+  max-height: calc(100vh - var(--header-height) - var(--footer-height) - 80px) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 1em auto !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.reader-content figure,
+.reader-content .figcenter,
+.reader-content .xhtml_center,
+.reader-content .figleft,
+.reader-content .figright,
+.reader-content .cover {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  text-align: center;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 1em auto;
+}
+
 /* Timeline Footer */
 .reader-footer {
   height: var(--footer-height);
