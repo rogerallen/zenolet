@@ -1,7 +1,7 @@
 import './style.css';
 import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
-import { fetchCatalog, filterCatalog, extractPopularGenres, type CatalogBook } from './services/catalog.ts';
+import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
 import { getGutenbergCandidateUrls, fetchWithProxyFallback, processBookHtml } from './services/corsProxy.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
@@ -12,9 +12,9 @@ import {
   getDownloadedMetadataList,
   getStoredProgress,
   restoreBookProgressByFraction,
-  MAX_OFFLINE_BOOKS
+  type BookMetadata
 } from './services/storage.ts';
-import { renderCuratorHeader, renderGenrePills, renderBookshelf, renderCachedBooksShelf } from './components/Bookshelf.ts';
+import { renderCuratorHeader, render8SlotGrid } from './components/Bookshelf.ts';
 import {
   setTheme,
   setFontSize,
@@ -37,8 +37,6 @@ let config: ZenoletConfig = {};
 let allBooks: CatalogBook[] = [];
 let downloadedBooks = new Set<string>();
 let activeBook: CatalogBook | null = null;
-let currentGenre = 'All';
-let searchQuery = '';
 
 const readerState: ReaderState = {
   currentView: 'library',
@@ -63,12 +61,7 @@ const DOM = {
   libraryView: document.getElementById('library-view') as HTMLDivElement,
   readerView: document.getElementById('reader-view') as HTMLDivElement,
   curatorHeader: document.getElementById('curator-header-container') as HTMLDivElement,
-  cachedBooksGrid: document.getElementById('cached-books-grid') as HTMLDivElement,
-  cachedCountBadge: document.getElementById('cached-count-badge') as HTMLSpanElement,
-  genrePills: document.getElementById('genre-pills-container') as HTMLDivElement,
-  bookshelfGrid: document.getElementById('bookshelf-grid') as HTMLDivElement,
-  bookCount: document.getElementById('book-count') as HTMLSpanElement,
-  searchInput: document.getElementById('search-input') as HTMLInputElement,
+  slotsGrid: document.getElementById('slots-grid') as HTMLDivElement,
 
   // Reader
   backButton: document.getElementById('back-button') as HTMLButtonElement,
@@ -98,8 +91,7 @@ const DOM = {
   qrUrlInput: document.getElementById('qr-url-input') as HTMLInputElement,
   qrClose: document.getElementById('qr-close') as HTMLButtonElement,
 
-  // Discover Modal
-  discoverBtn: document.getElementById('discover-btn') as HTMLButtonElement,
+  // Search GUI / Discover Modal
   discoverOverlay: document.getElementById('discover-overlay') as HTMLDivElement,
   discoverPanel: document.getElementById('discover-panel') as HTMLElement,
   discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
@@ -123,10 +115,10 @@ async function init() {
   const savedFontSize = localStorage.getItem('zenolet-font-size');
   if (savedFontSize) readerState.fontSize = parseInt(savedFontSize, 10);
 
-  // Render Curator Header
+  // Render Minimal Curator Header
   renderCuratorHeader(DOM.curatorHeader, config.siteTitle, config.curator);
 
-  // Fetch 1,000 Catalog
+  // Fetch Catalog
   allBooks = await fetchCatalog();
 
   // Append any custom Curator books from zenolet.config.json
@@ -145,18 +137,11 @@ async function init() {
 
   downloadedBooks = getDownloadedBookSet();
 
-  // Render Genre Pills
-  const genres = extractPopularGenres(allBooks);
-  renderGenrePills(DOM.genrePills, genres, currentGenre, (selectedGenre) => {
-    currentGenre = selectedGenre;
-    updateBookshelfView();
-  });
-
   // Setup Event Listeners
   setupEventListeners();
 
-  // Initial Bookshelf View
-  updateBookshelfView();
+  // Initial 8-Slot Bookshelf View
+  update8SlotShelfView();
 
   // Hide loading spinner
   DOM.loading.classList.add('hidden');
@@ -169,7 +154,6 @@ async function init() {
   // Register PWA Service Worker (Production only)
   if ('serviceWorker' in navigator) {
     if (import.meta.env.DEV) {
-      // Unregister Service Worker during local development to prevent stale Vite HMR module caching
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const reg of registrations) {
           reg.unregister();
@@ -184,45 +168,68 @@ async function init() {
   }
 }
 
-function updateBookshelfView() {
-  const cachedMeta = getDownloadedMetadataList();
+function update8SlotShelfView() {
+  let stored = getDownloadedMetadataList();
 
-  renderCachedBooksShelf(
-    DOM.cachedBooksGrid,
-    DOM.cachedCountBadge,
-    cachedMeta,
-    MAX_OFFLINE_BOOKS,
+  // Seed starter books on first visit if shelf is empty
+  if (stored.length === 0 && allBooks.length > 0) {
+    const seedIds = ['84', '2701', '11', '1661'];
+    const seeds: BookMetadata[] = seedIds
+      .map((id) => allBooks.find((b) => b.id === id))
+      .filter((b): b is CatalogBook => !!b)
+      .map((b) => ({ id: b.id, title: b.title, author: b.author, htmlUrl: b.htmlUrl }));
+
+    if (seeds.length > 0) {
+      localStorage.setItem('zenolet-offline-metadata', JSON.stringify(seeds));
+      stored = seeds;
+    }
+  }
+
+  render8SlotGrid(
+    DOM.slotsGrid,
+    stored,
+    8,
     (bookId) => {
       const book = allBooks.find((b) => b.id === bookId) || {
         id: bookId,
         title: `Book #${bookId}`,
         author: 'Project Gutenberg',
-        subjects: ['Cached'],
+        subjects: ['Classics'],
         downloads: 0
       };
       openBook(book);
     },
     async (bookId) => {
-      const book = allBooks.find((b) => b.id === bookId);
-      if (book) {
-        await toggleOfflineBook(book);
-      } else {
-        await removeBookOffline(bookId);
-        downloadedBooks.delete(bookId);
-        updateBookshelfView();
-      }
+      await removeBookOffline(bookId);
+      downloadedBooks.delete(bookId);
+      update8SlotShelfView();
+    },
+    (_slotIndex) => {
+      openSearchGUI();
     }
   );
+}
 
-  const filtered = filterCatalog(allBooks, searchQuery, currentGenre);
-  renderBookshelf(
-    filtered,
-    downloadedBooks,
-    DOM.bookshelfGrid,
-    DOM.bookCount,
-    (book) => openBook(book),
-    (book) => toggleOfflineBook(book)
-  );
+// --- Search GUI Operations ---
+function openSearchGUI() {
+  openDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
+  DOM.discoverSearchInput.value = '';
+  searchGutenberg('', DOM.discoverResults, allBooks, discoverState, handleSelectBookForSlot);
+}
+
+async function handleSelectBookForSlot(bookId: string, title: string, author: string, htmlUrl?: string) {
+  closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
+
+  const book: CatalogBook = allBooks.find((b) => b.id === bookId) || {
+    id: bookId,
+    title,
+    author,
+    subjects: ['Selected Title'],
+    downloads: 0,
+    htmlUrl
+  };
+
+  await openBook(book);
 }
 
 // --- Book Reader Operations ---
@@ -262,9 +269,15 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
       if (!rawContent) {
         throw lastErr || new Error(`Could not load text for book #${book.id}`);
       }
+
+      // Always auto-save book offline into slot storage upon selection
+      const processedContent = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
+      const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
+      await saveBookOffline(meta, { metadata: meta, content: processedContent });
+      downloadedBooks.add(book.id);
     }
 
-    // Process & Render Content (including relative image URL proxy rewriting)
+    // Process & Render Content
     if (rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')) {
       DOM.readerContent.innerHTML = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
     } else {
@@ -275,6 +288,9 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
     DOM.libraryView.classList.add('hidden');
     DOM.readerView.classList.remove('hidden');
     readerState.currentView = 'reader';
+
+    // Update bookshelf 8-slot view
+    update8SlotShelfView();
 
     // Recalculate Columns & Page Spreads
     recalculatePages(
@@ -293,7 +309,7 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
       restoreBookProgressByFraction(targetFraction, DOM.readerViewport);
     }
 
-    // Update URL state hash quietly without page reload
+    // Update URL state hash quietly
     updateUrlHashState();
   } catch (err) {
     alert(`Failed to load book "${book.title}". Check your connection or CORS proxy settings.`);
@@ -303,40 +319,15 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
   }
 }
 
-async function toggleOfflineBook(book: CatalogBook) {
-  if (downloadedBooks.has(book.id)) {
-    await removeBookOffline(book.id);
-    downloadedBooks.delete(book.id);
-  } else {
-    DOM.loading.classList.remove('hidden');
-    try {
-      const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
-      let content = '';
-      let bookSourceUrl = `https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}-images.html`;
-
-      for (const candidate of candidateUrls) {
-        try {
-          const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
-          if (text && text.length > 200) {
-            content = text;
-            bookSourceUrl = candidate;
-            break;
-          }
-        } catch (_) {}
-      }
-
-      if (!content) throw new Error('Failed to fetch offline content');
-
-      const processedContent = processBookHtml(content, bookSourceUrl, config.proxyUrl);
-      await saveBookOffline(book, { metadata: book, content: processedContent });
-      downloadedBooks.add(book.id);
-    } catch (err) {
-      alert(`Could not download "${book.title}" for offline reading.`);
-    } finally {
-      DOM.loading.classList.add('hidden');
-    }
+function closeReaderAndReturnToLibrary() {
+  DOM.readerView.classList.add('hidden');
+  DOM.libraryView.classList.remove('hidden');
+  readerState.currentView = 'library';
+  activeBook = null;
+  if (window.location.hash) {
+    window.history.replaceState(null, '', window.location.pathname);
   }
-  updateBookshelfView();
+  update8SlotShelfView();
 }
 
 // --- State & URL Encoding ---
@@ -358,8 +349,20 @@ async function updateUrlHashState() {
 
 async function handleUrlHashState() {
   const hash = window.location.hash;
+  if (!hash || !hash.startsWith('#s=')) {
+    if (readerState.currentView === 'reader') {
+      closeReaderAndReturnToLibrary();
+    }
+    return;
+  }
+
   const state = await decodeState(hash);
-  if (!state || !state.bookId) return;
+  if (!state || !state.bookId) {
+    if (readerState.currentView === 'reader') {
+      closeReaderAndReturnToLibrary();
+    }
+    return;
+  }
 
   if (state.theme) setTheme(state.theme as ReaderState['theme'], readerState);
   if (state.fontSize) setFontSize(state.fontSize, readerState, () => {});
@@ -377,20 +380,10 @@ async function handleUrlHashState() {
 
 // --- Event Listeners Setup ---
 function setupEventListeners() {
-  // Search Bar
-  DOM.searchInput.addEventListener('input', (e) => {
-    searchQuery = (e.target as HTMLInputElement).value;
-    updateBookshelfView();
-  });
-
-  // Back Button to Bookshelf
-  DOM.backButton.addEventListener('click', () => {
-    DOM.readerView.classList.add('hidden');
-    DOM.libraryView.classList.remove('hidden');
-    readerState.currentView = 'library';
-    activeBook = null;
-    window.history.replaceState(null, '', window.location.pathname);
-    updateBookshelfView();
+  // Back Button to Main Page
+  DOM.backButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeReaderAndReturnToLibrary();
   });
 
   // Settings Panel Toggle
@@ -420,10 +413,7 @@ function setupEventListeners() {
     if (e.target === DOM.qrModal) closeQRModal(DOM.qrModal);
   });
 
-  // Discover Gutenberg Modal
-  DOM.discoverBtn.addEventListener('click', () => {
-    openDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
-  });
+  // Search GUI Modal Listeners
   DOM.discoverClose.addEventListener('click', () => {
     closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
   });
@@ -433,16 +423,11 @@ function setupEventListeners() {
 
   let discoverTimeout: ReturnType<typeof setTimeout> | null = null;
   DOM.discoverSearchInput.addEventListener('input', (e) => {
-    const query = (e.target as HTMLInputElement).value.trim();
+    const query = (e.target as HTMLInputElement).value;
     if (discoverTimeout) clearTimeout(discoverTimeout);
-    if (query.length > 2) {
-      discoverTimeout = setTimeout(() => {
-        searchGutenberg(query, DOM.discoverResults, discoverState, (id, title, author, htmlUrl) => {
-          closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
-          openBook({ id, title, author, subjects: ['Imported'], downloads: 0, htmlUrl });
-        });
-      }, 400);
-    }
+    discoverTimeout = setTimeout(() => {
+      searchGutenberg(query, DOM.discoverResults, allBooks, discoverState, handleSelectBookForSlot);
+    }, 250);
   });
 
   // Navigation Arrow Button Clicks
@@ -502,8 +487,9 @@ function setupEventListeners() {
     }
   });
 
-  // Window Hash Change
+  // Window Navigation Listeners (Back/Forward buttons)
   window.addEventListener('hashchange', () => handleUrlHashState());
+  window.addEventListener('popstate', () => handleUrlHashState());
 }
 
 // Start app

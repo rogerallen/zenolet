@@ -1148,3 +1148,255 @@ a:hover {
 .btn-discover-import.imported {
   background-color: #22c55e;
 }
+
+/* --- Minimal Header --- */
+.minimal-header {
+  padding: 32px 24px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimal-site-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.minimal-byline {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* --- 8-Slot Grid (2 rows x 4 cols) --- */
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, minmax(180px, auto));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+@media (max-width: 900px) {
+  .slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .slots-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* --- Slot Cards --- */
+.slot-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Filled Slot Card */
+.slot-card.slot-filled {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.slot-card.slot-filled:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-color);
+}
+
+.slot-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 24px;
+}
+
+.slot-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.slot-card-author {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Trash Icon Button */
+.btn-trash-slot {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.btn-trash-slot:hover {
+  opacity: 1;
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Progress bar inside slot */
+.slot-progress-bar-container {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-progress-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.slot-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.slot-progress-fill {
+  height: 100%;
+  background-color: var(--accent-color);
+  border-radius: 4px;
+}
+
+.slot-card-status {
+  margin-top: 10px;
+}
+
+.slot-badge-cached {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16a34a;
+  background-color: rgba(22, 163, 74, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* Empty Slot Card */
+.slot-card.slot-empty {
+  border: 2px dashed var(--border-color);
+  background-color: transparent;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.slot-card.slot-empty:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.slot-empty-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot-plus-icon {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--text-muted);
+  line-height: 1;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.slot-card.slot-empty:hover .slot-plus-icon {
+  transform: scale(1.2);
+  color: var(--accent-color);
+}
+
+.slot-empty-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.slot-sub-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* --- Minimal Footer --- */
+.library-footer {
+  padding: 24px;
+  margin-top: auto;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+}
+
+.library-footer .version-tag {
+  font-weight: 500;
+}
+
+.library-footer .dot-separator {
+  opacity: 0.5;
+}
+
+.library-footer .github-link {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.library-footer .github-link:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}

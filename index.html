@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zenolet — Micro-Library & Horizontal Gutenberg Reader</title>
-  <meta name="description" content="Serverless, privacy-first, horizontal page-flowing PWA for reading top 1,000 Project Gutenberg classics." />
+  <title>Zenolet — Micro-Library Reader</title>
+  <meta name="description" content="Serverless, privacy-first, horizontal page-flowing reader for public domain literature." />
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#8f2d14" />
@@ -26,45 +26,27 @@
     <!-- Initial Loading Overlay -->
     <div id="loading" class="loading-overlay">
       <div class="spinner"></div>
-      <p>Initializing Zenolet Micro-Library...</p>
+      <p>Loading Zenolet...</p>
     </div>
 
     <!-- Library Bookshelf View -->
     <div id="library-view" class="view">
+      <!-- Minimal Header -->
       <header id="curator-header-container" class="library-header"></header>
 
-      <!-- Cached Books Shelf (Displayed above search bar) -->
-      <section id="cached-books-section" class="cached-books-section">
-        <div class="cached-books-header">
-          <div class="cached-books-title-group">
-            <span class="cached-books-icon">💾</span>
-            <h3 class="cached-books-title">My Offline Shelf</h3>
-          </div>
-          <span id="cached-count-badge" class="cached-count-badge">0 / 8 cached</span>
-        </div>
-        <div id="cached-books-grid" class="cached-books-grid"></div>
-      </section>
-
-      <div class="library-toolbar">
-        <div class="search-row">
-          <div class="search-input-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" class="search-input" placeholder="Search top 1,000 classics by title, author, or genre..." />
-          </div>
-          <button id="discover-btn" class="btn-primary">
-            <span>🌐</span> Discover Gutenberg
-          </button>
-        </div>
-        <div id="genre-pills-container" class="genre-pills-scroll"></div>
-      </div>
-
+      <!-- 8-Slot Bookshelf Section -->
       <main class="bookshelf-container">
-        <div class="bookshelf-meta-row">
-          <span id="book-count">Loading catalog...</span>
-          <span id="offline-badge" style="font-size: 0.85rem;">⚡ Serverless & Sovereign</span>
-        </div>
-        <div id="bookshelf-grid" class="bookshelf-grid"></div>
+        <div id="slots-grid" class="slots-grid"></div>
       </main>
+
+      <!-- Minimal Footer -->
+      <footer class="library-footer">
+        <span class="version-tag">Zenolet v1.0.0</span>
+        <span class="dot-separator">•</span>
+        <a href="https://github.com/rogerallen/zenolet" target="_blank" rel="noopener" class="github-link">
+          <span>GitHub</span>
+        </a>
+      </footer>
     </div>
 
     <!-- Horizontal Reader View -->
@@ -72,7 +54,7 @@
       <header class="reader-header">
         <div class="reader-header-left">
           <button id="back-button" class="btn-icon" title="Return to Bookshelf">
-            <span>←</span> Bookshelf
+            <span>←</span> Back to Shelf
           </button>
           <div class="reader-book-meta">
             <h2 id="reader-book-title" class="reader-book-title">Book Title</h2>
@@ -82,7 +64,7 @@
 
         <div class="reader-header-right" style="display: flex; gap: 10px; align-items: center;">
           <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)">
-            <span>📱</span> Read on Phone
+            <span>📱</span> Mobile Link
           </button>
           <button id="settings-toggle" class="btn-icon" title="Reading Settings">
             <span>⚙️</span> Settings
@@ -160,7 +142,7 @@
           <button id="qr-close" class="btn-close">&times;</button>
         </div>
         <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          Scan this QR code with your phone camera to seamlessly transfer your exact book and reading position:
+          Scan this QR code with your phone camera to transfer your book and reading position:
         </p>
         <div class="qr-canvas-wrapper">
           <canvas id="qr-canvas"></canvas>
@@ -169,19 +151,19 @@
       </div>
     </div>
 
-    <!-- Discover Gutenberg Modal Overlay -->
+    <!-- Search & Discover Modal Overlay -->
     <div id="discover-overlay" class="modal-overlay"></div>
     <aside id="discover-panel" class="discover-panel">
       <header class="discover-header">
-        <h3 style="font-family: var(--font-serif); font-size: 1.2rem;">Project Gutenberg Catalog</h3>
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem;">Add Book to Shelf</h3>
         <button id="discover-close" class="btn-close">&times;</button>
       </header>
       <div class="discover-body">
         <div class="search-input-wrapper">
           <span class="search-icon">🔍</span>
-          <input type="text" id="discover-search-input" class="search-input" placeholder="Search Project Gutenberg repository..." />
+          <input type="text" id="discover-search-input" class="search-input" placeholder="Search classics by title, author, or genre..." />
         </div>
-        <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;"></div>
       </div>
     </aside>
   </div>
