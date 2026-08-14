@@ -233,7 +233,7 @@ async function handleSelectBookForSlot(bookId: string, title: string, author: st
 }
 
 // --- Book Reader Operations ---
-async function openBook(book: CatalogBook, initialProgressFraction: number | null = null) {
+async function openBook(book: CatalogBook, initialProgressFraction: number | null = null, pushHistory: boolean = true) {
   activeBook = book;
   DOM.loading.classList.remove('hidden');
 
@@ -309,8 +309,8 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
       restoreBookProgressByFraction(targetFraction, DOM.readerViewport);
     }
 
-    // Update URL state hash quietly
-    updateUrlHashState();
+    // Update URL state hash (push new entry if opening book, replace if restored)
+    await updateUrlHashState(pushHistory);
   } catch (err) {
     alert(`Failed to load book "${book.title}". Check your connection or CORS proxy settings.`);
     console.error('[Zenolet Reader] Load error:', err);
@@ -325,13 +325,13 @@ function closeReaderAndReturnToLibrary() {
   readerState.currentView = 'library';
   activeBook = null;
   if (window.location.hash) {
-    window.history.replaceState(null, '', window.location.pathname);
+    window.history.replaceState({ view: 'library' }, '', window.location.pathname);
   }
   update8SlotShelfView();
 }
 
 // --- State & URL Encoding ---
-async function updateUrlHashState() {
+async function updateUrlHashState(pushHistory: boolean = false) {
   if (!activeBook) return;
   const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
   const progress = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
@@ -344,7 +344,11 @@ async function updateUrlHashState() {
   };
 
   const hash = await encodeState(appState);
-  window.history.replaceState(null, '', hash);
+  if (pushHistory) {
+    window.history.pushState({ view: 'reader', bookId: activeBook.id }, '', hash);
+  } else {
+    window.history.replaceState({ view: 'reader', bookId: activeBook.id }, '', hash);
+  }
 }
 
 async function handleUrlHashState() {
@@ -375,7 +379,7 @@ async function handleUrlHashState() {
     downloads: 0
   };
 
-  await openBook(book, state.progress);
+  await openBook(book, state.progress, false);
 }
 
 // --- Event Listeners Setup ---
