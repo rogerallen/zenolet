@@ -1,10 +1,18 @@
+/**
+ * Builds the proxied URL using strictly the Cloudflare Worker CORS proxy.
+ * Hard fails if no proxy URL setting is provided.
+ */
 export function buildProxyUrl(targetUrl: string, proxyUrlSetting?: string): string {
   if (!targetUrl) return '';
   if (targetUrl.startsWith('/') || targetUrl.startsWith(window.location.origin)) {
     return targetUrl;
   }
 
-  const baseProxy = proxyUrlSetting || 'https://corsproxy.io/?';
+  if (!proxyUrlSetting) {
+    throw new Error('[Zenolet CORS] Cloudflare CORS Proxy URL is not configured. Hard fail.');
+  }
+
+  const baseProxy = proxyUrlSetting;
 
   if (baseProxy.includes('workers.dev')) {
     const workerUrl = new URL(baseProxy);
@@ -31,44 +39,49 @@ export function getGutenbergCandidateUrls(bookId: string, rawHtmlUrl?: string): 
   return candidates;
 }
 
+/**
+ * Fetches content strictly using the Cloudflare Worker CORS proxy.
+ * Hard fails immediately if proxy is unconfigured, unreachable, or returns a non-OK HTTP status.
+ * No public fallbacks or direct connection retries.
+ */
 export async function fetchWithProxyFallback(
   targetUrl: string,
   proxyUrlSetting?: string
 ): Promise<string> {
-  const proxies: string[] = [];
-
-  if (proxyUrlSetting) {
-    proxies.push(proxyUrlSetting);
-  }
-  if (!proxies.includes('https://corsproxy.io/?')) proxies.push('https://corsproxy.io/?');
-  proxies.push('https://api.allorigins.win/raw?url=');
-  proxies.push('https://api.codetabs.com/v1/proxy?quest=');
-
-  let lastStatus = 0;
-
-  for (const proxy of proxies) {
-    const proxiedUrl = buildProxyUrl(targetUrl, proxy);
-    try {
-      const res = await fetch(proxiedUrl);
-      if (res.ok) {
-        const text = await res.text();
-        if (text && text.length > 200) {
-          return text;
-        }
-      }
-      lastStatus = res.status;
-    } catch (_) {}
+  if (!proxyUrlSetting) {
+    const errorMsg = '[Zenolet CORS] Hard fail: No Cloudflare CORS Proxy URL configured in settings.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
+  const proxiedUrl = buildProxyUrl(targetUrl, proxyUrlSetting);
+  console.log(`[Zenolet CORS] Fetching strictly via Cloudflare Proxy: "${proxiedUrl}" for target: "${targetUrl}"`);
+
+  let res: Response;
   try {
-    const directRes = await fetch(targetUrl);
-    if (directRes.ok) {
-      const text = await directRes.text();
-      if (text && text.length > 200) return text;
-    }
-  } catch (_) {}
+    res = await fetch(proxiedUrl);
+  } catch (err: any) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy connection error: ${err?.message || err}`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
 
-  throw new Error(`Proxy status: ${lastStatus}`);
+  if (!res.ok) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy returned HTTP status ${res.status} ${res.statusText}`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const text = await res.text();
+  if (!text || text.length <= 200) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Received invalid or empty content (${text ? text.length : 0} bytes) from Cloudflare Proxy.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const mbSize = (text.length / (1024 * 1024)).toFixed(2);
+  console.log(`[Zenolet CORS] Successfully downloaded ${text.length} chars (~${mbSize} MB) from "${targetUrl}" via Cloudflare Proxy.`);
+  return text;
 }
 
 export function processBookHtml(

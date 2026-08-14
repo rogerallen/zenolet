@@ -1,0 +1,5 @@
+{
+  "name": "zenolet-cors-proxy",
+  "compatibility_date": "2026-07-27",
+  "main": "worker/index.js"
+}
