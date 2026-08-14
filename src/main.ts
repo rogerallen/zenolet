@@ -57,7 +57,6 @@ const discoverState: DiscoverState = {
 
 // --- DOM Cache ---
 const DOM = {
-  loading: document.getElementById('loading') as HTMLDivElement,
   libraryView: document.getElementById('library-view') as HTMLDivElement,
   readerView: document.getElementById('reader-view') as HTMLDivElement,
   curatorHeader: document.getElementById('curator-header-container') as HTMLDivElement,
@@ -118,7 +117,14 @@ async function init() {
   // Render Minimal Curator Header
   renderCuratorHeader(DOM.curatorHeader, config.siteTitle, config.curator);
 
-  // Fetch Catalog
+  // Render 8-Slot Bookshelf View immediately from local storage (synchronous 0ms render)
+  downloadedBooks = getDownloadedBookSet();
+  update8SlotShelfView();
+
+  // Setup Event Listeners
+  setupEventListeners();
+
+  // Fetch Catalog for search GUI
   allBooks = await fetchCatalog();
 
   // Append any custom Curator books from zenolet.config.json
@@ -134,17 +140,6 @@ async function init() {
     }));
     allBooks = [...customCatalog, ...allBooks];
   }
-
-  downloadedBooks = getDownloadedBookSet();
-
-  // Setup Event Listeners
-  setupEventListeners();
-
-  // Initial 8-Slot Bookshelf View
-  update8SlotShelfView();
-
-  // Hide loading spinner
-  DOM.loading.classList.add('hidden');
 
   // Check URL Hash for state (#s=...)
   if (window.location.hash.startsWith('#s=')) {
@@ -171,18 +166,16 @@ async function init() {
 function update8SlotShelfView() {
   let stored = getDownloadedMetadataList();
 
-  // Seed starter books on first visit if shelf is empty
-  if (stored.length === 0 && allBooks.length > 0) {
-    const seedIds = ['84', '2701', '11', '1661'];
-    const seeds: BookMetadata[] = seedIds
-      .map((id) => allBooks.find((b) => b.id === id))
-      .filter((b): b is CatalogBook => !!b)
-      .map((b) => ({ id: b.id, title: b.title, author: b.author, htmlUrl: b.htmlUrl }));
-
-    if (seeds.length > 0) {
-      localStorage.setItem('zenolet-offline-metadata', JSON.stringify(seeds));
-      stored = seeds;
-    }
+  // Seed starter books on first visit if shelf is empty (0ms synchronous seed)
+  if (stored.length === 0) {
+    const seeds: BookMetadata[] = [
+      { id: '84', title: 'Frankenstein; Or, The Modern Prometheus', author: 'Mary Wollstonecraft Shelley' },
+      { id: '2701', title: 'Moby Dick; Or, The Whale', author: 'Herman Melville' },
+      { id: '11', title: "Alice's Adventures in Wonderland", author: 'Lewis Carroll' },
+      { id: '1661', title: 'The Adventures of Sherlock Holmes', author: 'Arthur Conan Doyle' }
+    ];
+    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(seeds));
+    stored = seeds;
   }
 
   render8SlotGrid(
@@ -235,7 +228,6 @@ async function handleSelectBookForSlot(bookId: string, title: string, author: st
 // --- Book Reader Operations ---
 async function openBook(book: CatalogBook, initialProgressFraction: number | null = null, pushHistory: boolean = true) {
   activeBook = book;
-  DOM.loading.classList.remove('hidden');
 
   DOM.readerBookTitle.textContent = book.title;
   DOM.readerBookAuthor.textContent = `by ${book.author}`;
@@ -314,8 +306,6 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
   } catch (err) {
     alert(`Failed to load book "${book.title}". Check your connection or CORS proxy settings.`);
     console.error('[Zenolet Reader] Load error:', err);
-  } finally {
-    DOM.loading.classList.add('hidden');
   }
 }
 
@@ -436,10 +426,10 @@ function setupEventListeners() {
 
   // Navigation Arrow Button Clicks
   DOM.prevPageBtn.addEventListener('click', () => {
-    DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'smooth' });
+    DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'auto' });
   });
   DOM.nextPageBtn.addEventListener('click', () => {
-    DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'smooth' });
+    DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
   });
 
   // Keyboard Shortcuts (Arrow Left/Right, Space)
@@ -449,10 +439,10 @@ function setupEventListeners() {
 
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'smooth' });
+      DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'auto' });
     } else if (e.key === 'ArrowRight' || e.key === ' ') {
       e.preventDefault();
-      DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'smooth' });
+      DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
     }
   });
 

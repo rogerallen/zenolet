@@ -117,7 +117,7 @@ export function recalculatePages(
   renderTimeline(readerContent, readerViewport, state.totalPagesSpreads, (spreadIndex) => {
     readerViewport.scrollTo({
       left: spreadIndex * pageWidth,
-      behavior: 'smooth'
+      behavior: 'auto'
     });
   });
 
