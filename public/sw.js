@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zenolet-v1';
+const CACHE_NAME = 'zenolet-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,8 +32,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  
+
   const url = new URL(event.request.url);
+
   // Bypass SW cache for local development, Vite HMR, and source modules
   if (
     url.hostname === 'localhost' ||
@@ -44,21 +45,53 @@ self.addEventListener('fetch', (event) => {
   ) {
     return;
   }
+
+  // Network-First strategy for HTML navigation & site config to prevent 404s on newly deployed asset hashes
+  const isHtmlOrConfig =
+    event.request.mode === 'navigate' ||
+    url.pathname.endsWith('/') ||
+    url.pathname.endsWith('/index.html') ||
+    url.pathname.endsWith('/zenolet.config.json');
+
+  if (isHtmlOrConfig) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || caches.match('./index.html');
+          });
+        })
+    );
+    return;
+  }
+
+  // Cache-First strategy for static assets & cached books with network fallback
+  event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+      return fetch(event.request)
+        .then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
           return networkResponse;
-        }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
+        })
+        .catch(() => {
+          return caches.match('./');
         });
-        return networkResponse;
-      }).catch(() => {
-        // Offline fallback
-        return caches.match('/');
-      });
     })
   );
 });
