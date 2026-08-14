@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "VITE_PROXY_URL=http://localhost:8787 concurrently -k -n worker,vite -c cyan,magenta \"npx wrangler dev\" \"vite\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/qrcode": "^1.5.5",
+    "concurrently": "^10.0.4",
     "jsdom": "^24.0.0",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",

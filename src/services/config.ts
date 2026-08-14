@@ -25,13 +25,21 @@ export interface ZenoletConfig {
 }
 
 export async function loadZenoletConfig(): Promise<ZenoletConfig> {
+  let cfg: ZenoletConfig = {};
   try {
     const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
     const res = await fetch(`${base}zenolet.config.json`);
-    if (!res.ok) return {};
-    return await res.json();
+    if (res.ok) {
+      cfg = await res.json();
+    }
   } catch (err) {
     console.warn('[Zenolet] Could not load zenolet.config.json, using defaults:', err);
-    return {};
   }
+
+  // Allow VITE_PROXY_URL env variable to override proxyUrl (useful for single-command local testing)
+  if (import.meta.env.VITE_PROXY_URL) {
+    cfg.proxyUrl = import.meta.env.VITE_PROXY_URL;
+  }
+
+  return cfg;
 }

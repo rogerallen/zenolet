@@ -12,16 +12,18 @@ export function buildProxyUrl(targetUrl: string, proxyUrlSetting?: string): stri
     throw new Error('[Zenolet CORS] Cloudflare CORS Proxy URL is not configured. Hard fail.');
   }
 
-  const baseProxy = proxyUrlSetting;
+  const baseProxy = proxyUrlSetting.trim();
 
-  if (baseProxy.includes('workers.dev')) {
+  if (baseProxy.endsWith('?') || baseProxy.endsWith('=')) {
+    return `${baseProxy}${encodeURIComponent(targetUrl)}`;
+  }
+
+  try {
     const workerUrl = new URL(baseProxy);
     workerUrl.searchParams.set('url', targetUrl);
     return workerUrl.toString();
-  } else if (baseProxy.endsWith('?')) {
-    return `${baseProxy}${encodeURIComponent(targetUrl)}`;
-  } else {
-    return `${baseProxy}${encodeURIComponent(targetUrl)}`;
+  } catch (_) {
+    return `${baseProxy}?url=${encodeURIComponent(targetUrl)}`;
   }
 }
 

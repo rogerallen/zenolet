@@ -33,7 +33,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
-  event.respondWith(
+  const url = new URL(event.request.url);
+  // Bypass SW cache for local development, Vite HMR, and source modules
+  if (
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1' ||
+    url.pathname.startsWith('/src/') ||
+    url.pathname.includes('node_modules') ||
+    event.request.url.includes('token=')
+  ) {
+    return;
+  }
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
       return fetch(event.request).then((networkResponse) => {

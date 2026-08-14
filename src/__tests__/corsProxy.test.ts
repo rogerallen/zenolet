@@ -1,7 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 // @ts-ignore
 import worker from '../../worker/index.js';
-import { fetchWithProxyFallback } from '../services/corsProxy.ts';
+import { buildProxyUrl, fetchWithProxyFallback } from '../services/corsProxy.ts';
+
+describe('buildProxyUrl URL Parsing', () => {
+  it('correctly constructs proxied URLs for localhost proxy endpoints', () => {
+    const target = 'https://www.gutenberg.org/cache/epub/245/pg245-images.html';
+    const proxy = 'http://localhost:8787';
+    const result = buildProxyUrl(target, proxy);
+    expect(result).toBe('http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html');
+  });
+
+  it('correctly constructs proxied URLs for Cloudflare workers.dev endpoints', () => {
+    const target = 'https://www.gutenberg.org/cache/epub/245/pg245-images.html';
+    const proxy = 'https://zenolet-cors-proxy.rallen-e12.workers.dev';
+    const result = buildProxyUrl(target, proxy);
+    expect(result).toBe('https://zenolet-cors-proxy.rallen-e12.workers.dev/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html');
+  });
+
+  it('correctly constructs proxied URLs when proxy ends with ?url=', () => {
+    const target = 'https://example.com';
+    const proxy = 'http://localhost:8787/?url=';
+    const result = buildProxyUrl(target, proxy);
+    expect(result).toBe('http://localhost:8787/?url=https%3A%2F%2Fexample.com');
+  });
+});
 
 describe('Worker Proxy Security & CORS Preflight', () => {
   it('handles OPTIONS preflight request for allowed GitHub Pages origin', async () => {

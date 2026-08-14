@@ -10,11 +10,12 @@ Named in honor of **Zenodotus of Ephesus** (the first chief librarian of Alexand
 
 - **100% Serverless & Sovereign**: All state lives in the user's browser or URL hash (`#s=...`). Zero tracking, logins, or remote databases.
 - **Top 1,000 Gutenberg Catalog**: Pre-indexed `public/catalog.json` featuring the 1,000 most popular Project Gutenberg titles with search and genre filtering.
-- **Custom Site Identity (`public/zenolet.config.json`)**: Make any deployed instance "yours" simply by editing a JSON configuration file to set branding, curator profile, bio, themes, and custom books.
+- **Custom Site Identity (`public/zenolet.config.json`)**: Personalize any instance by editing a JSON configuration file to set branding, curator profile, bio, themes, and custom books.
+- **Dedicated Cloudflare Worker CORS Proxy**: Custom serverless proxy (`worker/index.js`) with origin security, OPTIONS preflight handling, streaming byte logging, and strict hard-fail enforcement (no third-party proxy fallbacks).
+- **Single-Command Local Environment (`npm run dev:local`)**: Concurrently runs local Wrangler Worker proxy and Vite UI with zero need to modify production configuration files.
 - **Tactile Horizontal Flow Layout**: Book text flows horizontally in single-column (mobile) or double-column (desktop) spreads like a physical book, using CSS Multi-column layout and scroll snapping.
 - **Compressed State & QR Handoff**: Encodes reading progress, theme, and book ID into a compressed URL hash (`#s=...`) using `CompressionStream('deflate-raw')` + Base64URL. Render an instant QR code for mobile camera handoff (<300 characters).
-- **Off-Grid PWA & Cache Storage**: Service Worker caches app shell and up to 10 books in browser `CacheStorage` for full offline reading.
-- **Cloudflare Worker CORS Helper**: Included 15-line worker script (`worker/index.js`) for proxying Project Gutenberg assets across origins.
+- **Off-Grid PWA & Cache Storage**: Service Worker caches app shell and offline books for offline reading.
 
 ---
 
@@ -39,23 +40,28 @@ zenolet/
 │   │   ├── QRModal.ts           # QR code overlay for desktop-to-phone handoff
 │   │   └── SettingsModal.ts     # Reading themes (Paper, Sepia, Charcoal, Night) & font sizing
 │   ├── services/
-│   │   ├── config.ts            # Loader & validator for zenolet.config.json
+│   │   ├── config.ts            # Loader & validator for zenolet.config.json (supports VITE_PROXY_URL override)
 │   │   ├── catalog.ts           # Catalog search & genre classification service
 │   │   ├── state.ts             # CompressionStream URL hash encoder & decoder (#s=...)
 │   │   ├── storage.ts           # CacheStorage wrapper & reading progress persistence
 │   │   ├── api.ts               # Network fetch wrappers with timeout
-│   │   └── corsProxy.ts         # CORS proxy URL formatter
+   │   └── corsProxy.ts         # Cloudflare Worker CORS proxy client & hard-fail error handling
 │   ├── __tests__/
 │   │   ├── storage.test.ts      # Vitest unit tests for scroll math & storage
-│   │   └── gutenberg.test.ts    # Vitest unit tests for metadata extraction
+│   │   ├── gutenberg.test.ts    # Vitest unit tests for metadata extraction
+│   │   └── corsProxy.test.ts    # Vitest unit tests for proxy security, preflights, & hard fail
 │   ├── index.html               # Main HTML5 SPA shell
 │   ├── main.ts                  # App entry point & router
 │   └── style.css                # Global CSS system, multi-column rules & glassmorphic themes
 ├── worker/
-│   └── index.js                 # Cloudflare Worker CORS proxy script
+│   └── index.js                 # Cloudflare Worker CORS proxy script (origin restriction & byte logging)
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # GitHub Pages automated deployment pipeline (Node 24)
+├── wrangler.jsonc               # Cloudflare Wrangler CLI configuration
 ├── package.json                 # Dependencies & scripts
 ├── tsconfig.json                # TypeScript configuration
-├── vite.config.ts               # Vite bundler config
+├── vite.config.ts               # Vite bundler config & HMR setup
 └── vitest.config.ts             # Vitest test framework config
 ```
 
@@ -67,17 +73,17 @@ To personalize your Zenolet deployment, edit `public/zenolet.config.json`:
 
 ```json
 {
-  "siteTitle": "Alexandria Micro-Library",
+  "siteTitle": "Roger's Zenolet Library",
   "curator": {
     "name": "Roger Allen",
     "avatar": "https://github.com/rogerallen.png",
-    "bio": "A personal micro-library of timeless literature and early sci-fi classics.",
+    "bio": "A personal micro-library of 1,000 timeless classics.",
     "link": "https://github.com/rogerallen"
   },
   "defaultTheme": "sepia",
   "fontSize": 18,
   "layoutColumns": "auto",
-  "proxyUrl": "https://corsproxy.io/?",
+  "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev",
   "customBooks": []
 }
 ```
@@ -91,40 +97,51 @@ To personalize your Zenolet deployment, edit `public/zenolet.config.json`:
 npm install
 ```
 
-### 2. Run Local Development Server
+### 2. Run Single-Command Local Environment (UI + Worker Proxy)
+Run both the Vite frontend (`http://localhost:5173`) and local Cloudflare Worker proxy (`http://localhost:8787`) simultaneously:
+```bash
+npm run dev:local
+```
+> **Note:** `npm run dev:local` dynamically routes traffic through `http://localhost:8787` without modifying `public/zenolet.config.json`.
+
+### 3. Run Standard Frontend Dev Server
 ```bash
 npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 3. Run Unit Tests
+### 4. Run Unit Tests
 ```bash
 npm test
 ```
 
-### 4. Build Production Bundle
+### 5. Build Production Bundle
 ```bash
 npm run build
 ```
 
-### 5. Re-generate Top 1,000 Gutenberg Catalog
-```bash
-npm run generate-catalog
-```
-
 ---
 
-## 🌩️ CORS Proxy Worker Setup
+## 🌩️ Cloudflare CORS Proxy Worker
 
-To proxy Project Gutenberg assets across origins without relying on public CORS proxies, deploy `worker/index.js` to Cloudflare Workers:
+Zenolet relies strictly on a dedicated Cloudflare Worker proxy (`worker/index.js`) to fetch Gutenberg book texts and illustrations without third-party public proxies.
 
+### Key Worker Security & Logging Features
+* **Origin Protection:** Restricts requests to `https://rogerallen.github.io`, Tailscale domains (`*.ts.net`), and local dev hosts (`localhost`, `127.0.0.1`). Unauthorized origins are rejected with `403 Forbidden`.
+* **CORS Preflight (`OPTIONS`):** Returns `204 No Content` with cached CORS headers (`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods: GET, HEAD, OPTIONS`, `Access-Control-Max-Age: 86400`).
+* **Streaming Byte Logs:** Uses a `TransformStream` byte counter to log total bytes transferred when a book download completes.
+* **Strict Hard Fail Policy:** If the proxy is unconfigured or returns an error, Zenolet hard-fails immediately without falling back to public proxies.
+
+### Deploying the Worker to Cloudflare
 ```bash
-npx wrangler deploy worker/index.js --name zenolet-cors-proxy
-```
+# 1. Authenticate with Cloudflare
+npx wrangler login
 
-Then update `proxyUrl` in `public/zenolet.config.json` with your deployed Cloudflare Worker domain URL:
-```json
-"proxyUrl": "https://zenolet-cors-proxy.your-subdomain.workers.dev"
+# 2. Deploy Worker
+npx wrangler deploy
+
+# 3. Stream live logs (Optional)
+npx wrangler tail
 ```
 
 ---

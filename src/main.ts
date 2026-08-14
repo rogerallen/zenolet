@@ -166,12 +166,21 @@ async function init() {
     await handleUrlHashState();
   }
 
-  // Register PWA Service Worker
+  // Register PWA Service Worker (Production only)
   if ('serviceWorker' in navigator) {
-    const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-    navigator.serviceWorker.register(`${base}sw.js`).catch((err) => {
-      console.warn('[Zenolet PWA] SW registration failed:', err);
-    });
+    if (import.meta.env.DEV) {
+      // Unregister Service Worker during local development to prevent stale Vite HMR module caching
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) {
+          reg.unregister();
+        }
+      });
+    } else {
+      const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+      navigator.serviceWorker.register(`${base}sw.js`).catch((err) => {
+        console.warn('[Zenolet PWA] SW registration failed:', err);
+      });
+    }
   }
 }
 
