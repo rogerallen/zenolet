@@ -1,0 +1,36 @@
+# Zenolet Development Rules & Versioning Guidelines
+
+## 📦 Versioning Standard (Semantic Versioning)
+
+Zenolet follows strict Semantic Versioning formatted as `MAJOR.MINOR.BUGFIX` (e.g., `0.1.0`).
+
+### 1. Pre-1.0 Versioning Rules
+* **MAJOR**: Must equal `0` prior to official 1.0 release (e.g. `0.X.Y`).
+* **MINOR**: Starts at `1` (`0.1.0`) and increments when new features are added and a release/deployment is made (e.g. `0.1.0` -> `0.2.0` -> `0.3.0`).
+* **BUGFIX**: Stays `0` during pre-1.0 development, or increments for patch hotfixes.
+
+### 2. Post-1.0 Versioning Rules
+* **MAJOR**: Increments when breaking changes are introduced.
+* **MINOR**: Increments when backwards-compatible features are added.
+* **BUGFIX**: Increments for backwards-compatible bug fixes and patches.
+
+### 3. Version Update Workflow
+Whenever a feature, deploy, or version bump occurs:
+1. Update `"version"` in `package.json`.
+2. Update the version indicator in `index.html` (`Zenolet vMAJOR.MINOR.BUGFIX`).
+3. Update version references in `README.md`.
+4. Ask for explicit user confirmation before running `git push`.
+
+---
+
+## 🛡️ Git & Safety Workflow Rules
+
+1. **Commit & Push Confirmation**:
+   * **NEVER** run `git push` without asking for explicit user confirmation first.
+   * **ALWAYS** summarize the exact staged files and proposed commit message before making git commits or pushing.
+
+2. **Automated Pre-Commit Verification**:
+   * Always run `npx vitest run` and `npm run build` to verify clean compilation and zero failing tests before proposing a commit or release.
+
+3. **Development Commands**:
+   * Use `npm run dev:local` for single-command local testing (runs local Cloudflare Worker proxy on port 8787 and Vite UI on port 5173 concurrently).
