@@ -55,17 +55,17 @@ export function render8SlotGrid(
 
       html += `
         <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}">
-          <button class="btn-trash-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove book">
-            🗑️
+          <button class="btn-remove-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove book">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
           <div class="slot-card-content">
             <h3 class="slot-card-title">${escapeHtml(book.title)}</h3>
             <p class="slot-card-author">by ${escapeHtml(book.author)}</p>
           </div>
           ${progressHtml}
-          <div class="slot-card-status">
-            <span class="slot-badge-cached">✓ Stored</span>
-          </div>
         </div>
       `;
     } else {
@@ -86,14 +86,14 @@ export function render8SlotGrid(
   // Interactivity
   gridContainer.querySelectorAll('.slot-filled').forEach((card) => {
     card.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('.btn-trash-slot')) return;
+      if ((e.target as HTMLElement).closest('.btn-remove-slot, .btn-trash-slot')) return;
       const id = card.getAttribute('data-book-id');
       const idx = parseInt(card.getAttribute('data-slot-index') || '0', 10);
       if (id) onOpenBook(id, idx);
     });
   });
 
-  gridContainer.querySelectorAll('.btn-trash-slot').forEach((btn) => {
+  gridContainer.querySelectorAll('.btn-remove-slot, .btn-trash-slot').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = btn.getAttribute('data-book-id');
