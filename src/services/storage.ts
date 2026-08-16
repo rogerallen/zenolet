@@ -98,14 +98,17 @@ export async function removeBookFromSlot(slotIndex: number): Promise<void> {
   const slots = getStoredSlots();
   if (slotIndex >= 0 && slotIndex < NUM_SLOTS) {
     const book = slots[slotIndex];
-    if (book && typeof caches !== 'undefined') {
-      const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
-      try {
-        const cache = await caches.open(BOOK_CACHE_NAME);
-        await cache.delete(cacheUrl);
-      } catch (e) {
-        console.warn('[Zenolet PWA] Cache delete error:', e);
+    if (book) {
+      if (typeof caches !== 'undefined') {
+        const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
+        try {
+          const cache = await caches.open(BOOK_CACHE_NAME);
+          await cache.delete(cacheUrl);
+        } catch (e) {
+          console.warn('[Zenolet PWA] Cache delete error:', e);
+        }
       }
+      clearBookProgress(book.id);
     }
     slots[slotIndex] = null;
     saveSlots(slots);
@@ -192,6 +195,8 @@ export async function removeBookOffline(bookId: string): Promise<void> {
     }
   }
 
+  clearBookProgress(bookId);
+
   const slots = getStoredSlots();
   for (let i = 0; i < NUM_SLOTS; i++) {
     if (slots[i]?.id === bookId) {
@@ -229,6 +234,22 @@ export function saveBookProgress(bookId: string, progressFraction: number): void
       console.error('[Progress] Failed to save reading progress:', e);
     }
   }, 300);
+}
+
+export function clearBookProgress(bookId: string): void {
+  if (saveProgressTimeout) clearTimeout(saveProgressTimeout);
+  try {
+    const progressMapRaw = localStorage.getItem('zenolet-reading-progress');
+    if (progressMapRaw) {
+      const progressMap = JSON.parse(progressMapRaw);
+      if (progressMap[bookId]) {
+        delete progressMap[bookId];
+        localStorage.setItem('zenolet-reading-progress', JSON.stringify(progressMap));
+      }
+    }
+  } catch (e) {
+    console.error('[Progress] Failed to clear reading progress:', e);
+  }
 }
 
 export function getStoredProgress(bookId: string): number | null {

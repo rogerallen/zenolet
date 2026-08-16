@@ -52,3 +52,7 @@ Whenever a feature, deploy, or version bump occurs:
 3. **Zero Starter Books**:
    * An empty shelf must remain completely empty (all 8 slots `null`) with "+ Add Book" on each slot.
    * Never auto-seed starter or default books when the shelf is empty or cleared.
+
+4. **Progress & Local State Reset on Removal**:
+   * When a book is removed from a slot (or deleted from shelf), all locally tracked data for that book (such as reading progress) MUST be deleted.
+   * If that book is loaded again in the future, reading MUST start back at the very first page (progress = 0).

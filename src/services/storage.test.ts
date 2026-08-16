@@ -92,4 +92,25 @@ describe('Storage and Progress Math for Zenolet', () => {
     expect(afterRemoval[1]).toBeNull();
     expect(afterRemoval[5]?.id).toBe('2701'); // Slot 5 still in Slot 5, not shifted!
   });
+
+  it('resets reading progress when a book is removed from a slot', async () => {
+    const { saveSlots, removeBookFromSlot, getStoredProgress } = await import('./storage.js');
+    const mockBook = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
+    const slots = new Array(8).fill(null);
+    slots[2] = mockBook;
+    saveSlots(slots);
+
+    // Simulate stored progress for Frankenstein
+    localStorage.setItem(
+      'zenolet-reading-progress',
+      JSON.stringify({ '84': { progressFraction: 0.65, lastReadTime: Date.now() } })
+    );
+    expect(getStoredProgress('84')).toBe(0.65);
+
+    // Remove book from slot 2
+    await removeBookFromSlot(2);
+
+    // Progress must be reset / null so next time it starts on page 1
+    expect(getStoredProgress('84')).toBeNull();
+  });
 });
