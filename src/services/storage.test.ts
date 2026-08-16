@@ -65,14 +65,14 @@ describe('Storage and Progress Math for Zenolet', () => {
   });
 
   it('returns 8 empty null slots by default without starter books', async () => {
-    const { getStoredSlots } = await import('../services/storage.js');
+    const { getStoredSlots } = await import('./storage.js');
     const slots = getStoredSlots();
     expect(slots).toHaveLength(8);
     expect(slots.every((s) => s === null)).toBe(true);
   });
 
   it('preserves exact slot positions when updating or removing books', async () => {
-    const { getStoredSlots, saveSlots, removeBookFromSlot } = await import('../services/storage.js');
+    const { getStoredSlots, saveSlots, removeBookFromSlot } = await import('./storage.js');
     const mockBookA = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
     const mockBookB = { id: '2701', title: 'Moby Dick', author: 'Herman Melville' };
 

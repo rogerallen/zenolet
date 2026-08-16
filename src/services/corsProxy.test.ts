@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 // @ts-ignore
 import worker from '../../worker/index.js';
-import { buildProxyUrl, fetchWithProxyFallback } from '../services/corsProxy.ts';
+import { buildProxyUrl, fetchWithProxyFallback } from './corsProxy.ts';
 
 describe('buildProxyUrl URL Parsing', () => {
   it('correctly constructs proxied URLs for localhost proxy endpoints', () => {
