@@ -91,6 +91,11 @@ const DOM = {
   qrUrlInput: document.getElementById('qr-url-input') as HTMLInputElement,
   qrClose: document.getElementById('qr-close') as HTMLButtonElement,
 
+  // About Modal
+  aboutToggle: document.getElementById('about-toggle') as HTMLButtonElement | null,
+  aboutModal: document.getElementById('about-modal') as HTMLDivElement | null,
+  aboutClose: document.getElementById('about-close') as HTMLButtonElement | null,
+
   // Search GUI / Discover Modal
   discoverOverlay: document.getElementById('discover-overlay') as HTMLDivElement,
   discoverPanel: document.getElementById('discover-panel') as HTMLElement,
@@ -443,6 +448,17 @@ function setupEventListeners() {
     if (e.target === DOM.qrModal) closeQRModal(DOM.qrModal);
   });
 
+  // About Modal Listeners
+  DOM.aboutToggle?.addEventListener('click', () => {
+    DOM.aboutModal?.classList.add('visible');
+  });
+  DOM.aboutClose?.addEventListener('click', () => {
+    DOM.aboutModal?.classList.remove('visible');
+  });
+  DOM.aboutModal?.addEventListener('click', (e) => {
+    if (e.target === DOM.aboutModal) DOM.aboutModal?.classList.remove('visible');
+  });
+
   // Search GUI Modal Listeners
   DOM.discoverClose.addEventListener('click', () => {
     closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
@@ -470,6 +486,13 @@ function setupEventListeners() {
 
   // Keyboard Shortcuts (Arrow Left/Right, Space)
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      DOM.aboutModal?.classList.remove('visible');
+      closeQRModal(DOM.qrModal);
+      closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
+      DOM.settingsPanel.classList.remove('visible');
+    }
+
     if (readerState.currentView !== 'reader') return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 

@@ -77,7 +77,16 @@
 
       <!-- Minimal Footer (Below Slots) -->
       <footer class="library-footer">
-        <span class="version-tag">Zenolet v0.8.0</span>
+        <span class="version-tag">Zenolet v0.9.0</span>
+        <span class="dot-separator">•</span>
+        <button id="about-toggle" class="footer-link-btn" title="About Zenolet" aria-label="About Zenolet">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>About</span>
+        </button>
         <span class="dot-separator">•</span>
         <button id="library-settings-toggle" class="footer-link-btn" title="Settings" aria-label="Settings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -178,6 +187,55 @@
           <button class="layout-btn" data-columns="auto">Auto</button>
           <button class="layout-btn" data-columns="1">1 Col</button>
           <button class="layout-btn" data-columns="2">2 Col</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Modal Dialog Overlay -->
+    <div id="about-modal" class="modal-overlay">
+      <div class="modal-card about-modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">About Zenolet</h3>
+          <button id="about-close" class="btn-close">&times;</button>
+        </div>
+        <div class="about-modal-body">
+          <p class="about-lead">
+            <strong>Zenolet</strong> is an elegant, distraction-free e-book reader designed for exploring and reading timeless literary classics from Project Gutenberg.
+          </p>
+
+          <div class="about-feature-grid">
+            <div class="about-feature-item">
+              <span class="about-feature-icon">📖</span>
+              <div>
+                <strong>Curated 8-Slot Bookshelf</strong>
+                <p>Focus on what you're actively reading without endless library scroll fatigue. Stable slot positions let you organize your reading list.</p>
+              </div>
+            </div>
+
+            <div class="about-feature-item">
+              <span class="about-feature-icon">✈️</span>
+              <div>
+                <strong>100% Offline-First</strong>
+                <p>Books and all inline illustrations are cached locally in your browser so you can read anywhere—on a flight, commute, or off-grid—with zero network requests.</p>
+              </div>
+            </div>
+
+            <div class="about-feature-item">
+              <span class="about-feature-icon">📱</span>
+              <div>
+                <strong>Seamless Mobile Handoff</strong>
+                <p>Scan the QR code with your phone camera to transfer your book and exact page position between devices instantly with no account required.</p>
+              </div>
+            </div>
+
+            <div class="about-feature-item">
+              <span class="about-feature-icon">🎨</span>
+              <div>
+                <strong>Comfortable Reading Engine</strong>
+                <p>Paginated book spreads with column controls, smooth font resizing, and customized reading themes (Paper, Sepia, Charcoal, and Night).</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

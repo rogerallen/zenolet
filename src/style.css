@@ -884,6 +884,67 @@ a:hover {
   cursor: pointer;
 }
 
+/* About Modal Styling */
+.about-modal-card {
+  max-width: 580px;
+}
+
+.about-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-lead {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.about-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .about-feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.about-feature-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  align-items: flex-start;
+}
+
+.about-feature-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.about-feature-item strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.about-feature-item p {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .qr-canvas-wrapper {
   display: flex;
   justify-content: center;
