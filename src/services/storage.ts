@@ -14,32 +14,160 @@ export interface BookDetails {
 }
 
 export const BOOK_CACHE_NAME = 'zenolet-books-v1';
-export const MAX_OFFLINE_BOOKS = 8;
+export const NUM_SLOTS = 8;
+export const STORAGE_KEY_SLOTS = 'zenolet-slots';
 
-// --- Offline Book Storage (Cache API) ---
-export async function saveBookOffline(book: BookMetadata, data: BookDetails): Promise<void> {
-  const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
-  const cache = await caches.open(BOOK_CACHE_NAME);
-  const response = new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-  await cache.put(cacheUrl, response);
-
-  // Update metadata index list in localStorage
-  const savedMeta = getDownloadedMetadataList();
-  const filtered = savedMeta.filter((b) => b.id !== book.id);
-  // Keep max 10
-  if (filtered.length >= MAX_OFFLINE_BOOKS) {
-    const evicted = filtered.shift();
-    if (evicted) {
-      await removeBookOffline(evicted.id);
+export function getStoredSlots(): (BookMetadata | null)[] {
+  const raw = localStorage.getItem(STORAGE_KEY_SLOTS);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const slots: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
+        for (let i = 0; i < NUM_SLOTS; i++) {
+          slots[i] = parsed[i] || null;
+        }
+        return slots;
+      }
+    } catch (e) {
+      console.error('[Zenolet Storage] Failed to parse stored slots:', e);
     }
   }
-  filtered.push(book);
-  localStorage.setItem('zenolet-offline-metadata', JSON.stringify(filtered));
+
+  // Check legacy zenolet-offline-metadata for migration if slots not set yet
+  const legacy = localStorage.getItem('zenolet-offline-metadata');
+  if (legacy) {
+    try {
+      const parsed = JSON.parse(legacy) as BookMetadata[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const migrated: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
+        for (let i = 0; i < Math.min(NUM_SLOTS, parsed.length); i++) {
+          migrated[i] = parsed[i];
+        }
+        localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(migrated));
+        return migrated;
+      }
+    } catch (e) {}
+  }
+
+  // Default to 8 completely empty slots (no starter books)
+  const emptySlots: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
+  return emptySlots;
+}
+
+export function saveSlots(slots: (BookMetadata | null)[]): void {
+  const normalized: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
+  for (let i = 0; i < NUM_SLOTS; i++) {
+    normalized[i] = slots[i] || null;
+  }
+  localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(normalized));
+
+  // Keep zenolet-offline-metadata in sync for legacy compatibility
+  const nonNull = normalized.filter((b): b is BookMetadata => b !== null);
+  localStorage.setItem('zenolet-offline-metadata', JSON.stringify(nonNull));
+}
+
+export async function saveBookToSlot(slotIndex: number, book: BookMetadata, data: BookDetails): Promise<void> {
+  const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
+  if (typeof caches !== 'undefined') {
+    try {
+      const cache = await caches.open(BOOK_CACHE_NAME);
+      const response = new Response(JSON.stringify(data), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      await cache.put(cacheUrl, response);
+    } catch (e) {
+      console.warn('[Zenolet PWA] Cache put error:', e);
+    }
+  }
+
+  const slots = getStoredSlots();
+  // Clear previous slot if book already existed in another slot
+  for (let i = 0; i < NUM_SLOTS; i++) {
+    if (i !== slotIndex && slots[i]?.id === book.id) {
+      slots[i] = null;
+    }
+  }
+  if (slotIndex >= 0 && slotIndex < NUM_SLOTS) {
+    slots[slotIndex] = book;
+  }
+  saveSlots(slots);
+}
+
+export async function removeBookFromSlot(slotIndex: number): Promise<void> {
+  const slots = getStoredSlots();
+  if (slotIndex >= 0 && slotIndex < NUM_SLOTS) {
+    const book = slots[slotIndex];
+    if (book && typeof caches !== 'undefined') {
+      const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
+      try {
+        const cache = await caches.open(BOOK_CACHE_NAME);
+        await cache.delete(cacheUrl);
+      } catch (e) {
+        console.warn('[Zenolet PWA] Cache delete error:', e);
+      }
+    }
+    slots[slotIndex] = null;
+    saveSlots(slots);
+  }
+}
+
+// --- Offline Book Storage (Cache API) ---
+export async function saveBookOffline(
+  book: BookMetadata,
+  data: BookDetails,
+  targetSlotIndex?: number | null
+): Promise<void> {
+  const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
+  if (typeof caches !== 'undefined') {
+    try {
+      const cache = await caches.open(BOOK_CACHE_NAME);
+      const response = new Response(JSON.stringify(data), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      await cache.put(cacheUrl, response);
+    } catch (e) {
+      console.warn('[Zenolet PWA] Cache put error:', e);
+    }
+  }
+
+  const slots = getStoredSlots();
+  const existingIdx = slots.findIndex((s) => s?.id === book.id);
+
+  if (existingIdx !== -1) {
+    // If targetSlotIndex specified and different from existing slot, move to target
+    if (
+      typeof targetSlotIndex === 'number' &&
+      targetSlotIndex >= 0 &&
+      targetSlotIndex < NUM_SLOTS &&
+      targetSlotIndex !== existingIdx
+    ) {
+      slots[existingIdx] = null;
+      slots[targetSlotIndex] = book;
+    } else {
+      // Keep in existing slot without moving
+      slots[existingIdx] = book;
+    }
+  } else if (
+    typeof targetSlotIndex === 'number' &&
+    targetSlotIndex >= 0 &&
+    targetSlotIndex < NUM_SLOTS
+  ) {
+    slots[targetSlotIndex] = book;
+  } else {
+    // Assign to first empty slot
+    const emptyIdx = slots.findIndex((s) => s === null);
+    if (emptyIdx !== -1) {
+      slots[emptyIdx] = book;
+    } else {
+      slots[0] = book;
+    }
+  }
+  saveSlots(slots);
 }
 
 export async function getStoredBookOffline(bookId: string): Promise<BookDetails | null> {
+  if (typeof caches === 'undefined') return null;
   const cacheUrl = `/cached-books/${encodeURIComponent(bookId)}`;
   try {
     const cache = await caches.open(BOOK_CACHE_NAME);
@@ -54,29 +182,28 @@ export async function getStoredBookOffline(bookId: string): Promise<BookDetails 
 }
 
 export async function removeBookOffline(bookId: string): Promise<void> {
-  const cacheUrl = `/cached-books/${encodeURIComponent(bookId)}`;
-  try {
-    const cache = await caches.open(BOOK_CACHE_NAME);
-    await cache.delete(cacheUrl);
-  } catch (e) {
-    console.warn('[Zenolet PWA] Cache delete error:', e);
+  if (typeof caches !== 'undefined') {
+    const cacheUrl = `/cached-books/${encodeURIComponent(bookId)}`;
+    try {
+      const cache = await caches.open(BOOK_CACHE_NAME);
+      await cache.delete(cacheUrl);
+    } catch (e) {
+      console.warn('[Zenolet PWA] Cache delete error:', e);
+    }
   }
 
-  const savedMeta = getDownloadedMetadataList();
-  const updated = savedMeta.filter((b) => b.id !== bookId);
-  localStorage.setItem('zenolet-offline-metadata', JSON.stringify(updated));
+  const slots = getStoredSlots();
+  for (let i = 0; i < NUM_SLOTS; i++) {
+    if (slots[i]?.id === bookId) {
+      slots[i] = null;
+    }
+  }
+  saveSlots(slots);
 }
 
 export function getDownloadedMetadataList(): BookMetadata[] {
-  const savedMeta = localStorage.getItem('zenolet-offline-metadata');
-  if (savedMeta) {
-    try {
-      return JSON.parse(savedMeta) as BookMetadata[];
-    } catch (e) {
-      console.error('[Zenolet PWA] Failed to parse offline metadata list:', e);
-    }
-  }
-  return [];
+  const slots = getStoredSlots();
+  return slots.filter((b): b is BookMetadata => b !== null);
 }
 
 export function getDownloadedBookSet(): Set<string> {

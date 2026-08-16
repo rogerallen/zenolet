@@ -7,9 +7,8 @@ import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
   getStoredBookOffline,
-  removeBookOffline,
-  getDownloadedBookSet,
-  getDownloadedMetadataList,
+  getStoredSlots,
+  removeBookFromSlot,
   getStoredProgress,
   restoreBookProgressByFraction,
   type BookMetadata
@@ -35,8 +34,8 @@ import {
 // --- State ---
 let config: ZenoletConfig = {};
 let allBooks: CatalogBook[] = [];
-let downloadedBooks = new Set<string>();
 let activeBook: CatalogBook | null = null;
+let activeSlotIndex: number | null = null;
 
 const readerState: ReaderState = {
   currentView: 'library',
@@ -118,7 +117,6 @@ async function init() {
   renderCuratorHeader(DOM.curatorHeader, config.siteTitle, config.curator);
 
   // Render 8-Slot Bookshelf View immediately from local storage (synchronous 0ms render)
-  downloadedBooks = getDownloadedBookSet();
   update8SlotShelfView();
 
   // Setup Event Listeners
@@ -164,40 +162,29 @@ async function init() {
 }
 
 function update8SlotShelfView() {
-  let stored = getDownloadedMetadataList();
-
-  // Seed starter books on first visit if shelf is empty (0ms synchronous seed)
-  if (stored.length === 0) {
-    const seeds: BookMetadata[] = [
-      { id: '84', title: 'Frankenstein; Or, The Modern Prometheus', author: 'Mary Wollstonecraft Shelley' },
-      { id: '2701', title: 'Moby Dick; Or, The Whale', author: 'Herman Melville' },
-      { id: '11', title: "Alice's Adventures in Wonderland", author: 'Lewis Carroll' },
-      { id: '1661', title: 'The Adventures of Sherlock Holmes', author: 'Arthur Conan Doyle' }
-    ];
-    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(seeds));
-    stored = seeds;
-  }
+  const slots = getStoredSlots();
 
   render8SlotGrid(
     DOM.slotsGrid,
-    stored,
+    slots,
     8,
-    (bookId) => {
+    (bookId, slotIndex) => {
+      activeSlotIndex = slotIndex;
       const book = allBooks.find((b) => b.id === bookId) || {
         id: bookId,
-        title: `Book #${bookId}`,
-        author: 'Project Gutenberg',
+        title: slots[slotIndex]?.title || `Book #${bookId}`,
+        author: slots[slotIndex]?.author || 'Project Gutenberg',
         subjects: ['Classics'],
         downloads: 0
       };
-      openBook(book);
+      openBook(book, null, true, slotIndex);
     },
-    async (bookId) => {
-      await removeBookOffline(bookId);
-      downloadedBooks.delete(bookId);
+    async (_bookId, slotIndex) => {
+      await removeBookFromSlot(slotIndex);
       update8SlotShelfView();
     },
-    (_slotIndex) => {
+    (slotIndex) => {
+      activeSlotIndex = slotIndex;
       openSearchGUI();
     }
   );
@@ -222,12 +209,20 @@ async function handleSelectBookForSlot(bookId: string, title: string, author: st
     htmlUrl
   };
 
-  await openBook(book);
+  await openBook(book, null, true, activeSlotIndex);
 }
 
 // --- Book Reader Operations ---
-async function openBook(book: CatalogBook, initialProgressFraction: number | null = null, pushHistory: boolean = true) {
+async function openBook(
+  book: CatalogBook,
+  initialProgressFraction: number | null = null,
+  pushHistory: boolean = true,
+  targetSlotIndex?: number | null
+) {
   activeBook = book;
+  if (typeof targetSlotIndex === 'number') {
+    activeSlotIndex = targetSlotIndex;
+  }
 
   DOM.readerBookTitle.textContent = book.title;
   DOM.readerBookAuthor.textContent = `by ${book.author}`;
@@ -265,8 +260,8 @@ async function openBook(book: CatalogBook, initialProgressFraction: number | nul
       // Always auto-save book offline into slot storage upon selection
       const processedContent = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
       const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
-      await saveBookOffline(meta, { metadata: meta, content: processedContent });
-      downloadedBooks.add(book.id);
+      const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+      await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
     }
 
     // Process & Render Content

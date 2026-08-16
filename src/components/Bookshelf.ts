@@ -28,16 +28,16 @@ export function renderCuratorHeader(
 
 export function render8SlotGrid(
   gridContainer: HTMLElement,
-  storedBooks: BookMetadata[],
+  storedSlots: (BookMetadata | null)[],
   maxSlots: number = 8,
-  onOpenBook: (bookId: string) => void,
-  onRemoveBook: (bookId: string) => void,
+  onOpenBook: (bookId: string, slotIndex: number) => void,
+  onRemoveBook: (bookId: string, slotIndex: number) => void,
   onEmptySlotClick: (slotIndex: number) => void
 ): void {
   let html = '';
 
   for (let i = 0; i < maxSlots; i++) {
-    const book = storedBooks[i];
+    const book = storedSlots[i];
     if (book) {
       const progressFraction = getStoredProgress(book.id);
       let progressHtml = '';
@@ -54,8 +54,8 @@ export function render8SlotGrid(
       }
 
       html += `
-        <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}">
-          <button class="btn-trash-slot" data-book-id="${escapeHtml(book.id)}" title="Remove book from slot" aria-label="Remove book">
+        <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}">
+          <button class="btn-trash-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove book">
             🗑️
           </button>
           <div class="slot-card-content">
@@ -88,7 +88,8 @@ export function render8SlotGrid(
     card.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).closest('.btn-trash-slot')) return;
       const id = card.getAttribute('data-book-id');
-      if (id) onOpenBook(id);
+      const idx = parseInt(card.getAttribute('data-slot-index') || '0', 10);
+      if (id) onOpenBook(id, idx);
     });
   });
 
@@ -96,7 +97,8 @@ export function render8SlotGrid(
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = btn.getAttribute('data-book-id');
-      if (id) onRemoveBook(id);
+      const idx = parseInt(btn.getAttribute('data-slot-index') || '0', 10);
+      if (id) onRemoveBook(id, idx);
     });
   });
 

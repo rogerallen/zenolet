@@ -64,18 +64,32 @@ describe('Storage and Progress Math for Zenolet', () => {
     expect(getElementSpreadIndex(mockEl1, mockViewport, totalSpreads)).toBe(37);
   });
 
-  it('saves and reads offline metadata correctly in localStorage', () => {
-    const mockBooks = [
-      { id: '1661', title: 'Adventures of Sherlock Holmes', author: 'Arthur Conan Doyle' },
-      { id: '11', title: "Alice's Adventures in Wonderland", author: 'Lewis Carroll' }
-    ];
+  it('returns 8 empty null slots by default without starter books', async () => {
+    const { getStoredSlots } = await import('../services/storage.js');
+    const slots = getStoredSlots();
+    expect(slots).toHaveLength(8);
+    expect(slots.every((s) => s === null)).toBe(true);
+  });
 
-    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(mockBooks));
+  it('preserves exact slot positions when updating or removing books', async () => {
+    const { getStoredSlots, saveSlots, removeBookFromSlot } = await import('../services/storage.js');
+    const mockBookA = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
+    const mockBookB = { id: '2701', title: 'Moby Dick', author: 'Herman Melville' };
 
-    const retrievedRaw = localStorage.getItem('zenolet-offline-metadata');
-    expect(retrievedRaw).not.toBeNull();
-    const retrieved = JSON.parse(retrievedRaw!);
-    expect(retrieved).toHaveLength(2);
-    expect(retrieved[0].title).toBe('Adventures of Sherlock Holmes');
+    const initialSlots = new Array(8).fill(null);
+    initialSlots[1] = mockBookA;
+    initialSlots[5] = mockBookB;
+    saveSlots(initialSlots);
+
+    const loaded = getStoredSlots();
+    expect(loaded[0]).toBeNull();
+    expect(loaded[1]?.id).toBe('84');
+    expect(loaded[5]?.id).toBe('2701');
+
+    // Remove book in Slot 1
+    await removeBookFromSlot(1);
+    const afterRemoval = getStoredSlots();
+    expect(afterRemoval[1]).toBeNull();
+    expect(afterRemoval[5]?.id).toBe('2701'); // Slot 5 still in Slot 5, not shifted!
   });
 });
