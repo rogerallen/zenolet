@@ -279,7 +279,10 @@ async function openBook(
     // Update bookshelf 8-slot view
     update8SlotShelfView();
 
-    // Recalculate Columns & Page Spreads
+    // Ensure DOM viewport scroll is clean before opening new book
+    DOM.readerViewport.scrollLeft = 0;
+
+    // Recalculate Columns & Page Spreads without preserving stale DOM scroll
     recalculatePages(
       DOM.readerViewport,
       DOM.readerContent,
@@ -287,13 +290,22 @@ async function openBook(
       DOM.progressFill,
       DOM.pageIndicator,
       readerState,
-      book.id
+      book.id,
+      false
     );
 
-    // Restore Progress Fraction
+    // Restore Progress Fraction from storage if available
     const targetFraction = initialProgressFraction !== null ? initialProgressFraction : getStoredProgress(book.id);
     if (targetFraction !== null && targetFraction > 0) {
       restoreBookProgressByFraction(targetFraction, DOM.readerViewport);
+      updatePaginationIndicator(
+        DOM.readerViewport,
+        DOM.readerContent,
+        DOM.progressFill,
+        DOM.pageIndicator,
+        readerState,
+        book.id
+      );
     }
 
     // Update URL state hash (push new entry if opening book, replace if restored)
@@ -309,6 +321,7 @@ function closeReaderAndReturnToLibrary() {
   DOM.libraryView.classList.remove('hidden');
   readerState.currentView = 'library';
   activeBook = null;
+  DOM.readerViewport.scrollLeft = 0;
   if (window.location.hash) {
     window.history.replaceState({ view: 'library' }, '', window.location.pathname);
   }

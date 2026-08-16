@@ -61,11 +61,12 @@ export function recalculatePages(
   progressFill: HTMLDivElement,
   pageIndicator: HTMLSpanElement,
   state: ReaderState,
-  activeBookId: string | null
+  activeBookId: string | null,
+  preserveDOMScroll: boolean = true
 ): void {
   if (!activeBookId) return;
 
-  const prevProgress = getStoredProgressFraction(readerViewport);
+  const prevProgress = preserveDOMScroll ? getStoredProgressFraction(readerViewport) : 0;
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
 
@@ -121,7 +122,9 @@ export function recalculatePages(
     });
   });
 
-  restoreBookProgressByFraction(prevProgress, readerViewport);
+  if (preserveDOMScroll && prevProgress > 0) {
+    restoreBookProgressByFraction(prevProgress, readerViewport);
+  }
 }
 
 export function updatePaginationIndicator(
