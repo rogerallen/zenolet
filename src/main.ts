@@ -2,7 +2,7 @@ import './style.css';
 import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
 import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
-import { getGutenbergCandidateUrls, fetchWithProxyFallback, processBookHtml } from './services/corsProxy.ts';
+import { getGutenbergCandidateUrls, fetchWithProxyFallback, processBookHtml, cacheBookImagesOffline } from './services/corsProxy.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
@@ -235,6 +235,18 @@ async function openBook(
     const offlineData = await getStoredBookOffline(book.id);
     if (offlineData) {
       rawContent = offlineData.content;
+      DOM.readerContent.innerHTML = rawContent;
+
+      // In background, upgrade any uncached images to offline base64 data URLs
+      if (rawContent.includes('<img') && !rawContent.includes('data:image')) {
+        const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
+        const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+        cacheBookImagesOffline(rawContent, config.proxyUrl).then((fullyCachedHtml) => {
+          if (fullyCachedHtml && fullyCachedHtml !== rawContent) {
+            saveBookOffline(meta, { metadata: meta, content: fullyCachedHtml }, slotToSave);
+          }
+        });
+      }
     } else {
       // 2. Fetch via candidate static URLs & proxy fallbacks
       const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
@@ -257,18 +269,26 @@ async function openBook(
         throw lastErr || new Error(`Could not load text for book #${book.id}`);
       }
 
+      // Process & Render Content
+      const processedContent = (rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>'))
+        ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
+        : await marked.parse(rawContent);
+
+      DOM.readerContent.innerHTML = processedContent;
+
       // Always auto-save book offline into slot storage upon selection
-      const processedContent = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
       const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
       const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
       await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
-    }
 
-    // Process & Render Content
-    if (rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')) {
-      DOM.readerContent.innerHTML = processBookHtml(rawContent, bookSourceUrl, config.proxyUrl);
-    } else {
-      DOM.readerContent.innerHTML = await marked.parse(rawContent);
+      // In background, download and inline all images as data URLs for 100% offline persistence
+      if (processedContent.includes('<img')) {
+        cacheBookImagesOffline(processedContent, config.proxyUrl).then((fullyCachedHtml) => {
+          if (fullyCachedHtml && fullyCachedHtml !== processedContent) {
+            saveBookOffline(meta, { metadata: meta, content: fullyCachedHtml }, slotToSave);
+          }
+        });
+      }
     }
 
     // Switch View

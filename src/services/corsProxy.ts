@@ -91,6 +91,7 @@ export function processBookHtml(
   bookSourceUrl: string,
   proxyUrlSetting?: string
 ): string {
+  if (typeof DOMParser === 'undefined') return rawHtml;
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHtml, 'text/html');
 
@@ -106,18 +107,33 @@ export function processBookHtml(
     const src = img.getAttribute('src');
     if (src) {
       try {
-        let absUrl = src;
-        if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:')) {
-          absUrl = new URL(src, baseUrlStr).toString();
-        }
-        const proxiedSrc = buildProxyUrl(absUrl, proxyUrlSetting);
-        img.setAttribute('src', proxiedSrc);
         img.removeAttribute('width');
         img.removeAttribute('height');
         img.style.maxWidth = '100%';
         img.style.maxHeight = 'calc(100vh - 160px)';
         img.style.height = 'auto';
         img.style.objectFit = 'contain';
+
+        // 1. Keep data URLs as-is
+        if (src.startsWith('data:')) {
+          return;
+        }
+
+        // 2. Prevent double-proxying if already proxied
+        if (proxyUrlSetting && src.startsWith(proxyUrlSetting)) {
+          return;
+        }
+        if (src.includes('?url=')) {
+          return;
+        }
+
+        // 3. Resolve relative image paths against book baseUrl
+        let absUrl = src;
+        if (!src.startsWith('http://') && !src.startsWith('https://')) {
+          absUrl = new URL(src, baseUrlStr).toString();
+        }
+        const proxiedSrc = buildProxyUrl(absUrl, proxyUrlSetting);
+        img.setAttribute('src', proxiedSrc);
       } catch (err) {
         console.warn('[Zenolet Image] Resolution error for src:', src, err);
       }
@@ -125,4 +141,60 @@ export function processBookHtml(
   });
 
   return doc.body ? doc.body.innerHTML : rawHtml;
+}
+
+export async function cacheBookImagesOffline(
+  processedHtml: string,
+  proxyUrlSetting?: string
+): Promise<string> {
+  if (typeof DOMParser === 'undefined') return processedHtml;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(processedHtml, 'text/html');
+    const images = Array.from(doc.querySelectorAll('img'));
+    if (images.length === 0) return processedHtml;
+
+    let hasChanges = false;
+    const BATCH_SIZE = 4;
+    for (let i = 0; i < images.length; i += BATCH_SIZE) {
+      const batch = images.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (img) => {
+          const src = img.getAttribute('src');
+          if (src && !src.startsWith('data:')) {
+            let targetUrl = src;
+            if (src.includes('?url=')) {
+              const parts = src.split('?url=');
+              targetUrl = decodeURIComponent(parts[1] || parts[0]);
+            }
+            try {
+              const proxiedUrl = buildProxyUrl(targetUrl, proxyUrlSetting);
+              const response = await fetch(proxiedUrl);
+              if (response.ok) {
+                const blob = await response.blob();
+                const arrayBuf = await blob.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuf);
+                let binary = '';
+                const len = bytes.byteLength;
+                for (let b = 0; b < len; b++) {
+                  binary += String.fromCharCode(bytes[b]);
+                }
+                const base64 = btoa(binary);
+                const mimeType = blob.type || 'image/jpeg';
+                const dataUrl = `data:${mimeType};base64,${base64}`;
+                img.setAttribute('src', dataUrl);
+                hasChanges = true;
+              }
+            } catch (imgErr) {
+              console.warn('[Zenolet Image Cache] Failed to cache image:', src, imgErr);
+            }
+          }
+        })
+      );
+    }
+    return (hasChanges && doc.body) ? doc.body.innerHTML : processedHtml;
+  } catch (err) {
+    console.warn('[Zenolet Image Cache] Error caching book images:', err);
+    return processedHtml;
+  }
 }

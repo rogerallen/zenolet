@@ -26,6 +26,80 @@ describe('buildProxyUrl URL Parsing', () => {
   });
 });
 
+describe('processBookHtml Image Resolution & Caching', () => {
+  it('resolves relative image URLs against book baseUrl and adds proxy prefix', async () => {
+    const { processBookHtml } = await import('./corsProxy.ts');
+    const rawHtml = '<p>Chapter 1</p><img src="images/cover.jpg" alt="Cover">';
+    const bookUrl = 'https://www.gutenberg.org/cache/epub/1342/pg1342-images.html';
+    const proxy = 'http://localhost:8787';
+
+    const processed = processBookHtml(rawHtml, bookUrl, proxy);
+    expect(processed).toContain('src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg"');
+  });
+
+  it('preserves already-proxied URLs without double-proxying on revisit', async () => {
+    const { processBookHtml } = await import('./corsProxy.ts');
+    const alreadyProxiedHtml = '<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
+    const bookUrl = 'https://www.gutenberg.org/cache/epub/1342/pg1342-images.html';
+    const proxy = 'http://localhost:8787';
+
+    const processed = processBookHtml(alreadyProxiedHtml, bookUrl, proxy);
+    expect(processed).toBe('<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg" style="max-width: 100%; max-height: calc(100vh - 160px); height: auto; object-fit: contain;">');
+  });
+
+  it('preserves data:image base64 URLs without modifying them', async () => {
+    const { processBookHtml } = await import('./corsProxy.ts');
+    const dataUrlHtml = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">';
+    const bookUrl = 'https://www.gutenberg.org/cache/epub/1342/pg1342-images.html';
+    const proxy = 'http://localhost:8787';
+
+    const processed = processBookHtml(dataUrlHtml, bookUrl, proxy);
+    expect(processed).toContain('src="data:image/png;base64,');
+  });
+
+  it('downloads external images via proxy and inlines them as base64 data URLs in cacheBookImagesOffline', async () => {
+    const { cacheBookImagesOffline } = await import('./corsProxy.ts');
+    const inputHtml = '<p>Text</p><img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
+    const proxy = 'http://localhost:8787';
+
+    const fakeImageBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); // PNG header
+    const mockImageBlob = new Blob([fakeImageBytes], { type: 'image/png' });
+    const mockImageResponse = new Response(mockImageBlob, {
+      status: 200,
+      headers: { 'Content-Type': 'image/png' }
+    });
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue(mockImageResponse);
+
+    try {
+      const result = await cacheBookImagesOffline(inputHtml, proxy);
+      expect(result).toContain('src="data:image/png;base64,');
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        'http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg'
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it('retains original image src if image fetch fails in cacheBookImagesOffline', async () => {
+    const { cacheBookImagesOffline } = await import('./corsProxy.ts');
+    const inputHtml = '<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fimages%2Fmissing.jpg">';
+    const proxy = 'http://localhost:8787';
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue(new Response('Not Found', { status: 404 }));
+
+    try {
+      const result = await cacheBookImagesOffline(inputHtml, proxy);
+      expect(result).toContain('src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fimages%2Fmissing.jpg"');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
 describe('Worker Proxy Security & CORS Preflight', () => {
   it('handles OPTIONS preflight request for allowed GitHub Pages origin', async () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {

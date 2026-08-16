@@ -55,4 +55,8 @@ Whenever a feature, deploy, or version bump occurs:
 
 4. **Reading Progress & Removal Invariants**:
    * **Active Shelf Books**: While a book remains on the bookshelf, opening or revisiting it must always restore its saved reading position so the reader picks up right where they left off. Layout adjustments while reading (window resize, font changes, column toggles) must also preserve the active reading position.
-   * **Book Removal**: Removing a book from a slot (or deleting it from the shelf) completely clears all saved progress and viewport state. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
+   * **Book Removal**: Removing a book from a slot (or deleting it from the shelf) completely clears all saved progress, in-memory viewport state, and purges all cached content (both HTML and cached images) from local storage and Cache API. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
+
+5. **Proxy & Offline Asset Invariants**:
+   * **Strict Proxying**: All external book assets (both HTML content and inline images) MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
+   * **Complete Offline Caching**: When a book is stored on the shelf for offline reading, both the HTML text and all inline illustrations/images must be stored locally in cache (with images inlined/cached) so the entire book is 100% readable and visual without network connectivity.

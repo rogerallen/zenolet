@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getElementSpreadIndex } from '../components/Timeline.js';
 
 describe('Storage and Progress Math for Zenolet', () => {
@@ -112,5 +112,29 @@ describe('Storage and Progress Math for Zenolet', () => {
 
     // Progress must be reset / null so next time it starts on page 1
     expect(getStoredProgress('84')).toBeNull();
+  });
+
+  it('purges cached offline book content and images from Cache API on removal', async () => {
+    const { saveSlots, removeBookFromSlot } = await import('./storage.js');
+    const mockBook = { id: '1342', title: 'Pride and Prejudice', author: 'Jane Austen' };
+    const slots = new Array(8).fill(null);
+    slots[3] = mockBook;
+    saveSlots(slots);
+
+    const mockDelete = vi.fn().mockResolvedValue(true);
+    const mockCache = { delete: mockDelete, put: vi.fn(), match: vi.fn() };
+    const mockOpen = vi.fn().mockResolvedValue(mockCache);
+
+    // @ts-ignore
+    globalThis.caches = { open: mockOpen, delete: vi.fn(), has: vi.fn(), keys: vi.fn(), match: vi.fn() };
+
+    try {
+      await removeBookFromSlot(3);
+      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v1');
+      expect(mockDelete).toHaveBeenCalledWith('/cached-books/1342');
+    } finally {
+      // @ts-ignore
+      delete globalThis.caches;
+    }
   });
 });
