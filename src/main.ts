@@ -57,6 +57,7 @@ const discoverState: DiscoverState = {
 // --- DOM Cache ---
 const DOM = {
   libraryView: document.getElementById('library-view') as HTMLDivElement,
+  librarySettingsToggle: document.getElementById('library-settings-toggle') as HTMLButtonElement | null,
   readerView: document.getElementById('reader-view') as HTMLDivElement,
   curatorHeader: document.getElementById('curator-header-container') as HTMLDivElement,
   slotsGrid: document.getElementById('slots-grid') as HTMLDivElement,
@@ -82,6 +83,7 @@ const DOM = {
   progressTrack: document.getElementById('progress-track') as HTMLDivElement,
   progressFill: document.getElementById('progress-fill') as HTMLDivElement,
   pageIndicator: document.getElementById('page-indicator') as HTMLSpanElement,
+  footerRepoLink: document.getElementById('footer-repo-link') as HTMLAnchorElement | null,
 
   // QR Modal
   qrModal: document.getElementById('qr-modal') as HTMLDivElement,
@@ -102,19 +104,39 @@ async function init() {
   // Load Curator Config
   config = await loadZenoletConfig();
 
-  // Apply curator theme defaults
-  if (config.defaultTheme) {
-    setTheme(config.defaultTheme, readerState);
+  // Apply Repo URL to Footer
+  if (config.repoUrl && DOM.footerRepoLink) {
+    DOM.footerRepoLink.href = config.repoUrl;
+  }
+
+  // Apply curator settings & theme defaults
+  const themeDefault = config.settings?.defaultTheme || (config as any).defaultTheme;
+  if (themeDefault) {
+    setTheme(themeDefault, readerState);
   } else {
     const savedTheme = localStorage.getItem('zenolet-theme') as ReaderState['theme'];
     if (savedTheme) setTheme(savedTheme, readerState);
   }
 
+  const configuredFontSize = config.settings?.fontSize || (config as any).fontSize;
   const savedFontSize = localStorage.getItem('zenolet-font-size');
-  if (savedFontSize) readerState.fontSize = parseInt(savedFontSize, 10);
+  if (savedFontSize) {
+    readerState.fontSize = parseInt(savedFontSize, 10);
+  } else if (configuredFontSize) {
+    readerState.fontSize = configuredFontSize;
+  }
+
+  const configuredColumns = config.settings?.layoutColumns || (config as any).layoutColumns;
+  const savedColumns = localStorage.getItem('zenolet-columns') as ReaderState['layoutColumns'];
+  if (savedColumns) {
+    readerState.layoutColumns = savedColumns;
+  } else if (configuredColumns) {
+    readerState.layoutColumns = configuredColumns;
+  }
 
   // Render Minimal Curator Header
-  renderCuratorHeader(DOM.curatorHeader, config.siteTitle, config.curator);
+  const siteTitle = config.title || config.siteTitle;
+  renderCuratorHeader(DOM.curatorHeader, siteTitle, config.curator, config.blurb);
 
   // Render 8-Slot Bookshelf View immediately from local storage (synchronous 0ms render)
   update8SlotShelfView();
@@ -124,20 +146,6 @@ async function init() {
 
   // Fetch Catalog for search GUI
   allBooks = await fetchCatalog();
-
-  // Append any custom Curator books from zenolet.config.json
-  if (config.customBooks && config.customBooks.length > 0) {
-    const customCatalog: CatalogBook[] = config.customBooks.map((b) => ({
-      id: b.id,
-      title: b.title,
-      author: b.author,
-      subjects: [b.category || 'Curator Choice'],
-      downloads: 9999,
-      htmlUrl: b.htmlUrl,
-      coverUrl: b.cover
-    }));
-    allBooks = [...customCatalog, ...allBooks];
-  }
 
   // Check URL Hash for state (#s=...)
   if (window.location.hash.startsWith('#s=')) {
@@ -408,8 +416,8 @@ function setupEventListeners() {
     closeReaderAndReturnToLibrary();
   });
 
-  // Settings Panel Toggle
-  setupSettingsModal(DOM.settingsPanel, DOM.settingsToggle, readerState, () => {
+  // Settings Panel Toggle (Available in both Bookshelf and Reader views)
+  setupSettingsModal(DOM.settingsPanel, [DOM.settingsToggle, DOM.librarySettingsToggle], readerState, () => {
     if (activeBook) {
       recalculatePages(
         DOM.readerViewport,

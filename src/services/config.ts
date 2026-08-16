@@ -1,27 +1,22 @@
 export interface CuratorConfig {
   name: string;
-  avatar?: string;
-  bio?: string;
-  link?: string;
+  linkUrl?: string;
 }
 
-export interface CustomBook {
-  id: string;
-  title: string;
-  author: string;
-  category?: string;
-  cover?: string;
-  htmlUrl: string;
-}
-
-export interface ZenoletConfig {
-  siteTitle?: string;
-  curator?: CuratorConfig;
+export interface ReaderSettingsConfig {
   defaultTheme?: 'paper' | 'sepia' | 'charcoal' | 'night';
   fontSize?: number;
   layoutColumns?: 'auto' | '1' | '2';
+}
+
+export interface ZenoletConfig {
+  title?: string;
+  blurb?: string;
+  siteTitle?: string;
+  repoUrl?: string;
+  curator?: CuratorConfig;
+  settings?: ReaderSettingsConfig;
   proxyUrl?: string;
-  customBooks?: CustomBook[];
 }
 
 export async function loadZenoletConfig(): Promise<ZenoletConfig> {

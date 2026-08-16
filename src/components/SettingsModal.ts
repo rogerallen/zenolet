@@ -3,17 +3,28 @@ import { setTheme, setFontSize, setLayoutColumns, type ReaderState } from './Rea
 
 export function setupSettingsModal(
   panel: HTMLDivElement,
-  toggleBtn: HTMLButtonElement,
+  toggleBtns: HTMLElement | (HTMLElement | null)[],
   state: ReaderState,
   onRecalculate: () => void
 ): void {
-  toggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    panel.classList.toggle('visible');
+  const buttons = (Array.isArray(toggleBtns) ? toggleBtns : [toggleBtns]).filter(
+    (b): b is HTMLElement => b !== null
+  );
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (btn.id === 'library-settings-toggle') {
+        panel.classList.add('panel-from-footer');
+      } else {
+        panel.classList.remove('panel-from-footer');
+      }
+      panel.classList.toggle('visible');
+    });
   });
 
   document.addEventListener('click', (e) => {
-    if (!panel.contains(e.target as Node) && e.target !== toggleBtn) {
+    if (!panel.contains(e.target as Node) && !buttons.some((b) => b.contains(e.target as Node))) {
       panel.classList.remove('visible');
     }
   });

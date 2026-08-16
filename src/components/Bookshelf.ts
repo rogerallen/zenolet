@@ -13,15 +13,24 @@ export function escapeHtml(str: string): string {
 export function renderCuratorHeader(
   container: HTMLElement,
   siteTitle?: string,
-  curator?: CuratorConfig
+  curator?: CuratorConfig,
+  blurb?: string
 ): void {
   const title = siteTitle || 'Zenolet';
   const name = curator?.name || 'Roger Allen';
+  const curatorHtml = curator?.linkUrl
+    ? `<a href="${escapeHtml(curator.linkUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
+    : escapeHtml(name);
+
+  const blurbHtml = blurb
+    ? `<p class="minimal-blurb">${escapeHtml(blurb)}</p>`
+    : '';
 
   container.innerHTML = `
     <div class="minimal-header">
       <h1 class="minimal-site-title">${escapeHtml(title)}</h1>
-      <p class="minimal-byline">Curated by ${escapeHtml(name)}</p>
+      ${blurbHtml}
+      <p class="minimal-byline">Curated by ${curatorHtml}</p>
     </div>
   `;
 }

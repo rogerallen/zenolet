@@ -75,11 +75,19 @@
         <div id="slots-grid" class="slots-grid"></div>
       </main>
 
-      <!-- Minimal Footer -->
+      <!-- Minimal Footer (Below Slots) -->
       <footer class="library-footer">
-        <span class="version-tag">Zenolet v0.7.0</span>
+        <span class="version-tag">Zenolet v0.8.0</span>
         <span class="dot-separator">•</span>
-        <a href="https://github.com/rogerallen/zenolet" target="_blank" rel="noopener" class="github-link">
+        <button id="library-settings-toggle" class="footer-link-btn" title="Settings" aria-label="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+        <span class="dot-separator">•</span>
+        <a id="footer-repo-link" href="https://github.com/rogerallen/zenolet" target="_blank" rel="noopener" class="github-link">
           <span>GitHub</span>
         </a>
       </footer>
@@ -103,41 +111,14 @@
             <span>📱</span> Mobile Link
           </button>
           <button id="settings-toggle" class="btn-icon" title="Reading Settings">
-            <span>⚙️</span> Settings
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
           </button>
         </div>
       </header>
-
-      <!-- Settings Dropdown Panel -->
-      <div id="settings-panel" class="settings-panel">
-        <div class="settings-group">
-          <span class="settings-label">Theme</span>
-          <div class="theme-options">
-            <button class="theme-btn" data-theme="paper">Paper</button>
-            <button class="theme-btn" data-theme="sepia">Sepia</button>
-            <button class="theme-btn" data-theme="charcoal">Charcoal</button>
-            <button class="theme-btn" data-theme="night">Night</button>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <span class="settings-label">Font Size</span>
-          <div class="font-controls">
-            <button id="font-decrease" class="btn-font">A-</button>
-            <span id="font-size-display" style="font-weight: 600;">18px</span>
-            <button id="font-increase" class="btn-font">A+</button>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <span class="settings-label">Layout Columns</span>
-          <div class="layout-options">
-            <button class="layout-btn" data-columns="auto">Auto</button>
-            <button class="layout-btn" data-columns="1">1 Col</button>
-            <button class="layout-btn" data-columns="2">2 Col</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Reader Main Area with Floating Navigation Arrows -->
       <main id="reader-main" class="reader-main">
@@ -168,6 +149,37 @@
           <div id="timeline-ticks" class="timeline-ticks"></div>
         </div>
       </footer>
+    </div>
+
+    <!-- Settings Dropdown Panel (Available in Bookshelf & Reader) -->
+    <div id="settings-panel" class="settings-panel">
+      <div class="settings-group">
+        <span class="settings-label">Theme</span>
+        <div class="theme-options">
+          <button class="theme-btn" data-theme="paper">Paper</button>
+          <button class="theme-btn" data-theme="sepia">Sepia</button>
+          <button class="theme-btn" data-theme="charcoal">Charcoal</button>
+          <button class="theme-btn" data-theme="night">Night</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <span class="settings-label">Font Size</span>
+        <div class="font-controls">
+          <button id="font-decrease" class="btn-font">A-</button>
+          <span id="font-size-display" style="font-weight: 600;">18px</span>
+          <button id="font-increase" class="btn-font">A+</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <span class="settings-label">Layout Columns</span>
+        <div class="layout-options">
+          <button class="layout-btn" data-columns="auto">Auto</button>
+          <button class="layout-btn" data-columns="1">1 Col</button>
+          <button class="layout-btn" data-columns="2">2 Col</button>
+        </div>
+      </div>
     </div>
 
     <!-- QR Code Mobile Handoff Modal Overlay -->

@@ -73,18 +73,19 @@ To personalize your Zenolet deployment, edit `public/zenolet.config.json`:
 
 ```json
 {
-  "siteTitle": "Roger's Zenolet Library",
+  "title": "The Most Popular 1,000 Gutenberg E-Books",
+  "blurb": "A curated collection of the most popular 1,000 e-books from Project Gutenberg, presented in a horizontal reading interface.  Load books into any of 8 slots for offline reading.",
+  "repoUrl": "https://github.com/rogerallen/zenolet",
   "curator": {
     "name": "Roger Allen",
-    "avatar": "https://github.com/rogerallen.png",
-    "bio": "A personal micro-library of 1,000 timeless classics.",
-    "link": "https://github.com/rogerallen"
+    "linkUrl": "https://rogerallen.github.io"
   },
-  "defaultTheme": "sepia",
-  "fontSize": 18,
-  "layoutColumns": "auto",
-  "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev",
-  "customBooks": []
+  "settings": {
+    "defaultTheme": "sepia",
+    "fontSize": 18,
+    "layoutColumns": "auto"
+  },
+  "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev"
 }
 ```
 

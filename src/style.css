@@ -2,21 +2,22 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap');
 
-:root {
-  /* Default: Paper Theme */
-  --bg-primary: #fcfbf9;
-  --bg-secondary: #f3f1eb;
-  --bg-panel: rgba(243, 241, 235, 0.85);
-  --text-primary: #2c2924;
-  --text-secondary: #6e675b;
-  --text-muted: #9c9384;
-  --border-color: #e5dfd3;
+:root,
+[data-theme="paper"] {
+  /* Paper Theme: Crisp white, high legibility, clean modern book look */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f7f9;
+  --bg-panel: rgba(246, 247, 249, 0.95);
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
   --accent-color: #8f2d14;
   --accent-hover: #6d200c;
   --accent-glow: rgba(143, 45, 20, 0.15);
-  --shadow-sm: 0 2px 8px rgba(44, 41, 36, 0.04);
-  --shadow-md: 0 8px 30px rgba(44, 41, 36, 0.08);
-  --shadow-lg: 0 16px 40px rgba(44, 41, 36, 0.12);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -27,11 +28,11 @@
   --footer-height: 64px;
 }
 
-/* Sepia Theme */
+/* Sepia Theme: Warm vintage book parchment tones */
 [data-theme="sepia"] {
   --bg-primary: #fbf0d9;
   --bg-secondary: #ebdcb9;
-  --bg-panel: rgba(235, 220, 185, 0.85);
+  --bg-panel: rgba(235, 220, 185, 0.95);
   --text-primary: #433422;
   --text-secondary: #6b553c;
   --text-muted: #8d755b;
@@ -39,6 +40,9 @@
   --accent-color: #8f2d14;
   --accent-hover: #6d200c;
   --accent-glow: rgba(143, 45, 20, 0.15);
+  --shadow-sm: 0 2px 8px rgba(67, 52, 34, 0.06);
+  --shadow-md: 0 8px 30px rgba(67, 52, 34, 0.10);
+  --shadow-lg: 0 16px 40px rgba(67, 52, 34, 0.15);
 }
 
 /* Charcoal Theme */
@@ -137,59 +141,6 @@ a:hover {
   width: 100%;
   margin: 0 auto;
   padding: 30px 24px 10px;
-}
-
-.curator-card {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px 30px;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 24px;
-}
-
-.curator-avatar-wrapper {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid var(--accent-color);
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
-}
-
-.curator-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.curator-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.site-title {
-  font-family: var(--font-serif);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.curator-byline {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.curator-bio {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-top: 4px;
 }
 
 /* --- Cached Books Shelf (Above Search Bar) --- */
@@ -954,8 +905,8 @@ a:hover {
 
 /* Settings Dropdown Panel */
 .settings-panel {
-  position: absolute;
-  top: var(--header-height);
+  position: fixed;
+  top: 64px;
   right: 24px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -967,6 +918,13 @@ a:hover {
   display: none;
   flex-direction: column;
   gap: 16px;
+}
+
+.settings-panel.panel-from-footer {
+  top: auto;
+  bottom: 72px;
+  right: 50%;
+  transform: translateX(50%);
 }
 
 .settings-panel.visible {
@@ -1127,11 +1085,33 @@ a:hover {
   margin-bottom: 4px;
 }
 
+.minimal-blurb {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 680px;
+  line-height: 1.5;
+  margin: 6px auto 10px;
+  text-align: center;
+}
+
 .minimal-byline {
   font-size: 0.9rem;
   color: var(--text-muted);
   font-weight: 500;
   letter-spacing: 0.02em;
+}
+
+.curator-link {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--border-color);
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
+}
+
+.curator-link:hover {
+  color: var(--accent-color);
+  text-decoration-color: var(--accent-color);
 }
 
 /* --- 8-Slot Grid (2 rows x 4 cols) --- */
@@ -1342,6 +1322,35 @@ a:hover {
 
 .library-footer .dot-separator {
   opacity: 0.5;
+}
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s ease;
+}
+
+.footer-link-btn svg {
+  stroke: currentColor;
+  opacity: 0.8;
+}
+
+.footer-link-btn:hover {
+  color: var(--accent-color);
+}
+
+.footer-link-btn:hover svg {
+  opacity: 1;
 }
 
 .library-footer .github-link {
