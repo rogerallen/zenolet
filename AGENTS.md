@@ -34,3 +34,21 @@ Whenever a feature, deploy, or version bump occurs:
 
 3. **Development Commands**:
    * Use `npm run dev:local` for single-command local testing (runs local Cloudflare Worker proxy on port 8787 and Vite UI on port 5173 concurrently).
+
+---
+
+## 📚 8-Slot Bookshelf Invariants
+
+1. **Fixed 8 Slots**:
+   * The bookshelf consists of exactly 8 discrete slots (`0..7`), stored as `(BookMetadata | null)[]`.
+   * Never convert the shelf into an unindexed dynamic list or shift elements on deletion.
+
+2. **Slot Position Stability**:
+   * **Persistence**: A book assigned to Slot `i` must always remain in Slot `i`.
+   * **Reading**: Opening, reading, or returning from a book must NEVER reorder or shift slot positions.
+   * **Deletion**: Deleting a book in Slot `i` only sets Slot `i` to `null` (empty slot) and NEVER collapses or shifts remaining slots.
+   * **Addition**: Clicking empty Slot `i` and picking a book must place that book directly into Slot `i`.
+
+3. **Zero Starter Books**:
+   * An empty shelf must remain completely empty (all 8 slots `null`) with "+ Add Book" on each slot.
+   * Never auto-seed starter or default books when the shelf is empty or cleared.
