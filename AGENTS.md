@@ -60,3 +60,7 @@ Whenever a feature, deploy, or version bump occurs:
 5. **Proxy & Offline Asset Invariants**:
    * **Strict Proxying**: All external book assets (both HTML content and inline images) MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
    * **Complete Offline Caching**: When a book is stored on the shelf for offline reading, both the HTML text and all inline illustrations/images must be stored locally in cache (with images inlined/cached) so the entire book is 100% readable and visual without network connectivity.
+
+6. **Curated Offline-Only Catalog Search**:
+   * **No Online Repository Lookups**: Book search operates strictly across the curated local catalog (`catalog.json`, containing the top ~1,000 classics). Never query external catalog APIs (such as Gutendex or external search endpoints).
+   * **Instant & Private**: Search must execute 100% locally in-memory with zero network latency, zero debounce delay, and zero external tracking.

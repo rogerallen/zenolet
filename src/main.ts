@@ -27,8 +27,7 @@ import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import {
   openDiscoverPanel,
   closeDiscoverPanel,
-  searchGutenberg,
-  type DiscoverState
+  renderLocalCatalogResults
 } from './components/DiscoverModal.ts';
 
 // --- State ---
@@ -44,14 +43,6 @@ const readerState: ReaderState = {
   layoutColumns: 'auto',
   currentPageSpread: 0,
   totalPagesSpreads: 1
-};
-
-const discoverState: DiscoverState = {
-  nextUrl: null,
-  previousUrl: null,
-  totalCount: 0,
-  currentPage: 1,
-  importedIds: new Set<string>()
 };
 
 // --- DOM Cache ---
@@ -207,7 +198,7 @@ function update8SlotShelfView() {
 function openSearchGUI() {
   openDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
   DOM.discoverSearchInput.value = '';
-  searchGutenberg('', DOM.discoverResults, allBooks, discoverState, handleSelectBookForSlot);
+  renderLocalCatalogResults('', allBooks, DOM.discoverResults, handleSelectBookForSlot);
 }
 
 async function handleSelectBookForSlot(bookId: string, title: string, author: string, htmlUrl?: string) {
@@ -467,13 +458,9 @@ function setupEventListeners() {
     closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
   });
 
-  let discoverTimeout: ReturnType<typeof setTimeout> | null = null;
   DOM.discoverSearchInput.addEventListener('input', (e) => {
     const query = (e.target as HTMLInputElement).value;
-    if (discoverTimeout) clearTimeout(discoverTimeout);
-    discoverTimeout = setTimeout(() => {
-      searchGutenberg(query, DOM.discoverResults, allBooks, discoverState, handleSelectBookForSlot);
-    }, 250);
+    renderLocalCatalogResults(query, allBooks, DOM.discoverResults, handleSelectBookForSlot);
   });
 
   // Navigation Arrow Button Clicks
