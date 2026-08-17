@@ -47,7 +47,9 @@ export function getStoredSlots(): (BookMetadata | null)[] {
         localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(migrated));
         return migrated;
       }
-    } catch (e) {}
+    } catch {
+      // Ignore legacy parsing errors
+    }
   }
 
   // Default to 8 completely empty slots (no starter books)
@@ -151,11 +153,7 @@ export async function saveBookOffline(
       // Keep in existing slot without moving
       slots[existingIdx] = book;
     }
-  } else if (
-    typeof targetSlotIndex === 'number' &&
-    targetSlotIndex >= 0 &&
-    targetSlotIndex < NUM_SLOTS
-  ) {
+  } else if (typeof targetSlotIndex === 'number' && targetSlotIndex >= 0 && targetSlotIndex < NUM_SLOTS) {
     slots[targetSlotIndex] = book;
   } else {
     // Assign to first empty slot
@@ -259,7 +257,7 @@ export function getStoredProgress(bookId: string): number | null {
     const progressMap = JSON.parse(progressMapRaw);
     const item = progressMap[bookId];
     return item && typeof item.progressFraction === 'number' ? item.progressFraction : null;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

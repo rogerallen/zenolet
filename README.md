@@ -94,29 +94,37 @@ To personalize your Zenolet deployment, edit `public/zenolet.config.json`:
 ## 🚀 Quick Start & Development
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Run Single-Command Local Environment (UI + Worker Proxy)
+
 Run both the Vite frontend (`http://localhost:5173`) and local Cloudflare Worker proxy (`http://localhost:8787`) simultaneously:
+
 ```bash
 npm run dev:local
 ```
+
 > **Note:** `npm run dev:local` dynamically routes traffic through `http://localhost:8787` without modifying `public/zenolet.config.json`.
 
 ### 3. Run Standard Frontend Dev Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ### 4. Run Unit Tests
+
 ```bash
 npm test
 ```
 
 ### 5. Build Production Bundle
+
 ```bash
 npm run build
 ```
@@ -130,7 +138,9 @@ Zenolet is intentionally designed as a **forkable, sovereign micro-library**. Yo
 ### Step-by-Step Guide to Deploy Your Own Node
 
 #### 1. Fork & Clone the Repository
+
 Click **Fork** at the top of the GitHub repository, then clone your fork locally:
+
 ```bash
 git clone https://github.com/<your-username>/zenolet.git
 cd zenolet
@@ -138,15 +148,12 @@ npm install
 ```
 
 #### 2. Deploy Your Cloudflare Worker CORS Proxy
+
 Project Gutenberg books and images require a CORS proxy for browser-based reading. Zenolet includes a minimal, zero-cost Cloudflare Worker proxy (`worker/index.js`).
 
 1. Edit `worker/index.js` to add your site domain to `ALLOWED_ORIGINS`:
    ```javascript
-   const ALLOWED_ORIGINS = [
-     'https://<your-username>.github.io',
-     'http://localhost:5173',
-     'http://127.0.0.1:5173'
-   ];
+   const ALLOWED_ORIGINS = ['https://<your-username>.github.io', 'http://localhost:5173', 'http://127.0.0.1:5173'];
    ```
 2. Log in to Cloudflare and deploy:
    ```bash
@@ -156,6 +163,7 @@ Project Gutenberg books and images require a CORS proxy for browser-based readin
 3. Copy your deployed Worker URL (e.g., `https://zenolet-cors-proxy.<your-subdomain>.workers.dev`).
 
 #### 3. Customize Your Site Configuration (`public/zenolet.config.json`)
+
 Update `public/zenolet.config.json` with your library title, blurb, curator details, repository link, and your deployed Cloudflare Worker URL:
 
 ```json
@@ -177,17 +185,19 @@ Update `public/zenolet.config.json` with your library title, blurb, curator deta
 ```
 
 #### 4. (Optional) Customize the Catalog (`public/catalog.json`)
+
 By default, `public/catalog.json` contains the top 1,000 Project Gutenberg titles. You can:
-* Keep the existing 1,000-book catalog as-is.
-* Or generate a customized catalog using `scripts/generate-catalog.ts` or your own JSON structure containing `{ "id", "title", "author", "subjects", "downloads", "htmlUrl" }`.
+
+- Keep the existing 1,000-book catalog as-is.
+- Or generate a customized catalog using `scripts/generate-catalog.ts` or your own JSON structure containing `{ "id", "title", "author", "subjects", "downloads", "htmlUrl" }`.
 
 #### 5. Deploy Your Static Site
-* **GitHub Pages (Automated):** If hosted on GitHub, navigate to **Settings > Pages > Build and deployment**, select **GitHub Actions** as the source, and push to `main`. The included workflow (`.github/workflows/deploy.yml`) will automatically build and publish your site.
-* **Cloudflare Pages / Netlify / Vercel:** Build command is `npm run build` and the output directory is `dist`.
+
+- **GitHub Pages (Automated):** If hosted on GitHub, navigate to **Settings > Pages > Build and deployment**, select **GitHub Actions** as the source, and push to `main`. The included workflow (`.github/workflows/deploy.yml`) will automatically build and publish your site.
+- **Cloudflare Pages / Netlify / Vercel:** Build command is `npm run build` and the output directory is `dist`.
 
 ---
 
 ## 📜 License
 
 MIT License. Open source and free for non-commercial and commercial use alike.
-

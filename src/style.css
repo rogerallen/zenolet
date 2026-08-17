@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap');
 
 :root,
-[data-theme="paper"] {
+[data-theme='paper'] {
   /* Paper Theme: Crisp white, high legibility, clean modern book look */
   --bg-primary: #ffffff;
   --bg-secondary: #f6f7f9;
@@ -29,7 +29,7 @@
 }
 
 /* Sepia Theme: Warm vintage book parchment tones */
-[data-theme="sepia"] {
+[data-theme='sepia'] {
   --bg-primary: #fbf0d9;
   --bg-secondary: #ebdcb9;
   --bg-panel: rgba(235, 220, 185, 0.95);
@@ -41,12 +41,12 @@
   --accent-hover: #6d200c;
   --accent-glow: rgba(143, 45, 20, 0.15);
   --shadow-sm: 0 2px 8px rgba(67, 52, 34, 0.06);
-  --shadow-md: 0 8px 30px rgba(67, 52, 34, 0.10);
+  --shadow-md: 0 8px 30px rgba(67, 52, 34, 0.1);
   --shadow-lg: 0 16px 40px rgba(67, 52, 34, 0.15);
 }
 
 /* Charcoal Theme */
-[data-theme="charcoal"] {
+[data-theme='charcoal'] {
   --bg-primary: #20222a;
   --bg-secondary: #1a1b21;
   --bg-panel: rgba(26, 27, 33, 0.85);
@@ -63,7 +63,7 @@
 }
 
 /* Night Theme */
-[data-theme="night"] {
+[data-theme='night'] {
   --bg-primary: #0a0b0d;
   --bg-secondary: #12141a;
   --bg-panel: rgba(18, 20, 26, 0.85);
@@ -132,7 +132,9 @@ a:hover {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- Library / Bookshelf Header & Curator Card --- */
@@ -211,7 +213,10 @@ a:hover {
   justify-content: space-between;
   gap: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   box-shadow: var(--shadow-sm);
   position: relative;
 }
@@ -314,7 +319,9 @@ a:hover {
   color: var(--text-primary);
   font-size: 1rem;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .search-input:focus {
@@ -343,7 +350,9 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
 }
 
 .btn-primary:hover {
@@ -422,7 +431,10 @@ a:hover {
   justify-content: space-between;
   gap: 16px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   position: relative;
   box-shadow: var(--shadow-sm);
 }
@@ -544,7 +556,9 @@ a:hover {
   gap: 6px;
   font-weight: 500;
   font-size: 0.9rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .btn-icon:hover {
@@ -688,7 +702,7 @@ a:hover {
 
   column-fill: auto;
   column-gap: 0;
-  
+
   font-family: var(--font-serif);
   line-height: 1.7;
   color: var(--text-primary);
@@ -707,7 +721,9 @@ a:hover {
   }
 }
 
-.reader-content h1, .reader-content h2, .reader-content h3 {
+.reader-content h1,
+.reader-content h2,
+.reader-content h3 {
   font-family: var(--font-serif);
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -829,7 +845,8 @@ a:hover {
   transform: translate(-50%, -50%) scale(1.4);
 }
 
-.page-indicator, .active-chapter-indicator {
+.page-indicator,
+.active-chapter-indicator {
   font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
@@ -1005,12 +1022,14 @@ a:hover {
   font-weight: 600;
 }
 
-.theme-options, .layout-options {
+.theme-options,
+.layout-options {
   display: flex;
   gap: 8px;
 }
 
-.theme-btn, .layout-btn {
+.theme-btn,
+.layout-btn {
   flex: 1;
   padding: 8px;
   border: 1px solid var(--border-color);
@@ -1022,7 +1041,8 @@ a:hover {
   transition: all 0.2s ease;
 }
 
-.theme-btn.active, .layout-btn.active {
+.theme-btn.active,
+.layout-btn.active {
   border-color: var(--accent-color);
   background-color: var(--accent-color);
   color: #ffffff;
@@ -1219,7 +1239,10 @@ a:hover {
 }
 
 .slot-card.slot-filled:hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
   border-color: var(--accent-color);
@@ -1343,7 +1366,9 @@ a:hover {
   font-weight: 300;
   color: var(--text-muted);
   line-height: 1;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .slot-card.slot-empty:hover .slot-plus-icon {

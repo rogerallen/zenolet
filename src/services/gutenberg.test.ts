@@ -54,6 +54,8 @@ Boilerplate Footer
       }
     }
 
-    expect(content.trim()).toBe('Chapter 1: Down the Rabbit Hole\nAlice was beginning to get very tired of sitting by her sister...');
+    expect(content.trim()).toBe(
+      'Chapter 1: Down the Rabbit Hole\nAlice was beginning to get very tired of sitting by her sister...'
+    );
   });
 });

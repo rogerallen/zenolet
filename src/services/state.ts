@@ -1,14 +1,14 @@
 export interface AppState {
   bookId: string;
   progress: number; // 0.0 to 1.0
-  theme?: string;   // 'paper' | 'sepia' | 'charcoal' | 'night'
+  theme?: string; // 'paper' | 'sepia' | 'charcoal' | 'night'
   fontSize?: number;
 }
 
 // Encode state into compressed URL hash: #s=...
 export async function encodeState(state: AppState): Promise<string> {
   const jsonStr = JSON.stringify(state);
-  
+
   if (typeof CompressionStream !== 'undefined') {
     try {
       const stream = new Blob([jsonStr]).stream().pipeThrough(new CompressionStream('deflate-raw'));
@@ -54,7 +54,7 @@ export async function decodeState(hash: string): Promise<AppState | null> {
     const base64 = rawPayload.replace(/-/g, '+').replace(/_/g, '/');
     const binary = atob(base64);
     const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    
+
     if (typeof DecompressionStream !== 'undefined') {
       const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
       const jsonStr = await new Response(stream).text();

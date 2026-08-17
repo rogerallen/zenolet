@@ -7,9 +7,7 @@ export function setupSettingsModal(
   state: ReaderState,
   onRecalculate: () => void
 ): void {
-  const buttons = (Array.isArray(toggleBtns) ? toggleBtns : [toggleBtns]).filter(
-    (b): b is HTMLElement => b !== null
-  );
+  const buttons = (Array.isArray(toggleBtns) ? toggleBtns : [toggleBtns]).filter((b): b is HTMLElement => b !== null);
 
   buttons.forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -40,7 +38,7 @@ export function setupSettingsModal(
   // Font Buttons
   const fontDec = panel.querySelector('#font-decrease') as HTMLButtonElement;
   const fontInc = panel.querySelector('#font-increase') as HTMLButtonElement;
-  
+
   if (fontDec) {
     fontDec.addEventListener('click', () => {
       if (state.fontSize > 12) {

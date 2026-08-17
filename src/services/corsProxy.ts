@@ -46,10 +46,7 @@ export function getGutenbergCandidateUrls(bookId: string, rawHtmlUrl?: string): 
  * Hard fails immediately if proxy is unconfigured, unreachable, or returns a non-OK HTTP status.
  * No public fallbacks or direct connection retries.
  */
-export async function fetchWithProxyFallback(
-  targetUrl: string,
-  proxyUrlSetting?: string
-): Promise<string> {
+export async function fetchWithProxyFallback(targetUrl: string, proxyUrlSetting?: string): Promise<string> {
   if (!proxyUrlSetting) {
     const errorMsg = '[Zenolet CORS] Hard fail: No Cloudflare CORS Proxy URL configured in settings.';
     console.error(errorMsg);
@@ -62,10 +59,10 @@ export async function fetchWithProxyFallback(
   let res: Response;
   try {
     res = await fetch(proxiedUrl);
-  } catch (err: any) {
-    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy connection error: ${err?.message || err}`;
+  } catch (err) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy connection error: ${err instanceof Error ? err.message : String(err)}`;
     console.error(errorMsg);
-    throw new Error(errorMsg);
+    throw new Error(errorMsg, { cause: err });
   }
 
   if (!res.ok) {
@@ -82,15 +79,13 @@ export async function fetchWithProxyFallback(
   }
 
   const mbSize = (text.length / (1024 * 1024)).toFixed(2);
-  console.log(`[Zenolet CORS] Successfully downloaded ${text.length} chars (~${mbSize} MB) from "${targetUrl}" via Cloudflare Proxy.`);
+  console.log(
+    `[Zenolet CORS] Successfully downloaded ${text.length} chars (~${mbSize} MB) from "${targetUrl}" via Cloudflare Proxy.`
+  );
   return text;
 }
 
-export function processBookHtml(
-  rawHtml: string,
-  bookSourceUrl: string,
-  proxyUrlSetting?: string
-): string {
+export function processBookHtml(rawHtml: string, bookSourceUrl: string, proxyUrlSetting?: string): string {
   if (typeof DOMParser === 'undefined') return rawHtml;
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHtml, 'text/html');
@@ -143,10 +138,7 @@ export function processBookHtml(
   return doc.body ? doc.body.innerHTML : rawHtml;
 }
 
-export async function cacheBookImagesOffline(
-  processedHtml: string,
-  proxyUrlSetting?: string
-): Promise<string> {
+export async function cacheBookImagesOffline(processedHtml: string, proxyUrlSetting?: string): Promise<string> {
   if (typeof DOMParser === 'undefined') return processedHtml;
   try {
     const parser = new DOMParser();
@@ -192,7 +184,7 @@ export async function cacheBookImagesOffline(
         })
       );
     }
-    return (hasChanges && doc.body) ? doc.body.innerHTML : processedHtml;
+    return hasChanges && doc.body ? doc.body.innerHTML : processedHtml;
   } catch (err) {
     console.warn('[Zenolet Image Cache] Error caching book images:', err);
     return processedHtml;

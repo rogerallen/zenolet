@@ -42,7 +42,12 @@ export function renderLocalCatalogResults(
 
   const q = query.toLowerCase().trim();
   const matches = catalog
-    .filter((b) => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.subjects.some((s) => s.toLowerCase().includes(q)))
+    .filter(
+      (b) =>
+        b.title.toLowerCase().includes(q) ||
+        b.author.toLowerCase().includes(q) ||
+        b.subjects.some((s) => s.toLowerCase().includes(q))
+    )
     .slice(0, 30);
 
   if (matches.length > 0) {

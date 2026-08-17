@@ -8,14 +8,18 @@ describe('buildProxyUrl URL Parsing', () => {
     const target = 'https://www.gutenberg.org/cache/epub/245/pg245-images.html';
     const proxy = 'http://localhost:8787';
     const result = buildProxyUrl(target, proxy);
-    expect(result).toBe('http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html');
+    expect(result).toBe(
+      'http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html'
+    );
   });
 
   it('correctly constructs proxied URLs for Cloudflare workers.dev endpoints', () => {
     const target = 'https://www.gutenberg.org/cache/epub/245/pg245-images.html';
     const proxy = 'https://zenolet-cors-proxy.rallen-e12.workers.dev';
     const result = buildProxyUrl(target, proxy);
-    expect(result).toBe('https://zenolet-cors-proxy.rallen-e12.workers.dev/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html');
+    expect(result).toBe(
+      'https://zenolet-cors-proxy.rallen-e12.workers.dev/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F245%2Fpg245-images.html'
+    );
   });
 
   it('correctly constructs proxied URLs when proxy ends with ?url=', () => {
@@ -34,22 +38,28 @@ describe('processBookHtml Image Resolution & Caching', () => {
     const proxy = 'http://localhost:8787';
 
     const processed = processBookHtml(rawHtml, bookUrl, proxy);
-    expect(processed).toContain('src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg"');
+    expect(processed).toContain(
+      'src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg"'
+    );
   });
 
   it('preserves already-proxied URLs without double-proxying on revisit', async () => {
     const { processBookHtml } = await import('./corsProxy.ts');
-    const alreadyProxiedHtml = '<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
+    const alreadyProxiedHtml =
+      '<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
     const bookUrl = 'https://www.gutenberg.org/cache/epub/1342/pg1342-images.html';
     const proxy = 'http://localhost:8787';
 
     const processed = processBookHtml(alreadyProxiedHtml, bookUrl, proxy);
-    expect(processed).toBe('<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg" style="max-width: 100%; max-height: calc(100vh - 160px); height: auto; object-fit: contain;">');
+    expect(processed).toBe(
+      '<img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg" style="max-width: 100%; max-height: calc(100vh - 160px); height: auto; object-fit: contain;">'
+    );
   });
 
   it('preserves data:image base64 URLs without modifying them', async () => {
     const { processBookHtml } = await import('./corsProxy.ts');
-    const dataUrlHtml = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">';
+    const dataUrlHtml =
+      '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">';
     const bookUrl = 'https://www.gutenberg.org/cache/epub/1342/pg1342-images.html';
     const proxy = 'http://localhost:8787';
 
@@ -59,7 +69,8 @@ describe('processBookHtml Image Resolution & Caching', () => {
 
   it('downloads external images via proxy and inlines them as base64 data URLs in cacheBookImagesOffline', async () => {
     const { cacheBookImagesOffline } = await import('./corsProxy.ts');
-    const inputHtml = '<p>Text</p><img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
+    const inputHtml =
+      '<p>Text</p><img src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fcache%2Fepub%2F1342%2Fimages%2Fcover.jpg">';
     const proxy = 'http://localhost:8787';
 
     const fakeImageBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); // PNG header
@@ -93,7 +104,9 @@ describe('processBookHtml Image Resolution & Caching', () => {
 
     try {
       const result = await cacheBookImagesOffline(inputHtml, proxy);
-      expect(result).toContain('src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fimages%2Fmissing.jpg"');
+      expect(result).toContain(
+        'src="http://localhost:8787/?url=https%3A%2F%2Fwww.gutenberg.org%2Fimages%2Fmissing.jpg"'
+      );
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -105,7 +118,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'https://rogerallen.github.io'
+        Origin: 'https://rogerallen.github.io'
       }
     });
 
@@ -119,7 +132,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'http://localhost:5173'
+        Origin: 'http://localhost:5173'
       }
     });
 
@@ -132,7 +145,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'https://my-server.ts.net'
+        Origin: 'https://my-server.ts.net'
       }
     });
 
@@ -145,7 +158,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'https://unauthorized-evil-site.com'
+        Origin: 'https://unauthorized-evil-site.com'
       }
     });
 
@@ -157,7 +170,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'GET',
       headers: {
-        'Origin': 'https://unauthorized-evil-site.com'
+        Origin: 'https://unauthorized-evil-site.com'
       }
     });
 
@@ -167,7 +180,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
 
   it('proxies GET requests and calculates stream byte transfer', async () => {
     const mockTargetContent = 'Hello Moby Dick '.repeat(100);
-    
+
     // Mock global fetch for worker target fetch
     const originalFetch = global.fetch;
     global.fetch = vi.fn().mockResolvedValue(
@@ -181,7 +194,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
       const req = new Request('https://proxy.workers.dev/?url=https://www.gutenberg.org/cache/epub/2701/pg2701.txt', {
         method: 'GET',
         headers: {
-          'Origin': 'https://rogerallen.github.io'
+          Origin: 'https://rogerallen.github.io'
         }
       });
 

@@ -1,10 +1,7 @@
 // Cloudflare Worker CORS Proxy Script for Zenolet
 // Designed for https://rogerallen.github.io/zenolet with support for local dev & Tailscale domains.
 
-const ALLOWED_EXACT_ORIGINS = new Set([
-  'https://rogerallen.github.io',
-  'https://rogerallen.github.io/zenolet'
-]);
+const ALLOWED_EXACT_ORIGINS = new Set(['https://rogerallen.github.io', 'https://rogerallen.github.io/zenolet']);
 
 /**
  * Validates whether the incoming Origin is allowed to use this CORS proxy.
@@ -27,7 +24,9 @@ function isOriginAllowed(origin) {
 
     // Tailscale network domains (*.ts.net)
     if (host.endsWith('.ts.net')) return true;
-  } catch (_) {}
+  } catch {
+    // Ignore URL parse failures
+  }
 
   return false;
 }
@@ -36,9 +35,7 @@ function isOriginAllowed(origin) {
  * Returns standard CORS headers tailored to the requesting origin.
  */
 function getCorsHeaders(origin) {
-  const allowedOrigin = (origin && isOriginAllowed(origin))
-    ? origin
-    : 'https://rogerallen.github.io';
+  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : 'https://rogerallen.github.io';
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
@@ -101,8 +98,8 @@ export default {
       const contentLength = response.headers.get('content-length');
       console.log(
         `[Zenolet Proxy] Target response received for "${targetUrl}" | ` +
-        `Status: ${response.status} | Content-Type: ${response.headers.get('content-type') || 'unknown'} | ` +
-        `Content-Length: ${contentLength ? contentLength + ' bytes' : 'unknown/chunked'}`
+          `Status: ${response.status} | Content-Type: ${response.headers.get('content-type') || 'unknown'} | ` +
+          `Content-Length: ${contentLength ? contentLength + ' bytes' : 'unknown/chunked'}`
       );
 
       // Handle responses without body or HEAD requests
@@ -124,7 +121,7 @@ export default {
           const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2);
           console.log(
             `[Zenolet Proxy] Download complete for "${targetUrl}" | ` +
-            `Total Bytes Transferred: ${totalBytes} bytes (${sizeMB} MB)`
+              `Total Bytes Transferred: ${totalBytes} bytes (${sizeMB} MB)`
           );
         }
       });

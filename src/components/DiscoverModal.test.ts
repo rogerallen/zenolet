@@ -72,6 +72,11 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
     expect(addBtn).not.toBeNull();
     addBtn.click();
 
-    expect(onImport).toHaveBeenCalledWith('84', 'Frankenstein; Or, The Modern Prometheus', 'Mary Wollstonecraft Shelley', 'https://www.gutenberg.org/files/84/84-h/84-h.htm');
+    expect(onImport).toHaveBeenCalledWith(
+      '84',
+      'Frankenstein; Or, The Modern Prometheus',
+      'Mary Wollstonecraft Shelley',
+      'https://www.gutenberg.org/files/84/84-h/84-h.htm'
+    );
   });
 });

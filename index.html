@@ -1,279 +1,353 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zenolet — Micro-Library Reader</title>
-  <meta name="description" content="Serverless, privacy-first, horizontal page-flowing reader for public domain literature." />
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="manifest" href="/manifest.json" />
-  <!-- Preconnect Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zenolet — Micro-Library Reader</title>
+    <meta
+      name="description"
+      content="Serverless, privacy-first, horizontal page-flowing reader for public domain literature."
+    />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Preconnect Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- Critical Inline CSS to prevent Flash of Unstyled Content (FOUC) -->
-  <style>
-    :root {
-      --bg-primary: #fcfbf9;
-      --text-primary: #2c2924;
-    }
-    [data-theme="sepia"] { --bg-primary: #fbf0d9; --text-primary: #433422; }
-    [data-theme="charcoal"] { --bg-primary: #20222a; --text-primary: #e3e6eb; }
-    [data-theme="night"] { --bg-primary: #0a0b0d; --text-primary: #a0a6b2; }
-
-    html, body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-    }
-    .view.hidden,
-    .modal-overlay,
-    .discover-panel,
-    .settings-panel,
-    .library-footer {
-      display: none !important;
-    }
-    .modal-overlay.visible,
-    .discover-panel.visible,
-    .settings-panel.visible {
-      display: flex !important;
-    }
-  </style>
-
-  <!-- Prevent Theme Flash on Page Reload -->
-  <script>
-    (function() {
-      try {
-        var savedTheme = localStorage.getItem('zenolet-theme');
-        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
-      } catch (e) {}
-      if ('serviceWorker' in navigator && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          for (var i = 0; i < regs.length; i++) regs[i].unregister();
-        });
-        if (window.caches) {
-          caches.keys().then(function(keys) {
-            for (var j = 0; j < keys.length; j++) caches.delete(keys[j]);
-          });
-        }
+    <!-- Critical Inline CSS to prevent Flash of Unstyled Content (FOUC) -->
+    <style>
+      :root {
+        --bg-primary: #fcfbf9;
+        --text-primary: #2c2924;
       }
-    })();
-  </script>
-</head>
-<body>
-  <div id="app">
-    <!-- Library Bookshelf View -->
-    <div id="library-view" class="view">
-      <!-- Minimal Header -->
-      <header id="curator-header-container" class="library-header"></header>
+      [data-theme='sepia'] {
+        --bg-primary: #fbf0d9;
+        --text-primary: #433422;
+      }
+      [data-theme='charcoal'] {
+        --bg-primary: #20222a;
+        --text-primary: #e3e6eb;
+      }
+      [data-theme='night'] {
+        --bg-primary: #0a0b0d;
+        --text-primary: #a0a6b2;
+      }
 
-      <!-- 8-Slot Bookshelf Section -->
-      <main class="bookshelf-container">
-        <div id="slots-grid" class="slots-grid"></div>
-      </main>
+      html,
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        margin: 0;
+        padding: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        min-height: 100vh;
+      }
+      .view.hidden,
+      .modal-overlay,
+      .discover-panel,
+      .settings-panel,
+      .library-footer {
+        display: none !important;
+      }
+      .modal-overlay.visible,
+      .discover-panel.visible,
+      .settings-panel.visible {
+        display: flex !important;
+      }
+    </style>
 
-      <!-- Minimal Footer (Below Slots) -->
-      <footer class="library-footer">
-        <span class="version-tag">Zenolet v0.10.0</span>
-        <span class="dot-separator">•</span>
-        <button id="about-toggle" class="footer-link-btn" title="About Zenolet" aria-label="About Zenolet">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span>About</span>
-        </button>
-        <span class="dot-separator">•</span>
-        <button id="library-settings-toggle" class="footer-link-btn" title="Settings" aria-label="Settings">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>Settings</span>
-        </button>
-        <span class="dot-separator">•</span>
-        <a id="footer-repo-link" href="https://github.com/rogerallen/zenolet" target="_blank" rel="noopener" class="github-link">
-          <span>GitHub</span>
-        </a>
-      </footer>
-    </div>
+    <!-- Prevent Theme Flash on Page Reload -->
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('zenolet-theme');
+          if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        } catch (e) {}
+        if ('serviceWorker' in navigator && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            for (var i = 0; i < regs.length; i++) regs[i].unregister();
+          });
+          if (window.caches) {
+            caches.keys().then(function (keys) {
+              for (var j = 0; j < keys.length; j++) caches.delete(keys[j]);
+            });
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Library Bookshelf View -->
+      <div id="library-view" class="view">
+        <!-- Minimal Header -->
+        <header id="curator-header-container" class="library-header"></header>
 
-    <!-- Horizontal Reader View -->
-    <div id="reader-view" class="view hidden">
-      <header class="reader-header">
-        <div class="reader-header-left">
-          <button id="back-button" class="btn-icon" title="Return to Bookshelf">
-            <span>←</span> Back to Shelf
+        <!-- 8-Slot Bookshelf Section -->
+        <main class="bookshelf-container">
+          <div id="slots-grid" class="slots-grid"></div>
+        </main>
+
+        <!-- Minimal Footer (Below Slots) -->
+        <footer class="library-footer">
+          <span class="version-tag">Zenolet v0.10.0</span>
+          <span class="dot-separator">•</span>
+          <button id="about-toggle" class="footer-link-btn" title="About Zenolet" aria-label="About Zenolet">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>About</span>
           </button>
-          <div class="reader-book-meta">
-            <h2 id="reader-book-title" class="reader-book-title">Book Title</h2>
-            <p id="reader-book-author" class="reader-book-author">Author</p>
-          </div>
-        </div>
-
-        <div class="reader-header-right" style="display: flex; gap: 10px; align-items: center;">
-          <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)">
-            <span>📱</span> Mobile Link
-          </button>
-          <button id="settings-toggle" class="btn-icon" title="Reading Settings">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <span class="dot-separator">•</span>
+          <button id="library-settings-toggle" class="footer-link-btn" title="Settings" aria-label="Settings">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              ></path>
             </svg>
             <span>Settings</span>
           </button>
-        </div>
-      </header>
+          <span class="dot-separator">•</span>
+          <a
+            id="footer-repo-link"
+            href="https://github.com/rogerallen/zenolet"
+            target="_blank"
+            rel="noopener"
+            class="github-link"
+          >
+            <span>GitHub</span>
+          </a>
+        </footer>
+      </div>
 
-      <!-- Reader Main Area with Floating Navigation Arrows -->
-      <main id="reader-main" class="reader-main">
-        <button id="prev-page-btn" class="nav-arrow nav-arrow-left" aria-label="Previous Page" title="Previous Page (←)">
-          <span>‹</span>
-        </button>
+      <!-- Horizontal Reader View -->
+      <div id="reader-view" class="view hidden">
+        <header class="reader-header">
+          <div class="reader-header-left">
+            <button id="back-button" class="btn-icon" title="Return to Bookshelf"><span>←</span> Back to Shelf</button>
+            <div class="reader-book-meta">
+              <h2 id="reader-book-title" class="reader-book-title">Book Title</h2>
+              <p id="reader-book-author" class="reader-book-author">Author</p>
+            </div>
+          </div>
 
-        <div id="reader-container" class="reader-container">
-          <div id="reader-viewport" class="reader-viewport">
-            <div id="snap-points" class="snap-points"></div>
-            <article id="reader-content" class="reader-content"></article>
+          <div class="reader-header-right" style="display: flex; gap: 10px; align-items: center">
+            <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)">
+              <span>📱</span> Mobile Link
+            </button>
+            <button id="settings-toggle" class="btn-icon" title="Reading Settings">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                ></path>
+              </svg>
+              <span>Settings</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Reader Main Area with Floating Navigation Arrows -->
+        <main id="reader-main" class="reader-main">
+          <button
+            id="prev-page-btn"
+            class="nav-arrow nav-arrow-left"
+            aria-label="Previous Page"
+            title="Previous Page (←)"
+          >
+            <span>‹</span>
+          </button>
+
+          <div id="reader-container" class="reader-container">
+            <div id="reader-viewport" class="reader-viewport">
+              <div id="snap-points" class="snap-points"></div>
+              <article id="reader-content" class="reader-content"></article>
+            </div>
+          </div>
+
+          <button id="next-page-btn" class="nav-arrow nav-arrow-right" aria-label="Next Page" title="Next Page (→)">
+            <span>›</span>
+          </button>
+        </main>
+
+        <!-- Timeline Footer -->
+        <footer class="reader-footer">
+          <div class="timeline-meta-row">
+            <span id="active-chapter-indicator" class="active-chapter-indicator">Chapter 1</span>
+            <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
+          </div>
+          <div id="progress-track" class="progress-track" title="Click to jump to position">
+            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            <div id="timeline-ticks" class="timeline-ticks"></div>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Settings Dropdown Panel (Available in Bookshelf & Reader) -->
+      <div id="settings-panel" class="settings-panel">
+        <div class="settings-group">
+          <span class="settings-label">Theme</span>
+          <div class="theme-options">
+            <button class="theme-btn" data-theme="paper">Paper</button>
+            <button class="theme-btn" data-theme="sepia">Sepia</button>
+            <button class="theme-btn" data-theme="charcoal">Charcoal</button>
+            <button class="theme-btn" data-theme="night">Night</button>
           </div>
         </div>
 
-        <button id="next-page-btn" class="nav-arrow nav-arrow-right" aria-label="Next Page" title="Next Page (→)">
-          <span>›</span>
-        </button>
-      </main>
-
-      <!-- Timeline Footer -->
-      <footer class="reader-footer">
-        <div class="timeline-meta-row">
-          <span id="active-chapter-indicator" class="active-chapter-indicator">Chapter 1</span>
-          <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
+        <div class="settings-group">
+          <span class="settings-label">Font Size</span>
+          <div class="font-controls">
+            <button id="font-decrease" class="btn-font">A-</button>
+            <span id="font-size-display" style="font-weight: 600">18px</span>
+            <button id="font-increase" class="btn-font">A+</button>
+          </div>
         </div>
-        <div id="progress-track" class="progress-track" title="Click to jump to position">
-          <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
-          <div id="timeline-ticks" class="timeline-ticks"></div>
-        </div>
-      </footer>
-    </div>
 
-    <!-- Settings Dropdown Panel (Available in Bookshelf & Reader) -->
-    <div id="settings-panel" class="settings-panel">
-      <div class="settings-group">
-        <span class="settings-label">Theme</span>
-        <div class="theme-options">
-          <button class="theme-btn" data-theme="paper">Paper</button>
-          <button class="theme-btn" data-theme="sepia">Sepia</button>
-          <button class="theme-btn" data-theme="charcoal">Charcoal</button>
-          <button class="theme-btn" data-theme="night">Night</button>
+        <div class="settings-group">
+          <span class="settings-label">Layout Columns</span>
+          <div class="layout-options">
+            <button class="layout-btn" data-columns="auto">Auto</button>
+            <button class="layout-btn" data-columns="1">1 Col</button>
+            <button class="layout-btn" data-columns="2">2 Col</button>
+          </div>
         </div>
       </div>
 
-      <div class="settings-group">
-        <span class="settings-label">Font Size</span>
-        <div class="font-controls">
-          <button id="font-decrease" class="btn-font">A-</button>
-          <span id="font-size-display" style="font-weight: 600;">18px</span>
-          <button id="font-increase" class="btn-font">A+</button>
+      <!-- About Modal Dialog Overlay -->
+      <div id="about-modal" class="modal-overlay">
+        <div class="modal-card about-modal-card">
+          <div class="modal-header">
+            <h3 class="modal-title">About Zenolet</h3>
+            <button id="about-close" class="btn-close">&times;</button>
+          </div>
+          <div class="about-modal-body">
+            <p class="about-lead">
+              <strong>Zenolet</strong> is an elegant, distraction-free e-book reader designed for exploring and reading
+              timeless literary classics from Project Gutenberg.
+            </p>
+
+            <div class="about-feature-grid">
+              <div class="about-feature-item">
+                <span class="about-feature-icon">📖</span>
+                <div>
+                  <strong>Curated 8-Slot Bookshelf</strong>
+                  <p>
+                    Focus on what you're actively reading without endless library scroll fatigue. Stable slot positions
+                    let you organize your reading list.
+                  </p>
+                </div>
+              </div>
+
+              <div class="about-feature-item">
+                <span class="about-feature-icon">✈️</span>
+                <div>
+                  <strong>100% Offline-First</strong>
+                  <p>
+                    Books and all inline illustrations are cached locally in your browser so you can read anywhere—on a
+                    flight, commute, or off-grid—with zero network requests.
+                  </p>
+                </div>
+              </div>
+
+              <div class="about-feature-item">
+                <span class="about-feature-icon">📱</span>
+                <div>
+                  <strong>Seamless Mobile Handoff</strong>
+                  <p>
+                    Scan the QR code with your phone camera to transfer your book and exact page position between
+                    devices instantly with no account required.
+                  </p>
+                </div>
+              </div>
+
+              <div class="about-feature-item">
+                <span class="about-feature-icon">🎨</span>
+                <div>
+                  <strong>Comfortable Reading Engine</strong>
+                  <p>
+                    Paginated book spreads with column controls, smooth font resizing, and customized reading themes
+                    (Paper, Sepia, Charcoal, and Night).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="settings-group">
-        <span class="settings-label">Layout Columns</span>
-        <div class="layout-options">
-          <button class="layout-btn" data-columns="auto">Auto</button>
-          <button class="layout-btn" data-columns="1">1 Col</button>
-          <button class="layout-btn" data-columns="2">2 Col</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- About Modal Dialog Overlay -->
-    <div id="about-modal" class="modal-overlay">
-      <div class="modal-card about-modal-card">
-        <div class="modal-header">
-          <h3 class="modal-title">About Zenolet</h3>
-          <button id="about-close" class="btn-close">&times;</button>
-        </div>
-        <div class="about-modal-body">
-          <p class="about-lead">
-            <strong>Zenolet</strong> is an elegant, distraction-free e-book reader designed for exploring and reading timeless literary classics from Project Gutenberg.
+      <!-- QR Code Mobile Handoff Modal Overlay -->
+      <div id="qr-modal" class="modal-overlay">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3 class="modal-title">Read on Mobile</h3>
+            <button id="qr-close" class="btn-close">&times;</button>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary)">
+            Scan this QR code with your phone camera to transfer your book and reading position:
           </p>
-
-          <div class="about-feature-grid">
-            <div class="about-feature-item">
-              <span class="about-feature-icon">📖</span>
-              <div>
-                <strong>Curated 8-Slot Bookshelf</strong>
-                <p>Focus on what you're actively reading without endless library scroll fatigue. Stable slot positions let you organize your reading list.</p>
-              </div>
-            </div>
-
-            <div class="about-feature-item">
-              <span class="about-feature-icon">✈️</span>
-              <div>
-                <strong>100% Offline-First</strong>
-                <p>Books and all inline illustrations are cached locally in your browser so you can read anywhere—on a flight, commute, or off-grid—with zero network requests.</p>
-              </div>
-            </div>
-
-            <div class="about-feature-item">
-              <span class="about-feature-icon">📱</span>
-              <div>
-                <strong>Seamless Mobile Handoff</strong>
-                <p>Scan the QR code with your phone camera to transfer your book and exact page position between devices instantly with no account required.</p>
-              </div>
-            </div>
-
-            <div class="about-feature-item">
-              <span class="about-feature-icon">🎨</span>
-              <div>
-                <strong>Comfortable Reading Engine</strong>
-                <p>Paginated book spreads with column controls, smooth font resizing, and customized reading themes (Paper, Sepia, Charcoal, and Night).</p>
-              </div>
-            </div>
+          <div class="qr-canvas-wrapper">
+            <canvas id="qr-canvas"></canvas>
           </div>
+          <input type="text" id="qr-url-input" class="qr-url-input" readonly />
         </div>
       </div>
+
+      <!-- Search & Discover Modal Overlay -->
+      <div id="discover-overlay" class="modal-overlay"></div>
+      <aside id="discover-panel" class="discover-panel">
+        <header class="discover-header">
+          <h3 style="font-family: var(--font-serif); font-size: 1.2rem">Add Book to Shelf</h3>
+          <button id="discover-close" class="btn-close">&times;</button>
+        </header>
+        <div class="discover-body">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              id="discover-search-input"
+              class="search-input"
+              placeholder="Search classics by title, author, or genre..."
+            />
+          </div>
+          <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px"></div>
+        </div>
+      </aside>
     </div>
 
-    <!-- QR Code Mobile Handoff Modal Overlay -->
-    <div id="qr-modal" class="modal-overlay">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3 class="modal-title">Read on Mobile</h3>
-          <button id="qr-close" class="btn-close">&times;</button>
-        </div>
-        <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          Scan this QR code with your phone camera to transfer your book and reading position:
-        </p>
-        <div class="qr-canvas-wrapper">
-          <canvas id="qr-canvas"></canvas>
-        </div>
-        <input type="text" id="qr-url-input" class="qr-url-input" readonly />
-      </div>
-    </div>
-
-    <!-- Search & Discover Modal Overlay -->
-    <div id="discover-overlay" class="modal-overlay"></div>
-    <aside id="discover-panel" class="discover-panel">
-      <header class="discover-header">
-        <h3 style="font-family: var(--font-serif); font-size: 1.2rem;">Add Book to Shelf</h3>
-        <button id="discover-close" class="btn-close">&times;</button>
-      </header>
-      <div class="discover-body">
-        <div class="search-input-wrapper">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="discover-search-input" class="search-input" placeholder="Search classics by title, author, or genre..." />
-        </div>
-        <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;"></div>
-      </div>
-    </aside>
-  </div>
-
-  <script type="module" src="/src/main.ts"></script>
-</body>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

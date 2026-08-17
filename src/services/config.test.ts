@@ -23,10 +23,12 @@ describe('Zenolet Configuration & Curator Header', () => {
       proxyUrl: 'https://proxy.example.com'
     };
 
-    globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(mockConfig), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    }));
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(mockConfig), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    );
 
     const loaded = await loadZenoletConfig();
     expect(loaded.title).toBe('My Custom Library');
@@ -45,7 +47,9 @@ describe('Zenolet Configuration & Curator Header', () => {
     });
 
     expect(container.innerHTML).toContain('<h1 class="minimal-site-title">The Great Library</h1>');
-    expect(container.innerHTML).toContain('Curated by <a href="https://rogerallen.github.io" target="_blank" rel="noopener" class="curator-link">Roger Allen</a>');
+    expect(container.innerHTML).toContain(
+      'Curated by <a href="https://rogerallen.github.io" target="_blank" rel="noopener" class="curator-link">Roger Allen</a>'
+    );
   });
 
   it('renders curator header with blurb between title and curator byline', () => {
@@ -59,7 +63,9 @@ describe('Zenolet Configuration & Curator Header', () => {
 
     expect(container.innerHTML).toContain('<h1 class="minimal-site-title">The Great Library</h1>');
     expect(container.innerHTML).toContain('<p class="minimal-blurb">A timeless collection of classics.</p>');
-    expect(container.innerHTML).toContain('<p class="minimal-byline">Curated by <a href="https://rogerallen.github.io" target="_blank" rel="noopener" class="curator-link">Roger Allen</a></p>');
+    expect(container.innerHTML).toContain(
+      '<p class="minimal-byline">Curated by <a href="https://rogerallen.github.io" target="_blank" rel="noopener" class="curator-link">Roger Allen</a></p>'
+    );
   });
 
   it('renders plain text curator when linkUrl is not present', () => {

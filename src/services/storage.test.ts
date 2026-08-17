@@ -55,11 +55,31 @@ describe('Storage and Progress Math for Zenolet', () => {
     const mockViewport = {
       clientWidth: pageWidth,
       scrollLeft: 0,
-      getBoundingClientRect: () => ({ left: 0, top: 0, width: 1000, height: 800, right: 1000, bottom: 800, x: 0, y: 0, toJSON: () => {} })
+      getBoundingClientRect: () => ({
+        left: 0,
+        top: 0,
+        width: 1000,
+        height: 800,
+        right: 1000,
+        bottom: 800,
+        x: 0,
+        y: 0,
+        toJSON: () => {}
+      })
     } as unknown as HTMLDivElement;
 
     const mockEl1 = {
-      getBoundingClientRect: () => ({ left: 37050, top: 50, width: 400, height: 40, right: 37450, bottom: 90, x: 37050, y: 50, toJSON: () => {} })
+      getBoundingClientRect: () => ({
+        left: 37050,
+        top: 50,
+        width: 400,
+        height: 40,
+        right: 37450,
+        bottom: 90,
+        x: 37050,
+        y: 50,
+        toJSON: () => {}
+      })
     } as unknown as HTMLElement;
     expect(getElementSpreadIndex(mockEl1, mockViewport, totalSpreads)).toBe(37);
   });

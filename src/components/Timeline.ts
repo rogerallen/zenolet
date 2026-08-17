@@ -78,7 +78,7 @@ export function getChapterMarkers(
     }
 
     title = title
-      .replace(/^[—\-\s\d\.•·\:\~]+/, '')
+      .replace(/^[—\-\s\d.•·:~]+/, '')
       .replace(/\s+/g, ' ')
       .trim();
 
@@ -101,7 +101,7 @@ export function getChapterMarkers(
       const text = el.textContent?.trim();
       if (!text || text.length < 3) return;
       const cleanText = text
-        .replace(/^[—\-\s\d\.•·\:\~]+/, '')
+        .replace(/^[—\-\s\d.•·:~]+/, '')
         .replace(/\s+/g, ' ')
         .trim();
       if (seenTexts.has(cleanText)) return;

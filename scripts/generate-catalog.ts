@@ -55,19 +55,18 @@ async function generateCatalog() {
     console.log(`fetching page ${page} (${catalog.length}/${targetCount} books collected)...`);
     try {
       const data: GutendexResponse = await fetchJson<GutendexResponse>(nextUrl);
-      
+
       for (const item of data.results) {
         if (catalog.length >= targetCount) break;
 
-        const authorName = item.authors.length > 0 
-          ? item.authors.map(a => a.name).join(', ') 
-          : 'Unknown Author';
+        const authorName = item.authors.length > 0 ? item.authors.map((a) => a.name).join(', ') : 'Unknown Author';
 
         // Extract best HTML format if available
-        let htmlUrl = item.formats['text/html'] || 
-                      item.formats['text/html; charset=utf-8'] || 
-                      item.formats['text/plain; charset=utf-8'] || 
-                      item.formats['text/plain'];
+        const htmlUrl =
+          item.formats['text/html'] ||
+          item.formats['text/html; charset=utf-8'] ||
+          item.formats['text/plain; charset=utf-8'] ||
+          item.formats['text/plain'];
 
         const coverUrl = item.formats['image/jpeg'];
 

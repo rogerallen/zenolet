@@ -24,11 +24,7 @@ export async function fetchCatalog(): Promise<CatalogBook[]> {
   }
 }
 
-export function filterCatalog(
-  books: CatalogBook[],
-  query: string,
-  subjectFilter?: string
-): CatalogBook[] {
+export function filterCatalog(books: CatalogBook[], query: string, subjectFilter?: string): CatalogBook[] {
   let filtered = books;
   const q = query.trim().toLowerCase();
 
@@ -43,9 +39,7 @@ export function filterCatalog(
 
   if (subjectFilter && subjectFilter !== 'all') {
     const sf = subjectFilter.toLowerCase();
-    filtered = filtered.filter((b) =>
-      b.subjects.some((s) => s.toLowerCase().includes(sf))
-    );
+    filtered = filtered.filter((b) => b.subjects.some((s) => s.toLowerCase().includes(sf)));
   }
 
   return filtered;

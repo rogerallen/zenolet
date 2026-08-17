@@ -36,11 +36,7 @@ export function setFontSize(size: number, state: ReaderState, recalculateFn: () 
   recalculateFn();
 }
 
-export function setLayoutColumns(
-  cols: 'auto' | '1' | '2',
-  state: ReaderState,
-  recalculateFn: () => void
-): void {
+export function setLayoutColumns(cols: 'auto' | '1' | '2', state: ReaderState, recalculateFn: () => void): void {
   state.layoutColumns = cols;
   localStorage.setItem('zenolet-layout-columns', cols);
 
@@ -75,17 +71,15 @@ export function recalculatePages(
 
   const isWide = window.innerWidth > 768;
   const layoutCols = state.layoutColumns;
+  const actualCols = layoutCols === '2' || (layoutCols === 'auto' && isWide) ? 2 : 1;
 
   readerContent.classList.remove('one-column', 'two-columns');
 
-  let actualCols = 1;
-  if (layoutCols === '2' || (layoutCols === 'auto' && isWide)) {
+  if (actualCols === 2) {
     readerContent.classList.add('two-columns');
-    actualCols = 2;
     readerContent.style.columnWidth = `${pageWidth / 2}px`;
   } else {
     readerContent.classList.add('one-column');
-    actualCols = 1;
     readerContent.style.columnWidth = `${pageWidth}px`;
   }
 
@@ -141,17 +135,11 @@ export function updatePaginationIndicator(
 
   const cols = actualCols ?? (readerContent.classList.contains('two-columns') ? 2 : 1);
   const scrollLeft = readerViewport.scrollLeft;
-  const currentSpread = Math.min(
-    state.totalPagesSpreads - 1,
-    Math.max(0, Math.round(scrollLeft / pageWidth))
-  );
+  const currentSpread = Math.min(state.totalPagesSpreads - 1, Math.max(0, Math.round(scrollLeft / pageWidth)));
 
   state.currentPageSpread = currentSpread;
 
-  const progressPercent =
-    state.totalPagesSpreads > 1
-      ? (currentSpread / (state.totalPagesSpreads - 1)) * 100
-      : 100;
+  const progressPercent = state.totalPagesSpreads > 1 ? (currentSpread / (state.totalPagesSpreads - 1)) * 100 : 100;
   progressFill.style.width = `${progressPercent}%`;
 
   if (cols === 1) {

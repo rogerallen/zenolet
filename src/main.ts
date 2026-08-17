@@ -2,7 +2,12 @@ import './style.css';
 import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
 import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
-import { getGutenbergCandidateUrls, fetchWithProxyFallback, processBookHtml, cacheBookImagesOffline } from './services/corsProxy.ts';
+import {
+  getGutenbergCandidateUrls,
+  fetchWithProxyFallback,
+  processBookHtml,
+  cacheBookImagesOffline
+} from './services/corsProxy.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
@@ -24,11 +29,7 @@ import {
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
-import {
-  openDiscoverPanel,
-  closeDiscoverPanel,
-  renderLocalCatalogResults
-} from './components/DiscoverModal.ts';
+import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
@@ -274,9 +275,10 @@ async function openBook(
       }
 
       // Process & Render Content
-      const processedContent = (rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>'))
-        ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
-        : await marked.parse(rawContent);
+      const processedContent =
+        rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')
+          ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
+          : await marked.parse(rawContent);
 
       DOM.readerContent.innerHTML = processedContent;
 

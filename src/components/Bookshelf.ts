@@ -22,9 +22,7 @@ export function renderCuratorHeader(
     ? `<a href="${escapeHtml(curator.linkUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
     : escapeHtml(name);
 
-  const blurbHtml = blurb
-    ? `<p class="minimal-blurb">${escapeHtml(blurb)}</p>`
-    : '';
+  const blurbHtml = blurb ? `<p class="minimal-blurb">${escapeHtml(blurb)}</p>` : '';
 
   container.innerHTML = `
     <div class="minimal-header">
