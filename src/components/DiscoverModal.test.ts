@@ -47,8 +47,10 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
     renderLocalCatalogResults('mississippi', sampleCatalog, container, onImport);
 
     expect(container.innerHTML).toContain('Matching Classics (2)');
-    expect(container.innerHTML).toContain('Life on the Mississippi');
-    expect(container.innerHTML).toContain('Adventures of Huckleberry Finn');
+    expect(container.innerHTML).toContain('1) Life on the Mississippi');
+    expect(container.innerHTML).toContain('by Mark Twain #245');
+    expect(container.innerHTML).toContain('2) Adventures of Huckleberry Finn');
+    expect(container.innerHTML).toContain('by Mark Twain #76');
     expect(container.innerHTML).not.toContain('Frankenstein');
   });
 

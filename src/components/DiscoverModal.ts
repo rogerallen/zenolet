@@ -36,7 +36,7 @@ export function renderLocalCatalogResults(
   if (!query.trim()) {
     // Render top 15 popular books if query is empty
     const popular = catalog.slice(0, 15);
-    renderCatalogCards(popular, container, 'Popular Classics', onImportBook);
+    renderCatalogCards(popular, catalog, container, 'Popular Classics', onImportBook);
     return;
   }
 
@@ -51,7 +51,7 @@ export function renderLocalCatalogResults(
     .slice(0, 30);
 
   if (matches.length > 0) {
-    renderCatalogCards(matches, container, `Matching Classics (${matches.length})`, onImportBook);
+    renderCatalogCards(matches, catalog, container, `Matching Classics (${matches.length})`, onImportBook);
   } else {
     showDiscoverEmpty(container, 'No matching books found in the curated classics catalog.');
   }
@@ -59,6 +59,7 @@ export function renderLocalCatalogResults(
 
 function renderCatalogCards(
   books: CatalogBook[],
+  allCatalog: CatalogBook[],
   container: HTMLDivElement,
   sectionTitle: string,
   onImportBook: (bookId: string, title: string, author: string, htmlUrl?: string) => void
@@ -66,12 +67,16 @@ function renderCatalogCards(
   let html = `<div style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">${escapeHtml(sectionTitle)}</div>`;
 
   html += books
-    .map(
-      (b) => `
+    .map((b) => {
+      const rankIndex =
+        allCatalog.indexOf(b) !== -1 ? allCatalog.indexOf(b) : allCatalog.findIndex((x) => x.id === b.id);
+      const rankPrefix = rankIndex !== -1 ? `${rankIndex + 1}) ` : '';
+
+      return `
       <div class="discover-card">
         <div class="discover-card-info">
-          <h4 class="discover-title">#${escapeHtml(b.id)} — ${escapeHtml(b.title)}</h4>
-          <p class="discover-author">by ${escapeHtml(b.author)}</p>
+          <h4 class="discover-title">${rankPrefix}${escapeHtml(b.title)}</h4>
+          <p class="discover-author">by ${escapeHtml(b.author)} #${escapeHtml(b.id)}</p>
         </div>
         <button class="btn-discover-import" 
                 data-id="${escapeHtml(b.id)}" 
@@ -81,8 +86,8 @@ function renderCatalogCards(
           + Add to Shelf
         </button>
       </div>
-    `
-    )
+    `;
+    })
     .join('');
 
   container.innerHTML = html;

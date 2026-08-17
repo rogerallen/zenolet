@@ -307,7 +307,8 @@ a:hover {
 
 .search-input-wrapper {
   position: relative;
-  flex: 1;
+  width: 100%;
+  flex: 0 0 auto;
 }
 
 .search-input {
@@ -334,6 +335,9 @@ a:hover {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -941,6 +945,10 @@ a:hover {
   align-items: flex-start;
 }
 
+.about-feature-item-full {
+  grid-column: 1 / -1;
+}
+
 .about-feature-icon {
   font-size: 1.3rem;
   line-height: 1;
@@ -1102,6 +1110,15 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+#discover-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
 }
 
 .discover-card {

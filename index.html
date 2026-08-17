@@ -304,6 +304,17 @@
                   </p>
                 </div>
               </div>
+
+              <div class="about-feature-item about-feature-item-full">
+                <span class="about-feature-icon">🍴</span>
+                <div>
+                  <strong>Forkable & Sovereign Micro-Library</strong>
+                  <p>
+                    Zenolet is designed to be easily forked on GitHub. Anyone can deploy their own static curated
+                    library with custom branding, catalog selection, and a free Cloudflare CORS proxy.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -335,7 +346,21 @@
         </header>
         <div class="discover-body">
           <div class="search-input-wrapper">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon" aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
             <input
               type="text"
               id="discover-search-input"
@@ -343,7 +368,7 @@
               placeholder="Search classics by title, author, or genre..."
             />
           </div>
-          <div id="discover-results" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px"></div>
+          <div id="discover-results"></div>
         </div>
       </aside>
     </div>
