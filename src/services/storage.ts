@@ -5,6 +5,7 @@ export interface BookMetadata {
   title: string;
   author: string;
   coverUrl?: string;
+  epubUrl?: string;
   htmlUrl?: string;
 }
 

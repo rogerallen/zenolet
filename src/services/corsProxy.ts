@@ -27,18 +27,69 @@ export function buildProxyUrl(targetUrl: string, proxyUrlSetting?: string): stri
   }
 }
 
-export function getGutenbergCandidateUrls(bookId: string, rawHtmlUrl?: string): string[] {
+export function getGutenbergCandidateUrls(bookId: string, customUrl?: string): string[] {
   const candidates: string[] = [];
 
+  // 1. Primary: EPUB3 with images
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub3.images`);
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images-3.epub`);
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub.images`);
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images.epub`);
+
+  // 2. Custom URL provided by catalog (if any)
+  if (customUrl && !candidates.includes(customUrl)) {
+    candidates.push(customUrl);
+  }
+
+  // 3. Fallback: Raw HTML formats
   candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images.html`);
   candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}.html`);
   candidates.push(`https://www.gutenberg.org/files/${bookId}/${bookId}-h/${bookId}-h.htm`);
 
-  if (rawHtmlUrl && !candidates.includes(rawHtmlUrl)) {
-    candidates.push(rawHtmlUrl);
+  return candidates;
+}
+
+/**
+ * Fetches binary ArrayBuffer content strictly using the Cloudflare Worker CORS proxy.
+ * Hard fails immediately if proxy is unconfigured, unreachable, or returns a non-OK HTTP status.
+ */
+export async function fetchArrayBufferWithProxy(targetUrl: string, proxyUrlSetting?: string): Promise<ArrayBuffer> {
+  if (!proxyUrlSetting) {
+    const errorMsg = '[Zenolet CORS] Hard fail: No Cloudflare CORS Proxy URL configured in settings.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
-  return candidates;
+  const proxiedUrl = buildProxyUrl(targetUrl, proxyUrlSetting);
+  console.log(`[Zenolet CORS] Fetching binary via Cloudflare Proxy: "${proxiedUrl}" for target: "${targetUrl}"`);
+
+  let res: Response;
+  try {
+    res = await fetch(proxiedUrl);
+  } catch (err) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy connection error: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(errorMsg);
+    throw new Error(errorMsg, { cause: err });
+  }
+
+  if (!res.ok) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Cloudflare Worker proxy returned HTTP status ${res.status} ${res.statusText}`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const buffer = await res.arrayBuffer();
+  if (!buffer || buffer.byteLength < 50) {
+    const errorMsg = `[Zenolet CORS] Hard fail: Received invalid or empty binary content (${buffer ? buffer.byteLength : 0} bytes) from Cloudflare Proxy.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const mbSize = (buffer.byteLength / (1024 * 1024)).toFixed(2);
+  console.log(
+    `[Zenolet CORS] Successfully downloaded binary ${buffer.byteLength} bytes (~${mbSize} MB) from "${targetUrl}" via Cloudflare Proxy.`
+  );
+  return buffer;
 }
 
 /**

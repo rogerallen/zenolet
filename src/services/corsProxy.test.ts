@@ -250,3 +250,34 @@ describe('Zenolet Client Proxy Selection (fetchWithProxyFallback)', () => {
     await expect(fetchWithProxyFallback(targetUrl, customProxy)).rejects.toThrow('Hard fail');
   });
 });
+
+describe('getGutenbergCandidateUrls & fetchArrayBufferWithProxy', () => {
+  it('prioritizes EPUB3 candidate URLs in getGutenbergCandidateUrls', async () => {
+    const { getGutenbergCandidateUrls } = await import('./corsProxy.ts');
+    const candidates = getGutenbergCandidateUrls('2701');
+    expect(candidates[0]).toBe('https://www.gutenberg.org/ebooks/2701.epub3.images');
+    expect(candidates[1]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images-3.epub');
+    expect(candidates).toContain('https://www.gutenberg.org/cache/epub/2701/pg2701-images.html');
+  });
+
+  it('fetches binary ArrayBuffer through proxy via fetchArrayBufferWithProxy', async () => {
+    const { fetchArrayBufferWithProxy } = await import('./corsProxy.ts');
+    const customProxy = 'https://custom-worker.workers.dev';
+    const targetUrl = 'https://www.gutenberg.org/ebooks/2701.epub3.images';
+
+    const dummyBinary = new Uint8Array([
+      80, 75, 3, 4, 10, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+      23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+    ]);
+
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(dummyBinary.buffer, {
+        status: 200,
+        headers: { 'Content-Type': 'application/epub+zip' }
+      })
+    );
+
+    const buffer = await fetchArrayBufferWithProxy(targetUrl, customProxy);
+    expect(buffer.byteLength).toBe(dummyBinary.byteLength);
+  });
+});

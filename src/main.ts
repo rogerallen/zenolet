@@ -5,9 +5,11 @@ import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
 import {
   getGutenbergCandidateUrls,
   fetchWithProxyFallback,
+  fetchArrayBufferWithProxy,
   processBookHtml,
   cacheBookImagesOffline
 } from './services/corsProxy.ts';
+import { parseEpubArchive } from './services/epub.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   saveBookOffline,
@@ -244,7 +246,13 @@ async function openBook(
 
       // In background, upgrade any uncached images to offline base64 data URLs
       if (rawContent.includes('<img') && !rawContent.includes('data:image')) {
-        const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
+        const meta: BookMetadata = {
+          id: book.id,
+          title: book.title,
+          author: book.author,
+          epubUrl: book.epubUrl,
+          htmlUrl: book.htmlUrl
+        };
         const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
         cacheBookImagesOffline(rawContent, config.proxyUrl).then((fullyCachedHtml) => {
           if (fullyCachedHtml && fullyCachedHtml !== rawContent) {
@@ -253,42 +261,66 @@ async function openBook(
         });
       }
     } else {
-      // 2. Fetch via candidate static URLs & proxy fallbacks
-      const candidateUrls = getGutenbergCandidateUrls(book.id, book.htmlUrl);
+      // 2. Fetch via candidate static URLs (EPUB3 primary, HTML fallback)
+      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl || book.htmlUrl);
       let lastErr: Error | null = null;
+      let isEpub = false;
+      let epubBuffer: ArrayBuffer | null = null;
 
       for (const candidate of candidateUrls) {
         try {
-          const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
-          if (text && text.length > 200) {
-            rawContent = text;
-            bookSourceUrl = candidate;
-            break;
+          if (candidate.includes('.epub') || candidate.endsWith('.images')) {
+            const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
+            if (buffer && buffer.byteLength > 100) {
+              epubBuffer = buffer;
+              isEpub = true;
+              bookSourceUrl = candidate;
+              break;
+            }
+          } else {
+            const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
+            if (text && text.length > 200) {
+              rawContent = text;
+              bookSourceUrl = candidate;
+              break;
+            }
           }
         } catch (err) {
           lastErr = err as Error;
         }
       }
 
-      if (!rawContent) {
-        throw lastErr || new Error(`Could not load text for book #${book.id}`);
-      }
+      let processedContent = '';
 
-      // Process & Render Content
-      const processedContent =
-        rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')
-          ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
-          : await marked.parse(rawContent);
+      if (isEpub && epubBuffer) {
+        // Parse & Stitch EPUB3 Archive
+        const parsed = parseEpubArchive(epubBuffer);
+        processedContent = parsed.htmlContent;
+      } else if (rawContent) {
+        // Process Legacy HTML
+        processedContent =
+          rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')
+            ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
+            : await marked.parse(rawContent);
+      } else {
+        throw lastErr || new Error(`Could not load book #${book.id}`);
+      }
 
       DOM.readerContent.innerHTML = processedContent;
 
       // Always auto-save book offline into slot storage upon selection
-      const meta: BookMetadata = { id: book.id, title: book.title, author: book.author, htmlUrl: book.htmlUrl };
+      const meta: BookMetadata = {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        epubUrl: book.epubUrl,
+        htmlUrl: book.htmlUrl
+      };
       const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
       await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
 
-      // In background, download and inline all images as data URLs for 100% offline persistence
-      if (processedContent.includes('<img')) {
+      // In background, ensure all images are cached as data URLs
+      if (processedContent.includes('<img') && !processedContent.includes('data:image')) {
         cacheBookImagesOffline(processedContent, config.proxyUrl).then((fullyCachedHtml) => {
           if (fullyCachedHtml && fullyCachedHtml !== processedContent) {
             saveBookOffline(meta, { metadata: meta, content: fullyCachedHtml }, slotToSave);

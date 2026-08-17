@@ -4,6 +4,7 @@ export interface CatalogBook {
   author: string;
   subjects: string[];
   downloads: number;
+  epubUrl?: string;
   htmlUrl?: string;
   coverUrl?: string;
 }
