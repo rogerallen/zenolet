@@ -123,30 +123,71 @@ npm run build
 
 ---
 
-## 🌩️ Cloudflare CORS Proxy Worker
+## 🍴 Forking & Creating Your Own Curated Library
 
-Zenolet relies strictly on a dedicated Cloudflare Worker proxy (`worker/index.js`) to fetch Gutenberg book texts and illustrations without third-party public proxies.
+Zenolet is intentionally designed as a **forkable, sovereign micro-library**. You can fork this repository to publish your own standalone, curated literary collection (e.g. 1,000 philosophy classics, science fiction anthologies, poetry collections, or educational reading lists) hosted entirely for free on GitHub Pages, Cloudflare Pages, Netlify, or any static host.
 
-### Key Worker Security & Logging Features
-* **Origin Protection:** Restricts requests to `https://rogerallen.github.io`, Tailscale domains (`*.ts.net`), and local dev hosts (`localhost`, `127.0.0.1`). Unauthorized origins are rejected with `403 Forbidden`.
-* **CORS Preflight (`OPTIONS`):** Returns `204 No Content` with cached CORS headers (`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods: GET, HEAD, OPTIONS`, `Access-Control-Max-Age: 86400`).
-* **Streaming Byte Logs:** Uses a `TransformStream` byte counter to log total bytes transferred when a book download completes.
-* **Strict Hard Fail Policy:** If the proxy is unconfigured or returns an error, Zenolet hard-fails immediately without falling back to public proxies.
+### Step-by-Step Guide to Deploy Your Own Node
 
-### Deploying the Worker to Cloudflare
+#### 1. Fork & Clone the Repository
+Click **Fork** at the top of the GitHub repository, then clone your fork locally:
 ```bash
-# 1. Authenticate with Cloudflare
-npx wrangler login
-
-# 2. Deploy Worker
-npx wrangler deploy
-
-# 3. Stream live logs (Optional)
-npx wrangler tail
+git clone https://github.com/<your-username>/zenolet.git
+cd zenolet
+npm install
 ```
+
+#### 2. Deploy Your Cloudflare Worker CORS Proxy
+Project Gutenberg books and images require a CORS proxy for browser-based reading. Zenolet includes a minimal, zero-cost Cloudflare Worker proxy (`worker/index.js`).
+
+1. Edit `worker/index.js` to add your site domain to `ALLOWED_ORIGINS`:
+   ```javascript
+   const ALLOWED_ORIGINS = [
+     'https://<your-username>.github.io',
+     'http://localhost:5173',
+     'http://127.0.0.1:5173'
+   ];
+   ```
+2. Log in to Cloudflare and deploy:
+   ```bash
+   npx wrangler login
+   npx wrangler deploy
+   ```
+3. Copy your deployed Worker URL (e.g., `https://zenolet-cors-proxy.<your-subdomain>.workers.dev`).
+
+#### 3. Customize Your Site Configuration (`public/zenolet.config.json`)
+Update `public/zenolet.config.json` with your library title, blurb, curator details, repository link, and your deployed Cloudflare Worker URL:
+
+```json
+{
+  "title": "My Curated Classics Library",
+  "blurb": "A hand-picked collection of timeless public domain literature ready for instant offline reading.",
+  "repoUrl": "https://github.com/<your-username>/zenolet",
+  "curator": {
+    "name": "Your Name",
+    "linkUrl": "https://<your-username>.github.io"
+  },
+  "settings": {
+    "defaultTheme": "sepia",
+    "fontSize": 18,
+    "layoutColumns": "auto"
+  },
+  "proxyUrl": "https://zenolet-cors-proxy.<your-subdomain>.workers.dev"
+}
+```
+
+#### 4. (Optional) Customize the Catalog (`public/catalog.json`)
+By default, `public/catalog.json` contains the top 1,000 Project Gutenberg titles. You can:
+* Keep the existing 1,000-book catalog as-is.
+* Or generate a customized catalog using `scripts/generate-catalog.ts` or your own JSON structure containing `{ "id", "title", "author", "subjects", "downloads", "htmlUrl" }`.
+
+#### 5. Deploy Your Static Site
+* **GitHub Pages (Automated):** If hosted on GitHub, navigate to **Settings > Pages > Build and deployment**, select **GitHub Actions** as the source, and push to `main`. The included workflow (`.github/workflows/deploy.yml`) will automatically build and publish your site.
+* **Cloudflare Pages / Netlify / Vercel:** Build command is `npm run build` and the output directory is `dist`.
 
 ---
 
 ## 📜 License
 
 MIT License. Open source and free for non-commercial and commercial use alike.
+

@@ -64,3 +64,17 @@ Whenever a feature, deploy, or version bump occurs:
 6. **Curated Offline-Only Catalog Search**:
    * **No Online Repository Lookups**: Book search operates strictly across the curated local catalog (`catalog.json`, containing the top ~1,000 classics). Never query external catalog APIs (such as Gutendex or external search endpoints).
    * **Instant & Private**: Search must execute 100% locally in-memory with zero network latency, zero debounce delay, and zero external tracking.
+
+---
+
+## 🍴 Forkable Architecture Invariants
+
+1. **Config Externalization**:
+   * All site branding, curator metadata (`name`, `linkUrl`), site `title`, `blurb`, `repoUrl`, default reader settings, and `proxyUrl` MUST remain fully externalized in `public/zenolet.config.json`.
+   * Never hardcode personal URLs or site names into core application logic or components.
+
+2. **Self-Contained Static Deployment**:
+   * The app is designed to be forked by anyone to create their own independent, curated static library.
+   * The frontend must remain 100% static (deployable to GitHub Pages, Cloudflare Pages, Netlify, or any static file host) with no database or server requirements.
+   * The only external dependency for a forker is their own free Cloudflare Worker CORS proxy (`worker/index.js`), which must remain simple and self-contained.
+
