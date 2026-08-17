@@ -23,9 +23,15 @@ Named in honor of **Zenodotus of Ephesus** (the first chief librarian of Alexand
 
 ```
 zenolet/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # GitHub Pages automated deployment pipeline (Node 24)
+├── .vscode/
+│   ├── extensions.json          # Recommended VS Code extensions (ESLint, Prettier)
+│   └── settings.json            # VS Code workspace format-on-save settings
 ├── public/
 │   ├── zenolet.config.json      # Curator & site identity configuration
-│   ├── catalog.json             # Pre-generated index of top 1,000 Gutenberg titles
+│   ├── catalog.json             # Pre-generated index of top ~1,000 Gutenberg classics
 │   ├── icon.svg                 # App icon
 │   ├── manifest.json            # PWA Web Manifest
 │   └── sw.js                    # Service worker for offline caching
@@ -33,36 +39,39 @@ zenolet/
 │   └── generate-catalog.ts      # Script to fetch & build top 1,000 books catalog from Gutendex
 ├── src/
 │   ├── components/
-│   │   ├── Bookshelf.ts         # Library card grid, curator header, genre pills, search bar
-│   │   ├── ReaderEngine.ts      # CSS multi-column engine, page math, swiping, typography
-│   │   ├── Timeline.ts          # TOC scanner, chapter dots, reading timeline footer
-│   │   ├── DiscoverModal.ts     # Project Gutenberg search drawer & catalog importer
+│   │   ├── Bookshelf.ts         # 8-slot bookshelf, curator header, slot persistence
+│   │   ├── DiscoverModal.ts     # Instant local catalog search & add-to-shelf drawer
+│   │   ├── DiscoverModal.test.ts # Unit tests for local catalog search
 │   │   ├── QRModal.ts           # QR code overlay for desktop-to-phone handoff
-│   │   └── SettingsModal.ts     # Reading themes (Paper, Sepia, Charcoal, Night) & font sizing
+│   │   ├── ReaderEngine.ts      # CSS multi-column engine, page math, swiping, typography
+│   │   ├── ReaderEngine.test.ts # Unit tests for page layout and scroll restoration
+│   │   ├── SettingsModal.ts     # Reading themes (Paper, Sepia, Charcoal, Night) & font sizing
+│   │   └── Timeline.ts          # TOC scanner, chapter dots, reading timeline footer
 │   ├── services/
-│   │   ├── config.ts            # Loader & validator for zenolet.config.json (supports VITE_PROXY_URL override)
 │   │   ├── catalog.ts           # Catalog search & genre classification service
+│   │   ├── config.ts            # Loader & validator for zenolet.config.json
+│   │   ├── config.test.ts       # Unit tests for config loading & schema
+│   │   ├── corsProxy.ts         # Cloudflare Worker CORS proxy client & offline image caching
+│   │   ├── corsProxy.test.ts    # Unit tests for proxy security, preflights, & hard fail
+│   │   ├── gutenberg.test.ts    # Unit tests for metadata extraction & boilerplate cleanup
 │   │   ├── state.ts             # CompressionStream URL hash encoder & decoder (#s=...)
-│   │   ├── storage.ts           # CacheStorage wrapper & reading progress persistence
-│   │   ├── api.ts               # Network fetch wrappers with timeout
-   │   └── corsProxy.ts         # Cloudflare Worker CORS proxy client & hard-fail error handling
-│   ├── __tests__/
-│   │   ├── storage.test.ts      # Vitest unit tests for scroll math & storage
-│   │   ├── gutenberg.test.ts    # Vitest unit tests for metadata extraction
-│   │   └── corsProxy.test.ts    # Vitest unit tests for proxy security, preflights, & hard fail
-│   ├── index.html               # Main HTML5 SPA shell
-│   ├── main.ts                  # App entry point & router
-│   └── style.css                # Global CSS system, multi-column rules & glassmorphic themes
+│   │   ├── storage.ts           # 8-slot persistence, progress math, CacheStorage purging
+│   │   └── storage.test.ts      # Unit tests for 8-slot storage & offline cache
+│   ├── main.ts                  # App entry point, DOM cache, event orchestration
+│   └── style.css                # Global design system, multi-column rules & themes
 ├── worker/
 │   └── index.js                 # Cloudflare Worker CORS proxy script (origin restriction & byte logging)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml           # GitHub Pages automated deployment pipeline (Node 24)
-├── wrangler.jsonc               # Cloudflare Wrangler CLI configuration
+├── .gitignore
+├── .prettierignore
+├── .prettierrc
+├── AGENTS.md                    # Invariants, versioning rules, & development guidelines
+├── eslint.config.js             # Modern ESLint 9+ flat configuration
+├── index.html                   # Main HTML5 SPA shell
 ├── package.json                 # Dependencies & scripts
 ├── tsconfig.json                # TypeScript configuration
 ├── vite.config.ts               # Vite bundler config & HMR setup
-└── vitest.config.ts             # Vitest test framework config
+├── vitest.config.ts             # Vitest test framework config
+└── wrangler.jsonc               # Cloudflare Wrangler CLI configuration
 ```
 
 ---
