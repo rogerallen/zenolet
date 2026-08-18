@@ -34,10 +34,61 @@ Whenever a feature, deploy, or version bump occurs:
    - **ALWAYS** summarize the exact staged files and proposed commit message before making git commits or pushing.
 
 2. **Automated Pre-Commit Verification**:
-   - Always run `npx vitest run` and `npm run build` to verify clean compilation and zero failing tests before proposing a commit or release.
+   - Always run `npx vitest run`, `npm run lint`, `npm run format:check`, and `npm run build` to verify clean compilation, zero failing tests, and formatting compliance before proposing a commit or release.
 
 3. **Development Commands**:
    - Use `npm run dev:local` for single-command local testing (runs local Cloudflare Worker proxy on port 8787 and Vite UI on port 5173 concurrently).
+
+---
+
+## 🔒 Security & Privacy Invariants
+
+1. **Proxy Target Domain Whitelisting (`SEC-002`)**:
+   - The Cloudflare Worker proxy (`worker/index.js`) must strictly restrict target URLs to Project Gutenberg domains (`gutenberg.org` and `*.gutenberg.org`) over HTTP/HTTPS.
+   - Never allow the worker to proxy arbitrary hostnames or act as an open SSRF relay.
+
+2. **EPUB DOM Sanitization (`SEC-001`)**:
+   - All parsed EPUB XHTML content must undergo strict client-side DOM sanitization before being inserted into the reader view:
+     - Disallowed elements to remove: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<applet>`, `<form>`, `<input>`, `<textarea>`, `<button>`, `<meta>`, `<base>`.
+     - Attribute sanitization: Strip all inline event handlers (`on*` attributes like `onload`, `onerror`, `onclick`).
+     - Link sanitization: Disallow script URLs (`javascript:`, `vbscript:`, `data:text/html`).
+
+3. **Zero External Media Leaks (`PRI-001`)**:
+   - Only images packed inside the EPUB archive (inlined as local base64 Data URLs) may be rendered.
+   - Any external `<img>` or unresolvable asset URL must have its `src` stripped to prevent unproxied network requests, third-party tracking, or user IP leaks.
+
+---
+
+## 📖 Reader & Layout Invariants
+
+1. **Layout Resize & Progress Synchronization (`COR-001`)**:
+   - When recalculating page spreads on window resize, font size adjustment, or column layout toggles, DOM scroll position restoration (`restoreBookProgressByFraction`) MUST execute _before_ updating page indicators and saving progress.
+   - Never update pagination indicators or fire debounced progress saves while the viewport is in an intermediate or un-restored scroll position.
+
+2. **Cross-Platform State Handoff (`state.ts`)**:
+   - Reading state URLs (`#s=...`) use compressed base64url payloads with deflate-raw compression, with fallback for uncompressed base64 payloads (`#s=u_...`).
+   - Stream processing in `state.ts` must maintain universal compatibility across browser and Node/worker environments.
+
+---
+
+## ⚡ Service Worker & Caching Invariants
+
+1. **Development Cache Preservation (`COR-002`)**:
+   - The development cleanup script in `index.html` must preserve `zenolet-books-v1` when unregistering service workers on localhost/127.0.0.1 so offline book persistence is not destroyed on page reload during development.
+
+2. **Subresource Offline Fallback (`PWA-001`)**:
+   - The Service Worker (`public/sw.js`) must ONLY return the SPA navigation fallback (`index.html`) for navigation requests (`request.mode === 'navigate'`).
+   - Failed static subresources (JS, CSS, fonts, images) offline must return a 404 response and never return `index.html` to avoid MIME type errors and syntax crashes.
+
+---
+
+## ♿ Accessibility (a11y) Invariants
+
+1. **Keyboard Operability (`ACC-001`)**:
+   - All custom interactive elements (bookshelf slot cards, empty slot triggers, timeline jump dots, drawer triggers) must have `tabindex="0"`, `role="button"`, descriptive `aria-label` attributes, and `keydown` handlers for both `Enter` and `Space`.
+
+2. **Modal & Drawer Semantics**:
+   - All overlays and drawer panels (Settings, About, QR Modal, Discover panel) must have `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` referencing their respective title element. All close buttons must have explicit `aria-label` attributes.
 
 ---
 
