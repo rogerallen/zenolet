@@ -28,6 +28,7 @@ import {
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
+import { closeChapterPopup } from './components/Timeline.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
@@ -451,6 +452,7 @@ async function openBook(
 }
 
 function closeReaderAndReturnToLibrary() {
+  closeChapterPopup();
   DOM.readerView.classList.add('hidden');
   DOM.libraryView.classList.remove('hidden');
   readerState.currentView = 'library';

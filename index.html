@@ -93,7 +93,7 @@
 
         <!-- Minimal Footer (Below Slots) -->
         <footer class="library-footer">
-          <span class="version-tag">Zenolet v0.12.0</span>
+          <span class="version-tag">Zenolet v0.13.0</span>
           <span class="dot-separator">•</span>
           <span id="library-storage-status" class="storage-status-tag">0 books, 0 MB used</span>
           <span class="dot-separator">•</span>
@@ -150,18 +150,46 @@
       <div id="reader-view" class="view hidden">
         <header class="reader-header">
           <div class="reader-header-left">
-            <button id="back-button" class="btn-icon" title="Return to Bookshelf"><span>←</span> Back to Shelf</button>
+            <button id="back-button" class="btn-icon" title="Return to Bookshelf" aria-label="Return to Bookshelf">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span class="btn-label">Shelf</span>
+            </button>
             <div class="reader-book-meta">
               <h2 id="reader-book-title" class="reader-book-title">Book Title</h2>
               <p id="reader-book-author" class="reader-book-author">Author</p>
             </div>
           </div>
 
-          <div class="reader-header-right" style="display: flex; gap: 10px; align-items: center">
-            <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)">
-              <span>📱</span> Mobile Link
+          <div class="reader-header-right">
+            <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)" aria-label="Mobile Link">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+              </svg>
+              <span class="btn-label">Mobile</span>
             </button>
-            <button id="settings-toggle" class="btn-icon" title="Reading Settings">
+            <button id="settings-toggle" class="btn-icon" title="Reading Settings" aria-label="Settings">
               <svg
                 width="15"
                 height="15"
@@ -177,7 +205,7 @@
                   d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
                 ></path>
               </svg>
-              <span>Settings</span>
+              <span class="btn-label">Settings</span>
             </button>
           </div>
         </header>
@@ -259,7 +287,7 @@
           <div class="about-modal-body">
             <p class="about-lead">
               <strong>Zenolet</strong> is an elegant, distraction-free web reader for exploring and reading timeless
-              literary classics from
+              literary classics. This instance was created by Roger Allen to showcase the most popular titles from
               <a href="https://www.gutenberg.org" target="_blank" rel="noopener" class="curator-link"
                 >Project Gutenberg</a
               >.

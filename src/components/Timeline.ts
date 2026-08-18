@@ -161,6 +161,169 @@ export function updateActiveChapterLabel(
   indicator.textContent = activeChapterText || 'Reading...';
 }
 
+let activePopupElement: HTMLElement | null = null;
+let activePopupCleanup: (() => void) | null = null;
+let activeTargetSpread: number | null = null;
+
+export function closeChapterPopup(): void {
+  activeTargetSpread = null;
+  if (activePopupCleanup) {
+    activePopupCleanup();
+    activePopupCleanup = null;
+  }
+  if (activePopupElement) {
+    activePopupElement.remove();
+    activePopupElement = null;
+  }
+}
+
+export function showChapterPopup(
+  markers: ChapterMarker[],
+  targetSpread: number,
+  currentReadingSpread: number,
+  clickClientX: number,
+  trackRect: DOMRect,
+  totalPagesSpreads: number,
+  onJumpToSpread: (spreadIndex: number) => void
+): void {
+  if (activePopupElement && activeTargetSpread === targetSpread) {
+    // Already rendered and displayed for this spread position; avoid glitchy re-rendering
+    return;
+  }
+
+  closeChapterPopup();
+  activeTargetSpread = targetSpread;
+
+  if (!markers || markers.length === 0) return;
+
+  // Find which chapter corresponds to the user's active reading position
+  let activeMarkerId: string | null = null;
+  for (let i = 0; i < markers.length; i++) {
+    if (markers[i].pageSpread <= currentReadingSpread) {
+      activeMarkerId = markers[i].id;
+    } else {
+      break;
+    }
+  }
+  if (!activeMarkerId && markers.length > 0) {
+    activeMarkerId = markers[0].id;
+  }
+
+  // Find the closest marker index to the clicked target spread
+  let closestIdx = 0;
+  let minDiff = Infinity;
+  for (let i = 0; i < markers.length; i++) {
+    const diff = Math.abs(markers[i].pageSpread - targetSpread);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIdx = i;
+    }
+  }
+
+  // Guarantee displaying up to 12-14 chapters centered around the region
+  const windowSize = Math.min(14, markers.length);
+  const halfWindow = Math.floor(windowSize / 2);
+  let startIdx = Math.max(0, closestIdx - halfWindow);
+  let endIdx = Math.min(markers.length, startIdx + windowSize);
+
+  if (endIdx - startIdx < windowSize) {
+    if (startIdx === 0) {
+      endIdx = Math.min(markers.length, windowSize);
+    } else if (endIdx === markers.length) {
+      startIdx = Math.max(0, markers.length - windowSize);
+    }
+  }
+
+  const regionMarkers = markers.slice(startIdx, endIdx);
+  if (regionMarkers.length === 0) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'chapter-popup-menu';
+  popup.id = 'chapter-popup-menu';
+
+  const header = document.createElement('div');
+  header.className = 'chapter-popup-header';
+  header.innerHTML = `<span>Select Chapter</span><span class="chapter-popup-range">${startIdx + 1}–${endIdx} of ${markers.length}</span>`;
+  popup.appendChild(header);
+
+  const list = document.createElement('div');
+  list.className = 'chapter-popup-list';
+
+  regionMarkers.forEach((marker) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'chapter-popup-item';
+
+    const isCurrent = marker.id === activeMarkerId;
+    if (isCurrent) {
+      item.classList.add('current');
+    }
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'chapter-item-title';
+    titleSpan.textContent = marker.title;
+
+    const spreadSpan = document.createElement('span');
+    spreadSpan.className = 'chapter-item-spread';
+    const percent = Math.round((marker.pageSpread / Math.max(1, totalPagesSpreads - 1)) * 100);
+    spreadSpan.textContent = `${percent}%`;
+
+    item.appendChild(titleSpan);
+    item.appendChild(spreadSpan);
+
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeChapterPopup();
+      onJumpToSpread(marker.pageSpread);
+    });
+
+    list.appendChild(item);
+  });
+
+  popup.appendChild(list);
+  document.body.appendChild(popup);
+  activePopupElement = popup;
+
+  // Positioning logic
+  const popupWidth = Math.min(320, window.innerWidth - 32);
+  popup.style.width = `${popupWidth}px`;
+
+  const leftPos = Math.max(16, Math.min(window.innerWidth - popupWidth - 16, clickClientX - popupWidth / 2));
+  const bottomPos = Math.max(16, window.innerHeight - trackRect.top + 10);
+
+  popup.style.left = `${leftPos}px`;
+  popup.style.bottom = `${bottomPos}px`;
+
+  const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+    const target = (e instanceof TouchEvent && e.touches[0] ? e.touches[0].target : e.target) as Node;
+    if (popup && !popup.contains(target)) {
+      closeChapterPopup();
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeChapterPopup();
+    }
+  };
+
+  const handleResize = () => {
+    closeChapterPopup();
+  };
+
+  setTimeout(() => {
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleResize);
+  }, 20);
+
+  activePopupCleanup = () => {
+    window.removeEventListener('pointerdown', handlePointerDown);
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('resize', handleResize);
+  };
+}
+
 export function renderTimeline(
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
@@ -170,18 +333,172 @@ export function renderTimeline(
   const timelineTicks = document.getElementById('timeline-ticks');
   if (!timelineTicks) return;
   timelineTicks.innerHTML = '';
+  closeChapterPopup();
 
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0 || totalPagesSpreads <= 1) return;
 
+  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads);
+
+  // Filter markers to avoid overcrowding on books with many chapters (e.g. Moby Dick)
+  const minSpreadDistance = Math.max(1, Math.floor(totalPagesSpreads * 0.035));
+  const candidateMarkers: ChapterMarker[] = [];
+  let lastSpread = -minSpreadDistance;
+
+  markers.forEach((marker) => {
+    if (marker.pageSpread <= 0 || marker.pageSpread >= totalPagesSpreads - 1) return;
+    if (marker.pageSpread - lastSpread >= minSpreadDistance) {
+      candidateMarkers.push(marker);
+      lastSpread = marker.pageSpread;
+    }
+  });
+
+  // Cap maximum chapter dots to 14 to keep timeline clean on mobile & desktop
+  const maxDots = 14;
+  const step = Math.ceil(candidateMarkers.length / maxDots);
+  const displayedMarkers = step > 1 ? candidateMarkers.filter((_, idx) => idx % step === 0) : candidateMarkers;
+
+  const getCurrentReadingSpread = (): number => {
+    const pWidth = readerViewport.clientWidth;
+    if (pWidth <= 0 || totalPagesSpreads <= 1) return 0;
+    return Math.min(totalPagesSpreads - 1, Math.max(0, Math.round(readerViewport.scrollLeft / pWidth)));
+  };
+
   const progressTrack = document.getElementById('progress-track');
   if (progressTrack) {
+    let pressTimer: number | null = null;
+    let isLongPress = false;
+    let longPressResetTimer: number | null = null;
+    let startX = 0;
+    let startY = 0;
+
+    const startPress = (clientX: number, clientY: number) => {
+      if (longPressResetTimer !== null) {
+        window.clearTimeout(longPressResetTimer);
+        longPressResetTimer = null;
+      }
+      isLongPress = false;
+      startX = clientX;
+      startY = clientY;
+
+      if (pressTimer !== null) {
+        window.clearTimeout(pressTimer);
+      }
+
+      pressTimer = window.setTimeout(() => {
+        isLongPress = true;
+        pressTimer = null;
+        const rect = progressTrack.getBoundingClientRect();
+        const clickX = clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+        const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
+        showChapterPopup(
+          markers,
+          targetSpread,
+          getCurrentReadingSpread(),
+          clientX,
+          rect,
+          totalPagesSpreads,
+          onJumpToSpread
+        );
+      }, 350);
+    };
+
+    const cancelPress = () => {
+      if (pressTimer !== null) {
+        window.clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    };
+
+    const endPress = (clientX: number) => {
+      if (pressTimer !== null) {
+        window.clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      if (!isLongPress) {
+        const rect = progressTrack.getBoundingClientRect();
+        const clickX = clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+        const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
+        onJumpToSpread(targetSpread);
+      } else {
+        // Absorb subsequent synthetic click / contextmenu events from browser
+        longPressResetTimer = window.setTimeout(() => {
+          isLongPress = false;
+          longPressResetTimer = null;
+        }, 400);
+      }
+    };
+
+    progressTrack.onmousedown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      startPress(e.clientX, e.clientY);
+    };
+
+    progressTrack.onmousemove = (e: MouseEvent) => {
+      if (pressTimer !== null && (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8)) {
+        cancelPress();
+      }
+    };
+
+    progressTrack.onmouseup = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      endPress(e.clientX);
+    };
+
     progressTrack.onclick = (e: MouseEvent) => {
-      const rect = progressTrack.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-      const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
-      onJumpToSpread(targetSpread);
+      if (isLongPress) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    progressTrack.onmouseleave = () => {
+      cancelPress();
+    };
+
+    progressTrack.ontouchstart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        startPress(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    progressTrack.ontouchmove = (e: TouchEvent) => {
+      if (e.touches.length > 0 && pressTimer !== null) {
+        if (Math.abs(e.touches[0].clientX - startX) > 10 || Math.abs(e.touches[0].clientY - startY) > 10) {
+          cancelPress();
+        }
+      }
+    };
+
+    progressTrack.ontouchend = (e: TouchEvent) => {
+      const clientX = e.changedTouches.length > 0 ? e.changedTouches[0].clientX : startX;
+      endPress(clientX);
+    };
+
+    progressTrack.ontouchcancel = () => {
+      cancelPress();
+    };
+
+    progressTrack.oncontextmenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isLongPress) {
+        const rect = progressTrack.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+        const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
+        showChapterPopup(
+          markers,
+          targetSpread,
+          getCurrentReadingSpread(),
+          e.clientX,
+          rect,
+          totalPagesSpreads,
+          onJumpToSpread
+        );
+      }
     };
   }
 
@@ -205,10 +522,7 @@ export function renderTimeline(
   });
   timelineTicks.appendChild(endDot);
 
-  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads);
-  markers.forEach((marker) => {
-    if (marker.pageSpread <= 0 || marker.pageSpread >= totalPagesSpreads - 1) return;
-
+  displayedMarkers.forEach((marker) => {
     const percent = (marker.pageSpread / (totalPagesSpreads - 1)) * 100;
     const dot = document.createElement('div');
     dot.className = 'timeline-dot chapter-dot';
