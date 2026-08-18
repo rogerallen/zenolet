@@ -279,4 +279,42 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
     // 4. External tracking image stripped
     expect(parsed.htmlContent).not.toContain('https://tracking-site.com/pixel.png');
   });
+
+  it('sanitizes chapters that lack explicit body elements and prevents raw fallback (SEC-001)', () => {
+    const nonBodyEpub = zipSync({
+      mimetype: strToU8('application/epub+zip'),
+      'META-INF/container.xml': strToU8(`
+        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+          <rootfiles>
+            <rootfile full-path="package.opf" media-type="application/oebps-package+xml"/>
+          </rootfiles>
+        </container>
+      `),
+      'package.opf': strToU8(`
+        <package version="3.0" unique-identifier="pub-id" xmlns="http://www.idpf.org/2007/opf">
+          <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <dc:title>Non-body Test</dc:title>
+            <dc:creator>Tester</dc:creator>
+          </metadata>
+          <manifest>
+            <item id="ch1" href="ch1.xml" media-type="application/xhtml+xml" />
+          </manifest>
+          <spine>
+            <itemref idref="ch1" />
+          </spine>
+        </package>
+      `),
+      'ch1.xml': strToU8(`
+        <section xmlns="http://www.w3.org/1999/xhtml">
+          <script>alert('xss')</script>
+          <p onclick="alert(1)">Text in non-body root</p>
+        </section>
+      `)
+    });
+
+    const parsed = parseEpubArchive(nonBodyEpub.buffer);
+    expect(parsed.htmlContent).not.toContain('<script>');
+    expect(parsed.htmlContent).not.toContain('onclick');
+    expect(parsed.htmlContent).toContain('Text in non-body root');
+  });
 });

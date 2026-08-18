@@ -86,4 +86,27 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       'https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg'
     );
   });
+
+  it('opens discover panel and focuses the search input (ACC-001)', async () => {
+    const { openDiscoverPanel, closeDiscoverPanel } = await import('./DiscoverModal.js');
+    const overlay = document.createElement('div');
+    const panel = document.createElement('aside');
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+
+    try {
+      openDiscoverPanel(overlay, panel, input);
+      expect(overlay.classList.contains('visible')).toBe(true);
+      expect(panel.classList.contains('visible')).toBe(true);
+
+      await new Promise((r) => setTimeout(r, 60));
+      expect(document.activeElement).toBe(input);
+
+      closeDiscoverPanel(overlay, panel);
+      expect(overlay.classList.contains('visible')).toBe(false);
+      expect(panel.classList.contains('visible')).toBe(false);
+    } finally {
+      input.remove();
+    }
+  });
 });

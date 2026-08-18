@@ -186,26 +186,49 @@ export async function getStoredBookOffline(bookId: string): Promise<BookDetails 
 
 // --- Reading Progress Storage (localStorage) ---
 let saveProgressTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingSave: { bookId: string; progressFraction: number } | null = null;
 
-export function saveBookProgress(bookId: string, progressFraction: number): void {
-  if (saveProgressTimeout) clearTimeout(saveProgressTimeout);
-  saveProgressTimeout = setTimeout(() => {
+export function flushBookProgress(bookId?: string, progressFraction?: number): void {
+  if (saveProgressTimeout) {
+    clearTimeout(saveProgressTimeout);
+    saveProgressTimeout = null;
+  }
+
+  const targetBookId = bookId || pendingSave?.bookId;
+  const targetFraction = typeof progressFraction === 'number' ? progressFraction : pendingSave?.progressFraction;
+
+  if (targetBookId && typeof targetFraction === 'number') {
     try {
       const progressMapRaw = localStorage.getItem('zenolet-reading-progress') || '{}';
       const progressMap = JSON.parse(progressMapRaw);
-      progressMap[bookId] = {
-        progressFraction,
+      progressMap[targetBookId] = {
+        progressFraction: targetFraction,
         lastReadTime: Date.now()
       };
       localStorage.setItem('zenolet-reading-progress', JSON.stringify(progressMap));
     } catch (e) {
-      console.error('[Progress] Failed to save reading progress:', e);
+      console.error('[Progress] Failed to flush reading progress:', e);
     }
+  }
+  pendingSave = null;
+}
+
+export function saveBookProgress(bookId: string, progressFraction: number): void {
+  pendingSave = { bookId, progressFraction };
+  if (saveProgressTimeout) clearTimeout(saveProgressTimeout);
+  saveProgressTimeout = setTimeout(() => {
+    flushBookProgress();
   }, 300);
 }
 
 export function clearBookProgress(bookId: string): void {
-  if (saveProgressTimeout) clearTimeout(saveProgressTimeout);
+  if (pendingSave?.bookId === bookId) {
+    pendingSave = null;
+  }
+  if (saveProgressTimeout) {
+    clearTimeout(saveProgressTimeout);
+    saveProgressTimeout = null;
+  }
   try {
     const progressMapRaw = localStorage.getItem('zenolet-reading-progress');
     if (progressMapRaw) {
@@ -238,9 +261,10 @@ export function getStoredProgressFraction(viewport: HTMLDivElement): number {
 }
 
 export function restoreBookProgressByFraction(fraction: number, viewport: HTMLDivElement): void {
+  const safeFraction = Math.min(1, Math.max(0, isNaN(fraction) ? 0 : fraction));
   const maxScroll = viewport.scrollWidth - viewport.clientWidth;
   if (maxScroll > 0) {
-    const targetScroll = fraction * maxScroll;
+    const targetScroll = safeFraction * maxScroll;
     const pageWidth = viewport.clientWidth;
     const targetSpread = Math.round(targetScroll / pageWidth);
 

@@ -341,7 +341,11 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     });
 
     const bodyEl = chapterDoc.querySelector('body') || chapterDoc.body;
-    const bodyContent = bodyEl ? bodyEl.innerHTML : chapterRawText;
+    const bodyContent = bodyEl
+      ? bodyEl.innerHTML
+      : chapterDoc.documentElement
+        ? chapterDoc.documentElement.innerHTML
+        : '';
     if (bodyContent.trim().length > 0) {
       chapterHtmlSections.push(
         `<section class="epub-chapter" id="ch-${chapterIndex}" data-chapter-index="${chapterIndex}">\n${bodyContent}\n</section>`

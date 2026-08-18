@@ -12,6 +12,7 @@ import {
   removeBookFromSlot,
   getStoredProgress,
   restoreBookProgressByFraction,
+  flushBookProgress,
   getActualStorageUsage,
   formatStorageSummary,
   type BookMetadata
@@ -28,7 +29,12 @@ import {
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
-import { closeChapterPopup, getElementSpreadIndex, resolveChapterElement } from './components/Timeline.ts';
+import {
+  closeChapterPopup,
+  invalidateChapterMarkers,
+  getElementSpreadIndex,
+  resolveChapterElement
+} from './components/Timeline.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
@@ -214,7 +220,7 @@ function update8SlotShelfView() {
 
 // --- Search GUI Operations ---
 function openSearchGUI() {
-  openDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
+  openDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel, DOM.discoverSearchInput);
   DOM.discoverSearchInput.value = '';
   renderLocalCatalogResults('', allBooks, DOM.discoverResults, handleSelectBookForSlot);
 }
@@ -417,6 +423,23 @@ async function openBook(
     // Ensure DOM viewport scroll is clean before opening new book
     DOM.readerViewport.scrollLeft = 0;
 
+    // Ensure all inlined images are decoded before measuring layout dimensions
+    const images = Array.from(DOM.readerContent.querySelectorAll('img'));
+    if (images.length > 0) {
+      await Promise.all(
+        images.map((img) => {
+          if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+          if (typeof img.decode === 'function') {
+            return img.decode().catch(() => {});
+          }
+          return new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          });
+        })
+      );
+    }
+
     // Recalculate Columns & Page Spreads without preserving stale DOM scroll
     recalculatePages(
       DOM.readerViewport,
@@ -452,11 +475,18 @@ async function openBook(
 }
 
 function closeReaderAndReturnToLibrary() {
+  if (activeBook) {
+    const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
+    const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+    flushBookProgress(activeBook.id, progressFraction);
+  }
   closeChapterPopup();
+  invalidateChapterMarkers();
   DOM.readerView.classList.add('hidden');
   DOM.libraryView.classList.remove('hidden');
   readerState.currentView = 'library';
   activeBook = null;
+  activeSlotIndex = null;
   DOM.readerViewport.scrollLeft = 0;
   if (window.location.hash) {
     window.history.replaceState({ view: 'library' }, '', window.location.pathname);
@@ -517,6 +547,7 @@ async function handleUrlHashState() {
     downloads: 0
   };
 
+  activeSlotIndex = null;
   await openBook(book, state.progress, false);
 }
 
@@ -543,6 +574,7 @@ function setupEventListeners() {
   // About Modal Listeners
   DOM.aboutToggle?.addEventListener('click', () => {
     DOM.aboutModal?.classList.add('visible');
+    setTimeout(() => DOM.aboutClose?.focus(), 50);
   });
   DOM.aboutClose?.addEventListener('click', () => {
     DOM.aboutModal?.classList.remove('visible');
@@ -668,4 +700,21 @@ function setupEventListeners() {
   // Window Navigation Listeners (Back/Forward buttons)
   window.addEventListener('hashchange', () => handleUrlHashState());
   window.addEventListener('popstate', () => handleUrlHashState());
+
+  // Flush reading progress immediately on tab switch or page unload
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && activeBook) {
+      const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
+      const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+      flushBookProgress(activeBook.id, progressFraction);
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (activeBook) {
+      const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
+      const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+      flushBookProgress(activeBook.id, progressFraction);
+    }
+  });
 }

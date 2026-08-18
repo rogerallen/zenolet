@@ -9,6 +9,7 @@ export async function openQRModal(
 ): Promise<void> {
   urlDisplay.value = fullUrl;
   overlay.classList.add('visible');
+  setTimeout(() => urlDisplay.select(), 50);
 
   try {
     await QRCode.toCanvas(canvas, fullUrl, {

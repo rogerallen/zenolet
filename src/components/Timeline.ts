@@ -100,11 +100,22 @@ export function resolveChapterElement(readerContent: HTMLElement, id: string): H
   return targetEl;
 }
 
+let cachedChapterMarkers: ChapterMarker[] | null = null;
+
+export function invalidateChapterMarkers(): void {
+  cachedChapterMarkers = null;
+}
+
 export function getChapterMarkers(
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
-  totalPagesSpreads: number
+  totalPagesSpreads: number,
+  useCache: boolean = false
 ): ChapterMarker[] {
+  if (useCache && cachedChapterMarkers) {
+    return cachedChapterMarkers;
+  }
+
   const markers: ChapterMarker[] = [];
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return markers;
@@ -179,6 +190,7 @@ export function getChapterMarkers(
   }
 
   markers.sort((a, b) => a.pageSpread - b.pageSpread);
+  cachedChapterMarkers = markers;
   return markers;
 }
 
@@ -206,7 +218,9 @@ export function updateActiveChapterLabel(
     return;
   }
 
-  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads);
+  const markers = cachedChapterMarkers
+    ? cachedChapterMarkers
+    : getChapterMarkers(readerContent, readerViewport, totalPagesSpreads, true);
 
   let activeChapterText = '';
   for (let i = 0; i < markers.length; i++) {

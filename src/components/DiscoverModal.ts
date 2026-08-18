@@ -9,9 +9,12 @@ export interface DiscoverState {
   importedIds: Set<string>;
 }
 
-export function openDiscoverPanel(overlay: HTMLDivElement, panel: HTMLElement): void {
+export function openDiscoverPanel(overlay: HTMLDivElement, panel: HTMLElement, searchInput?: HTMLInputElement): void {
   overlay.classList.add('visible');
   panel.classList.add('visible');
+  if (searchInput) {
+    setTimeout(() => searchInput.focus(), 50);
+  }
 }
 
 export function closeDiscoverPanel(overlay: HTMLDivElement, panel: HTMLElement): void {

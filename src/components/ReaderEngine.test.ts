@@ -85,4 +85,74 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     expect(mockPageIndicator.textContent).toBe('Page 6 of 10');
     expect(mockProgressFill.style.width).not.toBe('0%');
   });
+
+  it('correctly calculates two-column spreads and indicators', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 1000, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 10000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 10000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'sepia',
+      fontSize: 18,
+      layoutColumns: '2',
+      currentPageSpread: 0,
+      totalPagesSpreads: 10
+    };
+
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false
+    );
+
+    expect(mockContent.classList.contains('two-columns')).toBe(true);
+    expect(mockPageIndicator.textContent).toContain('Pages 1–2 of 20');
+  });
+
+  it('uses cached chapter markers during active chapter updates without layout thrashing (PER-001)', async () => {
+    const { updateActiveChapterLabel, invalidateChapterMarkers } = await import('./Timeline.js');
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    mockContent.innerHTML = `
+      <h2 id="ch1">Chapter 1</h2>
+      <p>Content 1</p>
+      <h2 id="ch2">Chapter 2</h2>
+      <p>Content 2</p>
+    `;
+
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    const indicator = document.createElement('span');
+    indicator.id = 'active-chapter-indicator';
+    document.body.appendChild(indicator);
+
+    try {
+      invalidateChapterMarkers();
+      updateActiveChapterLabel(mockContent, mockViewport, 0, 10);
+      expect(indicator.textContent).toBe('Begin');
+
+      updateActiveChapterLabel(mockContent, mockViewport, 9, 10);
+      expect(indicator.textContent).toBe('End');
+
+      updateActiveChapterLabel(mockContent, mockViewport, 3, 10);
+      expect(indicator.textContent).toBeTruthy();
+    } finally {
+      indicator.remove();
+    }
+  });
 });

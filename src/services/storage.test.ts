@@ -175,4 +175,30 @@ describe('Storage and Progress Math for Zenolet', () => {
     expect(formatStorageSummary(1, 1.2 * 1024 * 1024)).toBe('1 book, 1.2 MB used');
     expect(formatStorageSummary(3, 3.8 * 1024 * 1024)).toBe('3 books, 3.8 MB used');
   });
+
+  it('immediately flushes debounced reading progress on demand via flushBookProgress (COR-002)', async () => {
+    const { saveBookProgress, flushBookProgress, getStoredProgress } = await import('./storage.js');
+    saveBookProgress('2701', 0.85);
+
+    // Before timeout fires, calling flushBookProgress immediately persists to localStorage
+    flushBookProgress('2701', 0.85);
+    expect(getStoredProgress('2701')).toBe(0.85);
+  });
+
+  it('safely normalizes NaN or out-of-range fractions in restoreBookProgressByFraction', async () => {
+    const { restoreBookProgressByFraction } = await import('./storage.js');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 5000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    restoreBookProgressByFraction(NaN, mockViewport);
+    expect(mockViewport.scrollLeft).toBe(0);
+
+    restoreBookProgressByFraction(-0.5, mockViewport);
+    expect(mockViewport.scrollLeft).toBe(0);
+
+    restoreBookProgressByFraction(1.5, mockViewport);
+    expect(mockViewport.scrollLeft).toBe(4500); // Max scroll = 5000 - 500 = 4500
+  });
 });
