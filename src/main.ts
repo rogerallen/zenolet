@@ -28,7 +28,7 @@ import {
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
-import { closeChapterPopup } from './components/Timeline.ts';
+import { closeChapterPopup, getElementSpreadIndex, resolveChapterElement } from './components/Timeline.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
@@ -489,6 +489,10 @@ async function handleUrlHashState() {
   const hash = window.location.hash;
   if (!hash || !hash.startsWith('#s=')) {
     if (readerState.currentView === 'reader') {
+      // If hash is an intra-book anchor target (e.g. #c0_... or short anchor), do not close reader
+      if (hash && (hash.startsWith('#c') || hash.length < 40)) {
+        return;
+      }
       closeReaderAndReturnToLibrary();
     }
     return;
@@ -586,6 +590,43 @@ function setupEventListeners() {
     } else if (e.key === 'ArrowRight' || e.key === ' ') {
       e.preventDefault();
       DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
+    }
+  });
+
+  // Intercept links inside book content (TOC chapter links, footnotes, external URLs)
+  DOM.readerContent.addEventListener('click', (e: MouseEvent) => {
+    const targetLink = (e.target as HTMLElement).closest('a');
+    if (!targetLink) return;
+
+    const href = targetLink.getAttribute('href');
+    if (!href) return;
+
+    // External links (http:// or https://)
+    if (/^https?:\/\//i.test(href)) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Internal book anchor / section links
+    e.preventDefault();
+    e.stopPropagation();
+
+    const anchorId = href.startsWith('#') ? href.slice(1) : href.includes('#') ? href.split('#')[1] : href;
+
+    if (!anchorId) return;
+
+    const targetEl = resolveChapterElement(DOM.readerContent, anchorId);
+    if (targetEl && readerState.totalPagesSpreads > 0) {
+      const targetSpread = getElementSpreadIndex(targetEl, DOM.readerViewport, readerState.totalPagesSpreads);
+      const pageWidth = DOM.readerViewport.clientWidth;
+      if (pageWidth > 0) {
+        DOM.readerViewport.scrollTo({
+          left: targetSpread * pageWidth,
+          behavior: 'smooth'
+        });
+      }
     }
   });
 

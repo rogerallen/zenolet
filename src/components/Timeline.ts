@@ -24,7 +24,26 @@ export function getElementSpreadIndex(
 }
 
 export function resolveChapterElement(readerContent: HTMLElement, id: string): HTMLElement | null {
-  const targetEl = readerContent.querySelector(`[id="${id}"], [name="${id}"]`) as HTMLElement;
+  if (!id) return null;
+  let targetEl: HTMLElement | null;
+  try {
+    const escaped = CSS.escape(id);
+    targetEl = (readerContent.querySelector(`[id="${escaped}"], [name="${escaped}"]`) as HTMLElement) || null;
+  } catch {
+    targetEl = (readerContent.querySelector(`[id="${id}"], [name="${id}"]`) as HTMLElement) || null;
+  }
+
+  // Fallback 1: If not found directly and id does not start with 'c', try chapter-prefixed instances (e.g. c0_id, c1_id)
+  if (!targetEl && !id.startsWith('c')) {
+    targetEl = (readerContent.querySelector(`[id$="_${id}"], [name$="_${id}"]`) as HTMLElement) || null;
+  }
+
+  // Fallback 2: If id starts with 'c<num>_' and was not found, try raw stripped id
+  if (!targetEl && /^c\d+_/.test(id)) {
+    const rawId = id.replace(/^c\d+_/, '');
+    targetEl = (readerContent.querySelector(`[id="${rawId}"], [name="${rawId}"]`) as HTMLElement) || null;
+  }
+
   if (!targetEl) return null;
 
   if (targetEl.tagName === 'A' || targetEl.tagName === 'SPAN') {

@@ -283,12 +283,16 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
       }
     });
 
-    // Prefix element IDs to avoid collisions between chapters
-    chapterDoc.querySelectorAll('[id]').forEach((el) => {
+    // Prefix element IDs and names to avoid collisions between chapters
+    chapterDoc.querySelectorAll('[id], [name]').forEach((el) => {
       const origId = el.getAttribute('id');
       if (origId) {
         el.setAttribute('id', `c${chapterIndex}_${origId}`);
-        // Register chapter marker target
+        el.classList.add('epub-anchor-target');
+      }
+      const origName = el.getAttribute('name');
+      if (origName) {
+        el.setAttribute('name', `c${chapterIndex}_${origName}`);
         el.classList.add('epub-anchor-target');
       }
     });
