@@ -589,12 +589,16 @@ a:not([href]) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 400px;
+  max-width: min(700px, calc(100vw - 320px));
 }
 
 .reader-book-author {
   font-size: 0.8rem;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(700px, calc(100vw - 320px));
 }
 
 /* Horizontal Column Reader Layout */
@@ -1144,13 +1148,26 @@ a:not([href]) {
 
 .discover-title {
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .discover-author {
   font-size: 0.8rem;
   color: var(--text-muted);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .btn-discover-import {
@@ -1167,6 +1184,27 @@ a:not([href]) {
 
 .btn-discover-import.imported {
   background-color: #22c55e;
+}
+
+.discover-cover-wrap {
+  width: 36px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.14);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discover-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* --- Minimal Header --- */
@@ -1221,9 +1259,9 @@ a:not([href]) {
 .slots-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, minmax(180px, auto));
+  grid-template-rows: repeat(2, minmax(210px, auto));
   gap: 20px;
-  max-width: 1100px;
+  max-width: 1160px;
   margin: 20px auto 40px;
   padding: 0 24px;
 }
@@ -1246,11 +1284,11 @@ a:not([href]) {
 .slot-card {
   position: relative;
   border-radius: 16px;
-  padding: 20px;
+  padding: 20px 18px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 180px;
+  min-height: 210px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1271,30 +1309,73 @@ a:not([href]) {
   border-color: var(--accent-color);
 }
 
+.slot-card-body {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.slot-cover-wrap {
+  width: 62px;
+  height: 92px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slot-cover-placeholder {
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+}
+
 .slot-card-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding-right: 24px;
+  justify-content: flex-start;
+  padding-right: 20px;
+  padding-top: 2px;
 }
 
 .slot-card-title {
   font-family: var(--font-serif);
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   font-weight: 600;
   line-height: 1.35;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.slot-card-author {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.slot-card-author {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 /* Remove Book Icon Button */

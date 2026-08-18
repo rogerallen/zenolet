@@ -31,7 +31,7 @@ export function renderLocalCatalogResults(
   query: string,
   catalog: CatalogBook[],
   container: HTMLDivElement,
-  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void
 ): void {
   if (!query.trim()) {
     // Render top 15 popular books if query is empty
@@ -62,7 +62,7 @@ function renderCatalogCards(
   allCatalog: CatalogBook[],
   container: HTMLDivElement,
   sectionTitle: string,
-  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void
 ): void {
   let html = `<div style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">${escapeHtml(sectionTitle)}</div>`;
 
@@ -72,8 +72,13 @@ function renderCatalogCards(
         allCatalog.indexOf(b) !== -1 ? allCatalog.indexOf(b) : allCatalog.findIndex((x) => x.id === b.id);
       const rankPrefix = rankIndex !== -1 ? `${rankIndex + 1}) ` : '';
 
+      const coverHtml = b.coverUrl
+        ? `<div class="discover-cover-wrap"><img class="discover-cover-img" src="${escapeHtml(b.coverUrl)}" alt="Cover" loading="lazy" /></div>`
+        : '';
+
       return `
       <div class="discover-card">
+        ${coverHtml}
         <div class="discover-card-info">
           <h4 class="discover-title">${rankPrefix}${escapeHtml(b.title)}</h4>
           <p class="discover-author">by ${escapeHtml(b.author)} #${escapeHtml(b.id)}</p>
@@ -82,7 +87,8 @@ function renderCatalogCards(
                 data-id="${escapeHtml(b.id)}" 
                 data-title="${escapeHtml(b.title)}" 
                 data-author="${escapeHtml(b.author)}" 
-                data-url="${escapeHtml(b.epubUrl || '')}">
+                data-url="${escapeHtml(b.epubUrl || '')}"
+                data-cover="${escapeHtml(b.coverUrl || '')}">
           + Add to Shelf
         </button>
       </div>
@@ -98,9 +104,10 @@ function renderCatalogCards(
       const title = btn.getAttribute('data-title');
       const author = btn.getAttribute('data-author');
       const url = btn.getAttribute('data-url');
+      const cover = btn.getAttribute('data-cover');
 
       if (id && title && author) {
-        onImportBook(id, title, author, url || undefined);
+        onImportBook(id, title, author, url || undefined, cover || undefined);
       }
     });
   });

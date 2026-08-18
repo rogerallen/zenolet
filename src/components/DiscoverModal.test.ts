@@ -10,7 +10,8 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mark Twain',
       subjects: ['Mississippi River -- Description and travel', 'Twain, Mark, 1835-1910'],
       downloads: 5000,
-      epubUrl: 'https://www.gutenberg.org/ebooks/245.epub3.images'
+      epubUrl: 'https://www.gutenberg.org/ebooks/245.epub3.images',
+      coverUrl: 'https://www.gutenberg.org/cache/epub/245/pg245.cover.medium.jpg'
     },
     {
       id: '76',
@@ -18,7 +19,8 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mark Twain',
       subjects: ['Mississippi River -- Fiction', 'Boys -- Fiction'],
       downloads: 12000,
-      epubUrl: 'https://www.gutenberg.org/ebooks/76.epub3.images'
+      epubUrl: 'https://www.gutenberg.org/ebooks/76.epub3.images',
+      coverUrl: 'https://www.gutenberg.org/cache/epub/76/pg76.cover.medium.jpg'
     },
     {
       id: '84',
@@ -26,7 +28,8 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mary Wollstonecraft Shelley',
       subjects: ['Monsters -- Fiction', 'Science fiction'],
       downloads: 15000,
-      epubUrl: 'https://www.gutenberg.org/ebooks/84.epub3.images'
+      epubUrl: 'https://www.gutenberg.org/ebooks/84.epub3.images',
+      coverUrl: 'https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg'
     }
   ];
 
@@ -38,6 +41,7 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
 
     expect(container.innerHTML).toContain('Popular Classics');
     expect(container.querySelectorAll('.discover-card').length).toBe(3);
+    expect(container.querySelectorAll('.discover-cover-img').length).toBe(3);
   });
 
   it('filters matches strictly from local catalog based on title, author, or subject', () => {
@@ -78,7 +82,8 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       '84',
       'Frankenstein; Or, The Modern Prometheus',
       'Mary Wollstonecraft Shelley',
-      'https://www.gutenberg.org/ebooks/84.epub3.images'
+      'https://www.gutenberg.org/ebooks/84.epub3.images',
+      'https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg'
     );
   });
 });

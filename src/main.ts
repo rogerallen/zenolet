@@ -179,6 +179,8 @@ function update8SlotShelfView() {
         id: bookId,
         title: slots[slotIndex]?.title || `Book #${bookId}`,
         author: slots[slotIndex]?.author || 'Project Gutenberg',
+        coverUrl: slots[slotIndex]?.coverUrl,
+        epubUrl: slots[slotIndex]?.epubUrl,
         subjects: ['Classics'],
         downloads: 0
       };
@@ -202,7 +204,13 @@ function openSearchGUI() {
   renderLocalCatalogResults('', allBooks, DOM.discoverResults, handleSelectBookForSlot);
 }
 
-async function handleSelectBookForSlot(bookId: string, title: string, author: string, epubUrl?: string) {
+async function handleSelectBookForSlot(
+  bookId: string,
+  title: string,
+  author: string,
+  epubUrl?: string,
+  coverUrl?: string
+) {
   closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
 
   const book: CatalogBook = allBooks.find((b) => b.id === bookId) || {
@@ -211,7 +219,8 @@ async function handleSelectBookForSlot(bookId: string, title: string, author: st
     author,
     subjects: ['Selected Title'],
     downloads: 0,
-    epubUrl
+    epubUrl,
+    coverUrl
   };
 
   await openBook(book, null, true, activeSlotIndex);
@@ -272,7 +281,8 @@ async function openBook(
         id: book.id,
         title: book.title,
         author: book.author,
-        epubUrl: book.epubUrl
+        epubUrl: book.epubUrl,
+        coverUrl: book.coverUrl
       };
       const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
       await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);

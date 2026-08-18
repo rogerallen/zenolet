@@ -60,6 +60,22 @@ export function render8SlotGrid(
         `;
       }
 
+      const coverUrl = book.coverUrl;
+      const coverHtml = coverUrl
+        ? `
+          <div class="slot-cover-wrap">
+            <img class="slot-cover-img" src="${escapeHtml(coverUrl)}" alt="${escapeHtml(book.title)} cover" loading="lazy" />
+          </div>
+        `
+        : `
+          <div class="slot-cover-wrap slot-cover-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+        `;
+
       html += `
         <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}">
           <button class="btn-remove-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove book">
@@ -68,9 +84,12 @@ export function render8SlotGrid(
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <div class="slot-card-content">
-            <h3 class="slot-card-title">${escapeHtml(book.title)}</h3>
-            <p class="slot-card-author">by ${escapeHtml(book.author)}</p>
+          <div class="slot-card-body">
+            ${coverHtml}
+            <div class="slot-card-content">
+              <h3 class="slot-card-title">${escapeHtml(book.title)}</h3>
+              <p class="slot-card-author">by ${escapeHtml(book.author)}</p>
+            </div>
           </div>
           ${progressHtml}
         </div>
