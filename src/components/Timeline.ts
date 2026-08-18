@@ -46,16 +46,57 @@ export function resolveChapterElement(readerContent: HTMLElement, id: string): H
 
   if (!targetEl) return null;
 
-  if (targetEl.tagName === 'A' || targetEl.tagName === 'SPAN') {
-    const heading =
-      targetEl.closest('h1, h2, h3, h4') ||
-      (targetEl.nextElementSibling && targetEl.nextElementSibling.matches('h1, h2, h3, h4, div, section, p')
-        ? (targetEl.nextElementSibling as HTMLElement)
-        : null);
-    if (heading && heading instanceof HTMLElement) {
-      return heading;
+  // If targetEl is a heading with text, return it directly
+  if (/^H[1-6]$/i.test(targetEl.tagName) && (targetEl.textContent?.trim().length ?? 0) > 0) {
+    return targetEl;
+  }
+
+  // If targetEl is inside a heading
+  const parentHeading = targetEl.closest('h1, h2, h3, h4, h5, h6');
+  if (parentHeading && parentHeading instanceof HTMLElement && (parentHeading.textContent?.trim().length ?? 0) > 0) {
+    return parentHeading;
+  }
+
+  // If targetEl contains a heading
+  const childHeading = targetEl.querySelector('h1, h2, h3, h4, h5, h6');
+  if (childHeading && childHeading instanceof HTMLElement && (childHeading.textContent?.trim().length ?? 0) > 0) {
+    return childHeading;
+  }
+
+  // If targetEl is an empty anchor or wrapper, forward-walk to the actual chapter heading or text element
+  let candidate: Element | null = targetEl;
+  if (
+    candidate.parentElement &&
+    candidate.parentElement !== readerContent &&
+    (candidate.parentElement.textContent?.trim() || '') === (candidate.textContent?.trim() || '')
+  ) {
+    candidate = candidate.parentElement;
+  }
+
+  for (let i = 0; i < 8 && candidate; i++) {
+    const next: Element | null = candidate.nextElementSibling;
+    if (next) {
+      if (/^H[1-6]$/i.test(next.tagName) && (next.textContent?.trim().length ?? 0) > 0) {
+        return next as HTMLElement;
+      }
+      const headingInside = next.querySelector('h1, h2, h3, h4, h5, h6');
+      if (
+        headingInside &&
+        headingInside instanceof HTMLElement &&
+        (headingInside.textContent?.trim().length ?? 0) > 0
+      ) {
+        return headingInside;
+      }
+      if ((next.textContent?.trim().length ?? 0) > 0) {
+        return next as HTMLElement;
+      }
+      candidate = next;
+    } else {
+      candidate = candidate.parentElement;
+      if (candidate === readerContent) break;
     }
   }
+
   return targetEl;
 }
 
@@ -80,10 +121,8 @@ export function getChapterMarkers(
     const id = href.substring(1);
     if (!id || seenIds.has(id)) return;
 
-    const rawTarget = readerContent.querySelector(`[id="${id}"], [name="${id}"]`) as HTMLElement;
-    if (!rawTarget) return;
-
-    const resolvedEl = resolveChapterElement(readerContent, id) || rawTarget;
+    const resolvedEl = resolveChapterElement(readerContent, id);
+    if (!resolvedEl) return;
 
     let title = '';
     const row = a.closest('tr');
@@ -92,8 +131,9 @@ export function getChapterMarkers(
       title = textCol?.textContent?.trim() || '';
     }
     if (!title) {
-      const heading = rawTarget.closest('h1, h2, h3, h4') || resolvedEl.closest('h1, h2, h3, h4');
-      title = heading?.textContent?.trim() || rawTarget.parentElement?.textContent?.trim() || '';
+      const heading =
+        resolvedEl.closest('h1, h2, h3, h4') || (resolvedEl.matches('h1, h2, h3, h4') ? resolvedEl : null);
+      title = heading?.textContent?.trim() || resolvedEl.parentElement?.textContent?.trim() || '';
     }
 
     title = title
