@@ -12,7 +12,6 @@ export interface CatalogBook {
   subjects: string[];
   downloads: number;
   epubUrl?: string;
-  htmlUrl?: string;
   coverUrl?: string;
 }
 
@@ -62,14 +61,8 @@ async function generateCatalog() {
 
         const authorName = item.authors.length > 0 ? item.authors.map((a) => a.name).join(', ') : 'Unknown Author';
 
-        // Extract best EPUB and HTML formats if available
+        // Extract best EPUB format
         const epubUrl = item.formats['application/epub+zip'];
-        const htmlUrl =
-          item.formats['text/html'] ||
-          item.formats['text/html; charset=utf-8'] ||
-          item.formats['text/plain; charset=utf-8'] ||
-          item.formats['text/plain'];
-
         const coverUrl = item.formats['image/jpeg'];
 
         catalog.push({
@@ -79,7 +72,6 @@ async function generateCatalog() {
           subjects: (item.subjects || []).slice(0, 5),
           downloads: item.download_count || 0,
           epubUrl,
-          htmlUrl,
           coverUrl
         });
       }

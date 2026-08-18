@@ -51,9 +51,10 @@ zenolet/
 │   │   ├── catalog.ts           # Catalog search & genre classification service
 │   │   ├── config.ts            # Loader & validator for zenolet.config.json
 │   │   ├── config.test.ts       # Unit tests for config loading & schema
-│   │   ├── corsProxy.ts         # Cloudflare Worker CORS proxy client & offline image caching
-│   │   ├── corsProxy.test.ts    # Unit tests for proxy security, preflights, & hard fail
-│   │   ├── gutenberg.test.ts    # Unit tests for metadata extraction & boilerplate cleanup
+│   │   ├── corsProxy.ts         # Cloudflare Worker CORS proxy client for EPUB binary fetching
+│   │   ├── corsProxy.test.ts    # Unit tests for proxy security, preflights, & candidate URLs
+│   │   ├── epub.ts              # In-memory EPUB3 unpacker, OPF parser, image inliner & stitcher
+│   │   ├── epub.test.ts         # Unit tests for EPUB unpacking, TOC, & XHTML bookmark anchors
 │   │   ├── state.ts             # CompressionStream URL hash encoder & decoder (#s=...)
 │   │   ├── storage.ts           # 8-slot persistence, progress math, CacheStorage purging
 │   │   └── storage.test.ts      # Unit tests for 8-slot storage & offline cache
@@ -198,7 +199,7 @@ Update `public/zenolet.config.json` with your library title, blurb, curator deta
 By default, `public/catalog.json` contains the top 1,000 Project Gutenberg titles. You can:
 
 - Keep the existing 1,000-book catalog as-is.
-- Or generate a customized catalog using `scripts/generate-catalog.ts` or your own JSON structure containing `{ "id", "title", "author", "subjects", "downloads", "htmlUrl" }`.
+- Or generate a customized catalog using `scripts/generate-catalog.ts` or your own JSON structure containing `{ "id", "title", "author", "subjects", "downloads", "epubUrl" }`.
 
 #### 5. Deploy Your Static Site
 

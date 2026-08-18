@@ -10,7 +10,7 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mark Twain',
       subjects: ['Mississippi River -- Description and travel', 'Twain, Mark, 1835-1910'],
       downloads: 5000,
-      htmlUrl: 'https://www.gutenberg.org/files/245/245-h/245-h.htm'
+      epubUrl: 'https://www.gutenberg.org/ebooks/245.epub3.images'
     },
     {
       id: '76',
@@ -18,7 +18,7 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mark Twain',
       subjects: ['Mississippi River -- Fiction', 'Boys -- Fiction'],
       downloads: 12000,
-      htmlUrl: 'https://www.gutenberg.org/files/76/76-h/76-h.htm'
+      epubUrl: 'https://www.gutenberg.org/ebooks/76.epub3.images'
     },
     {
       id: '84',
@@ -26,7 +26,7 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       author: 'Mary Wollstonecraft Shelley',
       subjects: ['Monsters -- Fiction', 'Science fiction'],
       downloads: 15000,
-      htmlUrl: 'https://www.gutenberg.org/files/84/84-h/84-h.htm'
+      epubUrl: 'https://www.gutenberg.org/ebooks/84.epub3.images'
     }
   ];
 
@@ -78,7 +78,7 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
       '84',
       'Frankenstein; Or, The Modern Prometheus',
       'Mary Wollstonecraft Shelley',
-      'https://www.gutenberg.org/files/84/84-h/84-h.htm'
+      'https://www.gutenberg.org/ebooks/84.epub3.images'
     );
   });
 });

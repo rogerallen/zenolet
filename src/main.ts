@@ -1,14 +1,7 @@
 import './style.css';
-import { marked } from 'marked';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
 import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
-import {
-  getGutenbergCandidateUrls,
-  fetchWithProxyFallback,
-  fetchArrayBufferWithProxy,
-  processBookHtml,
-  cacheBookImagesOffline
-} from './services/corsProxy.ts';
+import { getGutenbergCandidateUrls, fetchArrayBufferWithProxy } from './services/corsProxy.ts';
 import { parseEpubArchive } from './services/epub.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
@@ -24,9 +17,9 @@ import { renderCuratorHeader, render8SlotGrid } from './components/Bookshelf.ts'
 import {
   setTheme,
   setFontSize,
+  setupDragToScroll,
   recalculatePages,
   updatePaginationIndicator,
-  setupDragToScroll,
   type ReaderState
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
@@ -44,100 +37,113 @@ const readerState: ReaderState = {
   theme: 'sepia',
   fontSize: 18,
   layoutColumns: 'auto',
-  currentPageSpread: 0,
+  currentPageSpread: 1,
   totalPagesSpreads: 1
 };
 
-// --- DOM Cache ---
-const DOM = {
-  libraryView: document.getElementById('library-view') as HTMLDivElement,
-  librarySettingsToggle: document.getElementById('library-settings-toggle') as HTMLButtonElement | null,
-  readerView: document.getElementById('reader-view') as HTMLDivElement,
-  curatorHeader: document.getElementById('curator-header-container') as HTMLDivElement,
-  slotsGrid: document.getElementById('slots-grid') as HTMLDivElement,
-
-  // Reader
-  backButton: document.getElementById('back-button') as HTMLButtonElement,
-  readerBookTitle: document.getElementById('reader-book-title') as HTMLHeadingElement,
-  readerBookAuthor: document.getElementById('reader-book-author') as HTMLParagraphElement,
-  settingsToggle: document.getElementById('settings-toggle') as HTMLButtonElement,
-  settingsPanel: document.getElementById('settings-panel') as HTMLDivElement,
-  shareBtn: document.getElementById('share-btn') as HTMLButtonElement,
-
-  // Reader Navigation Arrows
-  prevPageBtn: document.getElementById('prev-page-btn') as HTMLButtonElement,
-  nextPageBtn: document.getElementById('next-page-btn') as HTMLButtonElement,
-
-  // Reader Viewport
-  readerViewport: document.getElementById('reader-viewport') as HTMLDivElement,
-  readerContent: document.getElementById('reader-content') as HTMLElement,
-  snapPoints: document.getElementById('snap-points') as HTMLDivElement,
-
-  // Footer & Timeline
-  progressTrack: document.getElementById('progress-track') as HTMLDivElement,
-  progressFill: document.getElementById('progress-fill') as HTMLDivElement,
-  pageIndicator: document.getElementById('page-indicator') as HTMLSpanElement,
-  footerRepoLink: document.getElementById('footer-repo-link') as HTMLAnchorElement | null,
-
-  // QR Modal
-  qrModal: document.getElementById('qr-modal') as HTMLDivElement,
-  qrCanvas: document.getElementById('qr-canvas') as HTMLCanvasElement,
-  qrUrlInput: document.getElementById('qr-url-input') as HTMLInputElement,
-  qrClose: document.getElementById('qr-close') as HTMLButtonElement,
-
-  // About Modal
-  aboutToggle: document.getElementById('about-toggle') as HTMLButtonElement | null,
-  aboutModal: document.getElementById('about-modal') as HTMLDivElement | null,
-  aboutClose: document.getElementById('about-close') as HTMLButtonElement | null,
-
-  // Search GUI / Discover Modal
-  discoverOverlay: document.getElementById('discover-overlay') as HTMLDivElement,
-  discoverPanel: document.getElementById('discover-panel') as HTMLElement,
-  discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
-  discoverSearchInput: document.getElementById('discover-search-input') as HTMLInputElement,
-  discoverResults: document.getElementById('discover-results') as HTMLDivElement
+// --- DOM Element Cache ---
+let DOM: {
+  curatorHeaderContainer: HTMLElement;
+  slotsGrid: HTMLDivElement;
+  libraryView: HTMLDivElement;
+  readerView: HTMLDivElement;
+  readerViewport: HTMLDivElement;
+  readerContent: HTMLElement;
+  snapPoints: HTMLDivElement;
+  readerBookTitle: HTMLHeadingElement;
+  readerBookAuthor: HTMLParagraphElement;
+  btnBack: HTMLButtonElement;
+  btnSettings: HTMLButtonElement;
+  btnLibrarySettings: HTMLButtonElement;
+  btnQR: HTMLButtonElement;
+  prevPageBtn: HTMLButtonElement;
+  nextPageBtn: HTMLButtonElement;
+  progressFill: HTMLDivElement;
+  progressTrack: HTMLDivElement;
+  pageIndicator: HTMLSpanElement;
+  settingsPanel: HTMLDivElement;
+  aboutModal: HTMLDivElement;
+  aboutToggle: HTMLButtonElement;
+  aboutClose: HTMLButtonElement;
+  qrModal: HTMLDivElement;
+  qrClose: HTMLButtonElement;
+  qrCanvas: HTMLCanvasElement;
+  qrUrlInput: HTMLInputElement;
+  discoverOverlay: HTMLDivElement;
+  discoverPanel: HTMLElement;
+  discoverClose: HTMLButtonElement;
+  discoverSearchInput: HTMLInputElement;
+  discoverResults: HTMLDivElement;
 };
 
-// --- Initialization ---
-async function init() {
-  // Load Curator Config
+// --- App Initialization ---
+document.addEventListener('DOMContentLoaded', async () => {
+  await initApp();
+});
+
+async function initApp() {
+  // Cache DOM Elements
+  DOM = {
+    curatorHeaderContainer: document.getElementById('curator-header-container') as HTMLElement,
+    slotsGrid: document.getElementById('slots-grid') as HTMLDivElement,
+    libraryView: document.getElementById('library-view') as HTMLDivElement,
+    readerView: document.getElementById('reader-view') as HTMLDivElement,
+    readerViewport: document.getElementById('reader-viewport') as HTMLDivElement,
+    readerContent: document.getElementById('reader-content') as HTMLElement,
+    snapPoints: document.getElementById('snap-points') as HTMLDivElement,
+    readerBookTitle: document.getElementById('reader-book-title') as HTMLHeadingElement,
+    readerBookAuthor: document.getElementById('reader-book-author') as HTMLParagraphElement,
+    btnBack: document.getElementById('back-button') as HTMLButtonElement,
+    btnSettings: document.getElementById('settings-toggle') as HTMLButtonElement,
+    btnLibrarySettings: document.getElementById('library-settings-toggle') as HTMLButtonElement,
+    btnQR: document.getElementById('share-btn') as HTMLButtonElement,
+    prevPageBtn: document.getElementById('prev-page-btn') as HTMLButtonElement,
+    nextPageBtn: document.getElementById('next-page-btn') as HTMLButtonElement,
+    progressFill: document.getElementById('progress-fill') as HTMLDivElement,
+    progressTrack: document.getElementById('progress-track') as HTMLDivElement,
+    pageIndicator: document.getElementById('page-indicator') as HTMLSpanElement,
+    settingsPanel: document.getElementById('settings-panel') as HTMLDivElement,
+    aboutModal: document.getElementById('about-modal') as HTMLDivElement,
+    aboutToggle: document.getElementById('about-toggle') as HTMLButtonElement,
+    aboutClose: document.getElementById('about-close') as HTMLButtonElement,
+    qrModal: document.getElementById('qr-modal') as HTMLDivElement,
+    qrClose: document.getElementById('qr-close') as HTMLButtonElement,
+    qrCanvas: document.getElementById('qr-canvas') as HTMLCanvasElement,
+    qrUrlInput: document.getElementById('qr-url-input') as HTMLInputElement,
+    discoverOverlay: document.getElementById('discover-overlay') as HTMLDivElement,
+    discoverPanel: document.getElementById('discover-panel') as HTMLElement,
+    discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
+    discoverSearchInput: document.getElementById('discover-search-input') as HTMLInputElement,
+    discoverResults: document.getElementById('discover-results') as HTMLDivElement
+  };
+
+  // Load Curator Configuration (zenolet.config.json)
   config = await loadZenoletConfig();
 
-  // Apply Repo URL to Footer
-  if (config.repoUrl && DOM.footerRepoLink) {
-    DOM.footerRepoLink.href = config.repoUrl;
-  }
+  // Render Curator Header from Config
+  renderCuratorHeader(DOM.curatorHeaderContainer, config.title, config.curator, config.blurb);
 
-  // Apply curator settings & theme defaults
-  const themeDefault = config.settings?.defaultTheme || (config as any).defaultTheme;
-  if (themeDefault) {
-    setTheme(themeDefault, readerState);
-  } else {
-    const savedTheme = localStorage.getItem('zenolet-theme') as ReaderState['theme'];
-    if (savedTheme) setTheme(savedTheme, readerState);
-  }
+  // Initialize Settings
+  setupSettingsModal(DOM.settingsPanel, [DOM.btnSettings, DOM.btnLibrarySettings], readerState, () => {
+    if (activeBook) {
+      recalculatePages(
+        DOM.readerViewport,
+        DOM.readerContent,
+        DOM.snapPoints,
+        DOM.progressFill,
+        DOM.pageIndicator,
+        readerState,
+        activeBook.id,
+        true
+      );
+    }
+  });
 
-  const configuredFontSize = config.settings?.fontSize || (config as any).fontSize;
-  const savedFontSize = localStorage.getItem('zenolet-font-size');
-  if (savedFontSize) {
-    readerState.fontSize = parseInt(savedFontSize, 10);
-  } else if (configuredFontSize) {
-    readerState.fontSize = configuredFontSize;
-  }
+  // Apply Initial Theme
+  const initialTheme = (localStorage.getItem('zenolet-theme') as ReaderState['theme']) || 'sepia';
+  setTheme(initialTheme, readerState);
 
-  const configuredColumns = config.settings?.layoutColumns || (config as any).layoutColumns;
-  const savedColumns = localStorage.getItem('zenolet-columns') as ReaderState['layoutColumns'];
-  if (savedColumns) {
-    readerState.layoutColumns = savedColumns;
-  } else if (configuredColumns) {
-    readerState.layoutColumns = configuredColumns;
-  }
-
-  // Render Minimal Curator Header
-  const siteTitle = config.title || config.siteTitle;
-  renderCuratorHeader(DOM.curatorHeader, siteTitle, config.curator, config.blurb);
-
-  // Render 8-Slot Bookshelf View immediately from local storage (synchronous 0ms render)
+  // Initial Bookshelf Render (8 discrete slots)
   update8SlotShelfView();
 
   // Setup Event Listeners
@@ -151,20 +157,12 @@ async function init() {
     await handleUrlHashState();
   }
 
-  // Register PWA Service Worker (Production only)
-  if ('serviceWorker' in navigator) {
-    if (import.meta.env.DEV) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const reg of registrations) {
-          reg.unregister();
-        }
-      });
-    } else {
-      const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-      navigator.serviceWorker.register(`${base}sw.js`).catch((err) => {
-        console.warn('[Zenolet PWA] SW registration failed:', err);
-      });
-    }
+  // Register PWA Service Worker
+  if ('serviceWorker' in navigator && !import.meta.env.DEV) {
+    const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+    navigator.serviceWorker.register(`${base}sw.js`).catch((err) => {
+      console.warn('[Zenolet PWA] SW registration failed:', err);
+    });
   }
 }
 
@@ -204,7 +202,7 @@ function openSearchGUI() {
   renderLocalCatalogResults('', allBooks, DOM.discoverResults, handleSelectBookForSlot);
 }
 
-async function handleSelectBookForSlot(bookId: string, title: string, author: string, htmlUrl?: string) {
+async function handleSelectBookForSlot(bookId: string, title: string, author: string, epubUrl?: string) {
   closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
 
   const book: CatalogBook = allBooks.find((b) => b.id === bookId) || {
@@ -213,7 +211,7 @@ async function handleSelectBookForSlot(bookId: string, title: string, author: st
     author,
     subjects: ['Selected Title'],
     downloads: 0,
-    htmlUrl
+    epubUrl
   };
 
   await openBook(book, null, true, activeSlotIndex);
@@ -235,77 +233,38 @@ async function openBook(
   DOM.readerBookAuthor.textContent = `by ${book.author}`;
 
   try {
-    let rawContent = '';
-    let bookSourceUrl = `https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}-images.html`;
+    let processedContent = '';
 
     // 1. Try Offline Cache API first
     const offlineData = await getStoredBookOffline(book.id);
     if (offlineData) {
-      rawContent = offlineData.content;
-      DOM.readerContent.innerHTML = rawContent;
-
-      // In background, upgrade any uncached images to offline base64 data URLs
-      if (rawContent.includes('<img') && !rawContent.includes('data:image')) {
-        const meta: BookMetadata = {
-          id: book.id,
-          title: book.title,
-          author: book.author,
-          epubUrl: book.epubUrl,
-          htmlUrl: book.htmlUrl
-        };
-        const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-        cacheBookImagesOffline(rawContent, config.proxyUrl).then((fullyCachedHtml) => {
-          if (fullyCachedHtml && fullyCachedHtml !== rawContent) {
-            saveBookOffline(meta, { metadata: meta, content: fullyCachedHtml }, slotToSave);
-          }
-        });
-      }
+      processedContent = offlineData.content;
+      DOM.readerContent.innerHTML = processedContent;
     } else {
-      // 2. Fetch via candidate static URLs (EPUB3 primary, HTML fallback)
-      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl || book.htmlUrl);
+      // 2. Fetch via candidate EPUB URLs
+      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
       let lastErr: Error | null = null;
-      let isEpub = false;
       let epubBuffer: ArrayBuffer | null = null;
 
       for (const candidate of candidateUrls) {
         try {
-          if (candidate.includes('.epub') || candidate.endsWith('.images')) {
-            const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
-            if (buffer && buffer.byteLength > 100) {
-              epubBuffer = buffer;
-              isEpub = true;
-              bookSourceUrl = candidate;
-              break;
-            }
-          } else {
-            const text = await fetchWithProxyFallback(candidate, config.proxyUrl);
-            if (text && text.length > 200) {
-              rawContent = text;
-              bookSourceUrl = candidate;
-              break;
-            }
+          const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
+          if (buffer && buffer.byteLength > 100) {
+            epubBuffer = buffer;
+            break;
           }
         } catch (err) {
           lastErr = err as Error;
         }
       }
 
-      let processedContent = '';
-
-      if (isEpub && epubBuffer) {
-        // Parse & Stitch EPUB3 Archive
-        const parsed = parseEpubArchive(epubBuffer);
-        processedContent = parsed.htmlContent;
-      } else if (rawContent) {
-        // Process Legacy HTML
-        processedContent =
-          rawContent.includes('<!DOCTYPE') || rawContent.includes('<html') || rawContent.includes('<p>')
-            ? processBookHtml(rawContent, bookSourceUrl, config.proxyUrl)
-            : await marked.parse(rawContent);
-      } else {
-        throw lastErr || new Error(`Could not load book #${book.id}`);
+      if (!epubBuffer) {
+        throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
       }
 
+      // Parse & Stitch EPUB3 Archive
+      const parsed = parseEpubArchive(epubBuffer);
+      processedContent = parsed.htmlContent;
       DOM.readerContent.innerHTML = processedContent;
 
       // Always auto-save book offline into slot storage upon selection
@@ -313,20 +272,10 @@ async function openBook(
         id: book.id,
         title: book.title,
         author: book.author,
-        epubUrl: book.epubUrl,
-        htmlUrl: book.htmlUrl
+        epubUrl: book.epubUrl
       };
       const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
       await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
-
-      // In background, ensure all images are cached as data URLs
-      if (processedContent.includes('<img') && !processedContent.includes('data:image')) {
-        cacheBookImagesOffline(processedContent, config.proxyUrl).then((fullyCachedHtml) => {
-          if (fullyCachedHtml && fullyCachedHtml !== processedContent) {
-            saveBookOffline(meta, { metadata: meta, content: fullyCachedHtml }, slotToSave);
-          }
-        });
-      }
     }
 
     // Switch View
@@ -441,28 +390,13 @@ async function handleUrlHashState() {
 // --- Event Listeners Setup ---
 function setupEventListeners() {
   // Back Button to Main Page
-  DOM.backButton.addEventListener('click', (e) => {
+  DOM.btnBack.addEventListener('click', (e) => {
     e.preventDefault();
     closeReaderAndReturnToLibrary();
   });
 
-  // Settings Panel Toggle (Available in both Bookshelf and Reader views)
-  setupSettingsModal(DOM.settingsPanel, [DOM.settingsToggle, DOM.librarySettingsToggle], readerState, () => {
-    if (activeBook) {
-      recalculatePages(
-        DOM.readerViewport,
-        DOM.readerContent,
-        DOM.snapPoints,
-        DOM.progressFill,
-        DOM.pageIndicator,
-        readerState,
-        activeBook.id
-      );
-    }
-  });
-
   // QR Code Share Handoff
-  DOM.shareBtn.addEventListener('click', async () => {
+  DOM.btnQR.addEventListener('click', async () => {
     await updateUrlHashState();
     const fullUrl = window.location.href;
     await openQRModal(DOM.qrModal, DOM.qrCanvas, DOM.qrUrlInput, fullUrl);
@@ -565,6 +499,3 @@ function setupEventListeners() {
   window.addEventListener('hashchange', () => handleUrlHashState());
   window.addEventListener('popstate', () => handleUrlHashState());
 }
-
-// Start app
-document.addEventListener('DOMContentLoaded', () => init());

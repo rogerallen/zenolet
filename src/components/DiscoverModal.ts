@@ -31,7 +31,7 @@ export function renderLocalCatalogResults(
   query: string,
   catalog: CatalogBook[],
   container: HTMLDivElement,
-  onImportBook: (bookId: string, title: string, author: string, htmlUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string) => void
 ): void {
   if (!query.trim()) {
     // Render top 15 popular books if query is empty
@@ -62,7 +62,7 @@ function renderCatalogCards(
   allCatalog: CatalogBook[],
   container: HTMLDivElement,
   sectionTitle: string,
-  onImportBook: (bookId: string, title: string, author: string, htmlUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string) => void
 ): void {
   let html = `<div style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">${escapeHtml(sectionTitle)}</div>`;
 
@@ -82,7 +82,7 @@ function renderCatalogCards(
                 data-id="${escapeHtml(b.id)}" 
                 data-title="${escapeHtml(b.title)}" 
                 data-author="${escapeHtml(b.author)}" 
-                data-url="${escapeHtml(b.htmlUrl || '')}">
+                data-url="${escapeHtml(b.epubUrl || '')}">
           + Add to Shelf
         </button>
       </div>

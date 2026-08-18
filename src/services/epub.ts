@@ -215,7 +215,7 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
       if (!doc.querySelector('parsererror')) {
         return doc;
       }
-    } catch (_) {
+    } catch {
       // Fallback to HTML parser below
     }
 

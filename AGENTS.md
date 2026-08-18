@@ -62,8 +62,8 @@ Whenever a feature, deploy, or version bump occurs:
    - **Book Removal**: Removing a book from a slot (or deleting it from the shelf) completely clears all saved progress, in-memory viewport state, and purges all cached content (both HTML and cached images) from local storage and Cache API. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
 
 5. **Proxy & Offline Asset Invariants**:
-   - **Strict Proxying**: All external book assets (both HTML content and inline images) MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
-   - **Complete Offline Caching**: When a book is stored on the shelf for offline reading, both the HTML text and all inline illustrations/images must be stored locally in cache (with images inlined/cached) so the entire book is 100% readable and visual without network connectivity.
+   - **Strict Proxying**: All external EPUB book archives MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
+   - **Complete Offline Caching**: When an EPUB book is downloaded into one of the 8 shelf slots, the parsed document tree (with all chapter XHTML and inlined base64 illustration data) is stored locally in Cache API so the entire book is 100% readable and visual without network connectivity.
 
 6. **Curated Offline-Only Catalog Search**:
    - **No Online Repository Lookups**: Book search operates strictly across the curated local catalog (`catalog.json`, containing the top ~1,000 classics). Never query external catalog APIs (such as Gutendex or external search endpoints).
