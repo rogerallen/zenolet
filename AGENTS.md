@@ -49,14 +49,18 @@ Whenever a feature, deploy, or version bump occurs:
 
 2. **EPUB DOM Sanitization**:
    - All parsed EPUB XHTML content must undergo strict client-side DOM sanitization before being inserted into the reader view:
-     - Disallowed elements to remove: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<applet>`, `<form>`, `<input>`, `<textarea>`, `<button>`, `<meta>`, `<base>`.
+     - Disallowed elements to remove: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<applet>`, `<form>`, `<input>`, `<textarea>`, `<button>`, `<meta>`, `<base>`, `<audio>`, `<video>`, `<source>`, `<track>`.
      - Attribute sanitization: Strip all inline event handlers (`on*` attributes like `onload`, `onerror`, `onclick`).
+     - Inline style sanitization: Strip any `url(...)`, `@import`, or `expression(...)` declarations inside `style` attributes to eliminate external media leaks.
      - Link sanitization: Disallow script URLs (`javascript:`, `vbscript:`, `data:text/html`).
      - **Chapter Fallback Sanitization**: Document stitching must serialize only the sanitized DOM tree (`body.innerHTML` or `documentElement.innerHTML`). Never fall back to unparsed/raw `chapterRawText` when a chapter lacks a standard `<body>` tag, as this would bypass sanitization.
 
 3. **Zero External Media Leaks**:
    - Only images packed inside the EPUB archive (inlined as local base64 Data URLs) may be rendered.
-   - Any external `<img>` or unresolvable asset URL must have its `src` stripped to prevent unproxied network requests, third-party tracking, or user IP leaks.
+   - Any external `<img>`, SVG `<image>`, or unresolvable asset URL must have its source attribute stripped to prevent unproxied network requests, third-party tracking, or user IP leaks.
+
+4. **Protocol Whitelisting for External Links**:
+   - All user-facing or config-driven links (e.g. curator `linkUrl`, external links inside book content) must validate and enforce safe HTTP/HTTPS protocols (`http:`, `https:`) before rendering clickable anchors. Disallow `javascript:` or other pseudo-protocols.
 
 ---
 
@@ -65,6 +69,7 @@ Whenever a feature, deploy, or version bump occurs:
 1. **Layout Resize & Progress Synchronization**:
    - When recalculating page spreads on window resize, font size adjustment, or column layout toggles, DOM scroll position restoration (`restoreBookProgressByFraction`) MUST execute _before_ updating page indicators and saving progress.
    - Never update pagination indicators or fire debounced progress saves while the viewport is in an intermediate or un-restored scroll position.
+   - Initial layout calculations during book opening must suppress progress saves (`skipSaveProgress = true`) to prevent race-condition writes of progress = 0 before the saved reading position is restored.
 
 2. **Asynchronous Image Decoding Before Spread Calculation**:
    - When opening or rendering illustrated EPUBs, all inlined base64 `<img>` elements must be fully decoded (via `Promise.all(images.map(img => img.decode()))`) before measuring `readerContent.scrollWidth` and finalizing `totalPagesSpreads`, preventing undercounted page spreads and cut-off trailing chapters.
@@ -75,9 +80,16 @@ Whenever a feature, deploy, or version bump occurs:
 4. **Immediate Reading Progress Flush**:
    - Debounced reading progress writes must be flushed immediately via `flushBookProgress()` upon leaving the reader, switching books, or when page visibility changes (`visibilitychange` / `beforeunload`).
 
-5. **Cross-Platform State Handoff (`state.ts`)**:
-   - Reading state URLs (`#s=...`) use compressed base64url payloads with deflate-raw compression, with fallback for uncompressed base64 payloads (`#s=u_...`).
-   - Stream processing in `state.ts` must maintain universal compatibility across browser and Node/worker environments.
+5. **Structured EPUB Table of Contents Integration**:
+   - When present, structured EPUB Table of Contents navigation (`nav.xhtml` or `toc.ncx`) must be parsed into `EpubChapter[]` and persisted with offline book details.
+   - Timeline markers and active chapter indicators must prioritize structured TOC chapters before falling back to DOM heading discovery.
+
+6. **Cross-Platform State Handoff (`state.ts`)**:
+   - Reading state URLs (`#s=...`) use compressed base64url payloads with deflate-raw compression via synchronous `fflate` (`deflateSync`/`inflateSync`), with fallback for uncompressed base64 payloads (`#s=u_...`).
+
+7. **Keyboard & Desktop Interaction**:
+   - Keyboard navigation must support `ArrowRight` / `Space` for forward page turns, and `ArrowLeft` / `Shift + Space` for backward page turns.
+   - Mouse drag-to-scroll must not suppress native text selection or click events on small pointer movements or interactive elements.
 
 ---
 
@@ -98,7 +110,7 @@ Whenever a feature, deploy, or version bump occurs:
    - All custom interactive elements (bookshelf slot cards, empty slot triggers, timeline jump dots, drawer triggers) must have `tabindex="0"`, `role="button"`, descriptive `aria-label` attributes, and `keydown` handlers for both `Enter` and `Space`.
 
 2. **Modal & Drawer Semantics and Focus Management**:
-   - All overlays and drawer panels (Settings, About, QR Modal, Discover panel) must have `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` referencing their respective title element. All close buttons must have explicit `aria-label` attributes.
+   - All overlays, drawer panels, and popup menus (Settings, About, QR Modal, Discover panel, Chapter popup) must have `role="dialog"`, `aria-modal="true"`, and appropriate `aria-labelledby` or `aria-label` attributes. All close buttons must have explicit `aria-label` attributes.
    - When opening modals or drawers, focus must be placed immediately into the primary input or dialog control (e.g. search input in Discover drawer, close button in About dialog, or selectable URL in QR modal).
 
 ---
@@ -122,7 +134,7 @@ Whenever a feature, deploy, or version bump occurs:
 
 4. **Reading Progress & Removal Invariants**:
    - **Active Shelf Books**: While a book remains on the bookshelf, opening or revisiting it must always restore its saved reading position so the reader picks up right where they left off. Layout adjustments while reading (window resize, font changes, column toggles) must also preserve the active reading position.
-   - **Book Removal**: Removing a book from a slot (or deleting it from the shelf) completely clears all saved progress, in-memory viewport state, and purges all cached content (both HTML and cached images) from local storage and Cache API. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
+   - **Book Removal & Overwriting**: Removing a book from a slot (or overwriting an occupied slot / replacing slot 0 on a full shelf) completely clears that book's saved progress, in-memory viewport state, and purges all cached content (both HTML and cached images) from local storage and Cache API. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
 
 5. **Proxy & Offline Asset Invariants**:
    - **Strict Proxying**: All external EPUB book archives MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
@@ -143,4 +155,4 @@ Whenever a feature, deploy, or version bump occurs:
 2. **Self-Contained Static Deployment**:
    - The app is designed to be forked by anyone to create their own independent, curated static library.
    - The frontend must remain 100% static (deployable to GitHub Pages, Cloudflare Pages, Netlify, or any static file host) with no database or server requirements.
-   - The only external dependency for a forker is their own free Cloudflare Worker CORS proxy (`worker/index.js`), which must remain simple and self-contained.
+   - The only external dependency for a forker is their own free Cloudflare Worker CORS proxy (`worker/index.js`), which supports wildcards and environment configuration for all major static hosting domains.

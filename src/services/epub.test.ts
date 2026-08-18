@@ -248,6 +248,10 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
             <img src="https://tracking-site.com/pixel.png" alt="Tracking pixel" />
             <img src="invalid-image.jpg" onerror="alert(document.cookie)" alt="Attack image" />
             <p onclick="alert('clicked')" onmouseover="alert('hover')">Clickable text</p>
+            <div style="background-image: url('https://leak.com/tracking.png'); color: black;">Styled background</div>
+            <svg viewBox="0 0 100 100"><image href="https://tracking-site.com/svg-leak.png"/></svg>
+            <audio src="https://leak.com/audio.mp3"></audio>
+            <video src="https://leak.com/video.mp4"></video>
             <a href="javascript:alert('xss')">Malicious Link</a>
             <a href="javascript: void(0)">Void Link</a>
             <iframe src="https://evil.com"></iframe>
@@ -275,9 +279,13 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
     expect(container.querySelector('form')).toBeNull();
     expect(container.querySelector('input')).toBeNull();
     expect(container.querySelector('object')).toBeNull();
+    expect(container.querySelector('audio')).toBeNull();
+    expect(container.querySelector('video')).toBeNull();
 
-    // 4. External tracking image stripped
+    // 4. External tracking images & styles stripped
     expect(parsed.htmlContent).not.toContain('https://tracking-site.com/pixel.png');
+    expect(parsed.htmlContent).not.toContain('https://leak.com/tracking.png');
+    expect(parsed.htmlContent).not.toContain('https://tracking-site.com/svg-leak.png');
   });
 
   it('sanitizes chapters that lack explicit body elements and prevents raw fallback (SEC-001)', () => {

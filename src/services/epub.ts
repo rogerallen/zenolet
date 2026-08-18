@@ -150,6 +150,23 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     }
   }
 
+  // Helper to map TOC link hrefs to stitched document anchor IDs
+  function resolveTocAnchorId(href: string): string {
+    if (!href) return 'ch-0';
+    const trimmed = href.trim();
+    if (trimmed.startsWith('#')) {
+      const rawAnchor = trimmed.slice(1);
+      return rawAnchor ? `c0_${rawAnchor}` : 'ch-0';
+    }
+
+    const [filePart, anchorPart] = trimmed.split('#');
+    const spineIdx = spineItems.findIndex((s) => s.href.endsWith(filePart) || s.fullPath.endsWith(filePart));
+    if (spineIdx !== -1) {
+      return anchorPart ? `c${spineIdx}_${anchorPart}` : `ch-${spineIdx}`;
+    }
+    return anchorPart ? `c0_${anchorPart}` : 'ch-0';
+  }
+
   // 7. Extract Table of Contents (nav.xhtml or toc.ncx)
   const chapters: EpubChapter[] = [];
 
@@ -166,11 +183,10 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
         const linkTitle = link.textContent?.trim() || '';
         const href = link.getAttribute('href') || '';
         if (linkTitle && href) {
-          const cleanHref = href.includes('#') ? href.split('#')[1] : href;
           chapters.push({
             title: linkTitle,
             href,
-            anchorId: `ch-target-${cleanHref}`
+            anchorId: resolveTocAnchorId(href)
           });
         }
       }
@@ -193,11 +209,10 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
           const label = np.querySelector('navLabel > text')?.textContent?.trim();
           const src = np.querySelector('content')?.getAttribute('src') || '';
           if (label && src) {
-            const cleanHref = src.includes('#') ? src.split('#')[1] : src;
             chapters.push({
               title: label,
               href: src,
-              anchorId: `ch-target-${cleanHref}`
+              anchorId: resolveTocAnchorId(src)
             });
           }
         }
@@ -239,7 +254,9 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
 
     // Remove dangerous and disallowed elements
     chapterDoc
-      .querySelectorAll('script, style, link, iframe, object, embed, applet, form, input, textarea, button, meta, base')
+      .querySelectorAll(
+        'script, style, link, iframe, object, embed, applet, form, input, textarea, button, meta, base, audio, video, source, track'
+      )
       .forEach((n) => n.remove());
 
     const chapterDir = spineItem.fullPath.includes('/')
@@ -271,10 +288,10 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
       }
     });
 
-    // Normalize SVG-wrapped cover images into standard <img>
+    // Normalize SVG-wrapped cover images into standard <img> and strip external SVG image sources
     chapterDoc.querySelectorAll('svg').forEach((svg) => {
-      const svgImage = svg.querySelector('image');
-      if (svgImage) {
+      const svgImages = svg.querySelectorAll('image');
+      svgImages.forEach((svgImage) => {
         const href = svgImage.getAttribute('xlink:href') || svgImage.getAttribute('href');
         if (href) {
           const resolvedImgPath = resolveZipPath(chapterDir, href).toLowerCase();
@@ -290,16 +307,31 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
             return;
           }
         }
-      }
+        // Strip unresolvable external SVG image links to prevent unproxied network leaks
+        svgImage.removeAttribute('href');
+        svgImage.removeAttribute('xlink:href');
+        svgImage.remove();
+      });
     });
 
-    // Sanitize all attributes across all remaining elements (SEC-001)
+    // Sanitize all attributes across all remaining elements (SEC-001, PRI-001)
     chapterDoc.querySelectorAll('*').forEach((el) => {
       const attrNames = el.getAttributeNames();
       for (const attr of attrNames) {
         // Strip inline event handler attributes (e.g. onload, onerror, onclick)
         if (/^on/i.test(attr)) {
           el.removeAttribute(attr);
+        }
+        // Sanitize inline styles to strip url(...) declarations that leak external media/IPs
+        if (attr.toLowerCase() === 'style') {
+          const styleVal = el.getAttribute('style') || '';
+          if (/url\s*\(/i.test(styleVal) || /@import/i.test(styleVal) || /expression\s*\(/i.test(styleVal)) {
+            const sanitizedStyle = styleVal
+              .replace(/url\s*\([^)]*\)/gi, 'none')
+              .replace(/@import[^;]*;?/gi, '')
+              .replace(/expression\s*\([^)]*\)/gi, '');
+            el.setAttribute('style', sanitizedStyle);
+          }
         }
       }
     });

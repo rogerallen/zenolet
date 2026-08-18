@@ -1,4 +1,4 @@
-// --- Timeline Component for Zenolet ---
+import type { EpubChapter } from '../services/epub.js';
 
 export interface ChapterMarker {
   id: string;
@@ -63,6 +63,11 @@ export function resolveChapterElement(readerContent: HTMLElement, id: string): H
     return childHeading;
   }
 
+  // If targetEl is a chapter container or has text content, return it directly
+  if (targetEl.classList.contains('epub-chapter') || (targetEl.textContent?.trim().length ?? 0) > 0) {
+    return targetEl;
+  }
+
   // If targetEl is an empty anchor or wrapper, forward-walk to the actual chapter heading or text element
   let candidate: Element | null = targetEl;
   if (
@@ -110,7 +115,8 @@ export function getChapterMarkers(
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
   totalPagesSpreads: number,
-  useCache: boolean = false
+  useCache: boolean = false,
+  epubChapters?: EpubChapter[]
 ): ChapterMarker[] {
   if (useCache && cachedChapterMarkers) {
     return cachedChapterMarkers;
@@ -120,46 +126,68 @@ export function getChapterMarkers(
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return markers;
 
-  const tocTable = readerContent.querySelector('table[data-summary="contents"], table[summary="contents"]');
-  const tocLinks = tocTable ? Array.from(tocTable.querySelectorAll('a[href^="#"]')) : [];
-
-  const seenIds = new Set<string>();
-
-  tocLinks.forEach((el) => {
-    const a = el as HTMLAnchorElement;
-    const href = a.getAttribute('href');
-    if (!href || !href.startsWith('#')) return;
-    const id = href.substring(1);
-    if (!id || seenIds.has(id)) return;
-
-    const resolvedEl = resolveChapterElement(readerContent, id);
-    if (!resolvedEl) return;
-
-    let title = '';
-    const row = a.closest('tr');
-    if (row) {
-      const textCol = row.querySelector('.tdl, td:nth-child(2)');
-      title = textCol?.textContent?.trim() || '';
+  // 1. Primary: Use structured EPUB Table of Contents if available
+  if (epubChapters && epubChapters.length > 0) {
+    const seenIds = new Set<string>();
+    for (const ch of epubChapters) {
+      if (!ch.anchorId || seenIds.has(ch.anchorId)) continue;
+      const targetEl = resolveChapterElement(readerContent, ch.anchorId);
+      if (targetEl) {
+        const pageSpread = getElementSpreadIndex(targetEl, readerViewport, totalPagesSpreads);
+        seenIds.add(ch.anchorId);
+        markers.push({
+          id: ch.anchorId,
+          title: ch.title || `Chapter ${markers.length + 1}`,
+          pageSpread
+        });
+      }
     }
-    if (!title) {
-      const heading =
-        resolvedEl.closest('h1, h2, h3, h4') || (resolvedEl.matches('h1, h2, h3, h4') ? resolvedEl : null);
-      title = heading?.textContent?.trim() || resolvedEl.parentElement?.textContent?.trim() || '';
-    }
+  }
 
-    title = title
-      .replace(/^[—\-\s\d.•·:~]+/, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // 2. Fallback: Parse Gutenberg contents table from DOM if no EPUB chapters found
+  if (markers.length === 0) {
+    const tocTable = readerContent.querySelector('table[data-summary="contents"], table[summary="contents"]');
+    const tocLinks = tocTable ? Array.from(tocTable.querySelectorAll('a[href^="#"]')) : [];
 
-    if (!title) title = id;
+    const seenIds = new Set<string>();
 
-    const pageSpread = getElementSpreadIndex(resolvedEl, readerViewport, totalPagesSpreads);
+    tocLinks.forEach((el) => {
+      const a = el as HTMLAnchorElement;
+      const href = a.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const id = href.substring(1);
+      if (!id || seenIds.has(id)) return;
 
-    seenIds.add(id);
-    markers.push({ id, title, pageSpread });
-  });
+      const resolvedEl = resolveChapterElement(readerContent, id);
+      if (!resolvedEl) return;
 
+      let title = '';
+      const row = a.closest('tr');
+      if (row) {
+        const textCol = row.querySelector('.tdl, td:nth-child(2)');
+        title = textCol?.textContent?.trim() || '';
+      }
+      if (!title) {
+        const heading =
+          resolvedEl.closest('h1, h2, h3, h4') || (resolvedEl.matches('h1, h2, h3, h4') ? resolvedEl : null);
+        title = heading?.textContent?.trim() || resolvedEl.parentElement?.textContent?.trim() || '';
+      }
+
+      title = title
+        .replace(/^[—\-\s\d.•·:~]+/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (!title) title = id;
+
+      const pageSpread = getElementSpreadIndex(resolvedEl, readerViewport, totalPagesSpreads);
+
+      seenIds.add(id);
+      markers.push({ id, title, pageSpread });
+    });
+  }
+
+  // 3. Fallback: Query all headings in rendered DOM
   if (markers.length === 0) {
     const headings = Array.from(
       readerContent.querySelectorAll('h1, h2, h3, [id^="chap"], [id^="chapter"], .chapter h2, .chapter h3')
@@ -313,6 +341,9 @@ export function showChapterPopup(
   const popup = document.createElement('div');
   popup.className = 'chapter-popup-menu';
   popup.id = 'chapter-popup-menu';
+  popup.setAttribute('role', 'dialog');
+  popup.setAttribute('aria-modal', 'true');
+  popup.setAttribute('aria-label', 'Select Chapter');
 
   const header = document.createElement('div');
   header.className = 'chapter-popup-header';
@@ -356,6 +387,14 @@ export function showChapterPopup(
   popup.appendChild(list);
   document.body.appendChild(popup);
   activePopupElement = popup;
+
+  // Focus the current active chapter button or first item
+  setTimeout(() => {
+    const currentBtn =
+      popup.querySelector<HTMLElement>('.chapter-popup-item.current') ||
+      popup.querySelector<HTMLElement>('.chapter-popup-item');
+    currentBtn?.focus();
+  }, 40);
 
   // Positioning logic
   const popupWidth = Math.min(320, window.innerWidth - 32);
@@ -401,7 +440,8 @@ export function renderTimeline(
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
   totalPagesSpreads: number,
-  onJumpToSpread: (spreadIndex: number) => void
+  onJumpToSpread: (spreadIndex: number) => void,
+  epubChapters?: EpubChapter[]
 ): void {
   const timelineTicks = document.getElementById('timeline-ticks');
   if (!timelineTicks) return;
@@ -411,7 +451,7 @@ export function renderTimeline(
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0 || totalPagesSpreads <= 1) return;
 
-  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads);
+  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads, false, epubChapters);
 
   // Filter markers to avoid overcrowding on books with many chapters (e.g. Moby Dick)
   const minSpreadDistance = Math.max(1, Math.floor(totalPagesSpreads * 0.035));

@@ -77,4 +77,16 @@ describe('Zenolet Configuration & Curator Header', () => {
     expect(container.innerHTML).toContain('Curated by Roger Allen');
     expect(container.innerHTML).not.toContain('<a href=');
   });
+
+  it('rejects unsafe protocols (javascript:, data:) in curator linkUrl and renders text (SEC-002)', () => {
+    const container = document.createElement('div');
+    renderCuratorHeader(container, 'The Great Library', {
+      name: 'Malicious Curator',
+      linkUrl: "javascript:alert('xss')"
+    });
+
+    expect(container.innerHTML).toContain('Curated by Malicious Curator');
+    expect(container.innerHTML).not.toContain('<a href=');
+    expect(container.innerHTML).not.toContain('javascript:');
+  });
 });

@@ -2,6 +2,8 @@
 import { restoreBookProgressByFraction, saveBookProgress, getStoredProgressFraction } from '../services/storage.js';
 import { updateActiveChapterLabel, renderTimeline } from './Timeline.js';
 
+import type { EpubChapter } from '../services/epub.js';
+
 export interface ReaderState {
   currentView: 'library' | 'reader';
   theme: 'paper' | 'sepia' | 'charcoal' | 'night';
@@ -58,7 +60,9 @@ export function recalculatePages(
   pageIndicator: HTMLSpanElement,
   state: ReaderState,
   activeBookId: string | null,
-  preserveDOMScroll: boolean = true
+  preserveDOMScroll: boolean = true,
+  skipSaveProgress: boolean = false,
+  epubChapters?: EpubChapter[]
 ): void {
   if (!activeBookId) return;
 
@@ -112,15 +116,22 @@ export function recalculatePages(
     pageIndicator,
     state,
     activeBookId,
-    actualCols
+    actualCols,
+    skipSaveProgress
   );
 
-  renderTimeline(readerContent, readerViewport, state.totalPagesSpreads, (spreadIndex) => {
-    readerViewport.scrollTo({
-      left: spreadIndex * pageWidth,
-      behavior: 'auto'
-    });
-  });
+  renderTimeline(
+    readerContent,
+    readerViewport,
+    state.totalPagesSpreads,
+    (spreadIndex) => {
+      readerViewport.scrollTo({
+        left: spreadIndex * pageWidth,
+        behavior: 'auto'
+      });
+    },
+    epubChapters
+  );
 }
 
 export function updatePaginationIndicator(
@@ -130,7 +141,8 @@ export function updatePaginationIndicator(
   pageIndicator: HTMLSpanElement,
   state: ReaderState,
   activeBookId: string | null,
-  actualCols?: number
+  actualCols?: number,
+  skipSaveProgress: boolean = false
 ): void {
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
@@ -157,7 +169,7 @@ export function updatePaginationIndicator(
     }
   }
 
-  if (activeBookId) {
+  if (activeBookId && !skipSaveProgress) {
     const maxScroll = readerViewport.scrollWidth - pageWidth;
     const progressFraction = maxScroll > 0 ? scrollLeft / maxScroll : 0;
     saveBookProgress(activeBookId, progressFraction);
@@ -172,8 +184,8 @@ export function setupDragToScroll(viewport: HTMLDivElement): void {
   let scrollLeft = 0;
 
   viewport.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('a, button, input, [role="button"]')) return;
     isDown = true;
-    viewport.classList.add('active');
     startX = e.pageX - viewport.offsetLeft;
     scrollLeft = viewport.scrollLeft;
   });
@@ -190,9 +202,12 @@ export function setupDragToScroll(viewport: HTMLDivElement): void {
 
   viewport.addEventListener('mousemove', (e) => {
     if (!isDown) return;
-    e.preventDefault();
     const x = e.pageX - viewport.offsetLeft;
     const walk = (x - startX) * 1.5;
-    viewport.scrollLeft = scrollLeft - walk;
+    if (Math.abs(walk) > 8) {
+      viewport.classList.add('active');
+      e.preventDefault();
+      viewport.scrollLeft = scrollLeft - walk;
+    }
   });
 }

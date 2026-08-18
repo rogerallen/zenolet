@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { recalculatePages, type ReaderState } from './ReaderEngine.js';
+import { clearBookProgress } from '../services/storage.js';
 
 describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
   beforeEach(() => {
     localStorage.clear();
+    clearBookProgress();
   });
 
   it('does not restore stale DOM scroll and stays on page 1 when preserveDOMScroll is false', () => {
@@ -154,5 +156,50 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     } finally {
       indicator.remove();
     }
+  });
+
+  it('does not trigger debounced saveBookProgress when skipSaveProgress is true (COR-002)', async () => {
+    const { getStoredProgress, flushBookProgress } = await import('../services/storage.js');
+    localStorage.setItem(
+      'zenolet-reading-progress',
+      JSON.stringify({ '2701': { progressFraction: 0.85, lastReadTime: Date.now() } })
+    );
+
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 5000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 5000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 18,
+      layoutColumns: '1',
+      currentPageSpread: 0,
+      totalPagesSpreads: 10
+    };
+
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false,
+      true // skipSaveProgress: true
+    );
+
+    // Ensure flushing debounced progress does NOT overwrite saved 0.85 with 0
+    flushBookProgress();
+    expect(getStoredProgress('2701')).toBe(0.85);
   });
 });

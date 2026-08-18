@@ -8,22 +8,46 @@ export function setupSettingsModal(
   onRecalculate: () => void
 ): void {
   const buttons = (Array.isArray(toggleBtns) ? toggleBtns : [toggleBtns]).filter((b): b is HTMLElement => b !== null);
+  let lastActiveButton: HTMLElement | null = null;
+
+  panel.setAttribute('aria-modal', 'true');
+
+  const openPanel = (btn: HTMLElement) => {
+    lastActiveButton = btn;
+    if (btn.id === 'library-settings-toggle') {
+      panel.classList.add('panel-from-footer');
+    } else {
+      panel.classList.remove('panel-from-footer');
+    }
+    panel.classList.add('visible');
+    setTimeout(() => {
+      const activeBtn =
+        panel.querySelector<HTMLElement>('.theme-btn.active') || panel.querySelector<HTMLElement>('.theme-btn');
+      activeBtn?.focus();
+    }, 40);
+  };
+
+  const closePanel = () => {
+    if (panel.classList.contains('visible')) {
+      panel.classList.remove('visible');
+      lastActiveButton?.focus();
+    }
+  };
 
   buttons.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (btn.id === 'library-settings-toggle') {
-        panel.classList.add('panel-from-footer');
+      if (panel.classList.contains('visible')) {
+        closePanel();
       } else {
-        panel.classList.remove('panel-from-footer');
+        openPanel(btn);
       }
-      panel.classList.toggle('visible');
     });
   });
 
   document.addEventListener('click', (e) => {
     if (!panel.contains(e.target as Node) && !buttons.some((b) => b.contains(e.target as Node))) {
-      panel.classList.remove('visible');
+      closePanel();
     }
   });
 

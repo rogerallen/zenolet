@@ -17,9 +17,11 @@ export function renderCuratorHeader(
   blurb?: string
 ): void {
   const title = siteTitle || 'Zenolet';
-  const name = curator?.name || 'Roger Allen';
-  const curatorHtml = curator?.linkUrl
-    ? `<a href="${escapeHtml(curator.linkUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
+  const name = curator?.name || 'Curator';
+  const rawUrl = curator?.linkUrl?.trim() || '';
+  const isSafeUrl = /^https?:\/\//i.test(rawUrl);
+  const curatorHtml = isSafeUrl
+    ? `<a href="${escapeHtml(rawUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
     : escapeHtml(name);
 
   let formattedBlurb = escapeHtml(blurb || '');

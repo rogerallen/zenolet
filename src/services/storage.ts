@@ -16,11 +16,31 @@ export function formatBytes(bytes?: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+export async function getStorageQuotaEstimate(): Promise<{ usage?: number; quota?: number } | null> {
+  if (typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.estimate === 'function') {
+    try {
+      const estimate = await navigator.storage.estimate();
+      return { usage: estimate.usage, quota: estimate.quota };
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export async function getActualStorageUsage(): Promise<{ bookCount: number; totalBytes: number }> {
   const slots = getStoredSlots();
   const activeBooks = slots.filter((s): s is BookMetadata => s !== null);
   const bookCount = activeBooks.length;
-  const totalBytes = activeBooks.reduce((acc, s) => acc + (s.byteSize || 0), 0);
+  let totalBytes = activeBooks.reduce((acc, s) => acc + (s.byteSize || 0), 0);
+
+  if (totalBytes === 0 && bookCount > 0) {
+    const estimate = await getStorageQuotaEstimate();
+    if (estimate?.usage && estimate.usage > 0) {
+      totalBytes = estimate.usage;
+    }
+  }
+
   return { bookCount, totalBytes };
 }
 
@@ -30,9 +50,12 @@ export function formatStorageSummary(bookCount: number, totalBytes: number): str
   return `${bookCount} ${bookLabel}, ${sizeFormatted} used`;
 }
 
+import type { EpubChapter } from './epub.js';
+
 export interface BookDetails {
   metadata: BookMetadata;
   content: string;
+  chapters?: EpubChapter[];
 }
 
 export const BOOK_CACHE_NAME = 'zenolet-books-v1';
@@ -90,21 +113,25 @@ export function saveSlots(slots: (BookMetadata | null)[]): void {
   }
 }
 
+export async function purgeBookCache(bookId: string): Promise<void> {
+  if (typeof caches !== 'undefined') {
+    const cacheUrl = `/cached-books/${encodeURIComponent(bookId)}`;
+    try {
+      const cache = await caches.open(BOOK_CACHE_NAME);
+      await cache.delete(cacheUrl);
+    } catch (e) {
+      console.warn('[Zenolet PWA] Cache delete error:', e);
+    }
+  }
+  clearBookProgress(bookId);
+}
+
 export async function removeBookFromSlot(slotIndex: number): Promise<void> {
   const slots = getStoredSlots();
   if (slotIndex >= 0 && slotIndex < NUM_SLOTS) {
     const book = slots[slotIndex];
     if (book) {
-      if (typeof caches !== 'undefined') {
-        const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
-        try {
-          const cache = await caches.open(BOOK_CACHE_NAME);
-          await cache.delete(cacheUrl);
-        } catch (e) {
-          console.warn('[Zenolet PWA] Cache delete error:', e);
-        }
-      }
-      clearBookProgress(book.id);
+      await purgeBookCache(book.id);
     }
     slots[slotIndex] = null;
     saveSlots(slots);
@@ -149,6 +176,10 @@ export async function saveBookOffline(
       targetSlotIndex < NUM_SLOTS &&
       targetSlotIndex !== existingIdx
     ) {
+      const overwrittenBook = slots[targetSlotIndex];
+      if (overwrittenBook && overwrittenBook.id !== book.id) {
+        await purgeBookCache(overwrittenBook.id);
+      }
       slots[existingIdx] = null;
       slots[targetSlotIndex] = book;
     } else {
@@ -156,6 +187,10 @@ export async function saveBookOffline(
       slots[existingIdx] = book;
     }
   } else if (typeof targetSlotIndex === 'number' && targetSlotIndex >= 0 && targetSlotIndex < NUM_SLOTS) {
+    const overwrittenBook = slots[targetSlotIndex];
+    if (overwrittenBook && overwrittenBook.id !== book.id) {
+      await purgeBookCache(overwrittenBook.id);
+    }
     slots[targetSlotIndex] = book;
   } else {
     // Assign to first empty slot
@@ -163,6 +198,11 @@ export async function saveBookOffline(
     if (emptyIdx !== -1) {
       slots[emptyIdx] = book;
     } else {
+      // Full shelf: overwrite Slot 0 and purge old Slot 0 book
+      const overwrittenBook = slots[0];
+      if (overwrittenBook && overwrittenBook.id !== book.id) {
+        await purgeBookCache(overwrittenBook.id);
+      }
       slots[0] = book;
     }
   }
@@ -221,25 +261,27 @@ export function saveBookProgress(bookId: string, progressFraction: number): void
   }, 300);
 }
 
-export function clearBookProgress(bookId: string): void {
-  if (pendingSave?.bookId === bookId) {
+export function clearBookProgress(bookId?: string): void {
+  if (!bookId || pendingSave?.bookId === bookId) {
     pendingSave = null;
   }
   if (saveProgressTimeout) {
     clearTimeout(saveProgressTimeout);
     saveProgressTimeout = null;
   }
-  try {
-    const progressMapRaw = localStorage.getItem('zenolet-reading-progress');
-    if (progressMapRaw) {
-      const progressMap = JSON.parse(progressMapRaw);
-      if (progressMap[bookId]) {
-        delete progressMap[bookId];
-        localStorage.setItem('zenolet-reading-progress', JSON.stringify(progressMap));
+  if (bookId) {
+    try {
+      const progressMapRaw = localStorage.getItem('zenolet-reading-progress');
+      if (progressMapRaw) {
+        const progressMap = JSON.parse(progressMapRaw);
+        if (progressMap[bookId]) {
+          delete progressMap[bookId];
+          localStorage.setItem('zenolet-reading-progress', JSON.stringify(progressMap));
+        }
       }
+    } catch (e) {
+      console.error('[Progress] Failed to clear reading progress:', e);
     }
-  } catch (e) {
-    console.error('[Progress] Failed to clear reading progress:', e);
   }
 }
 

@@ -36,10 +36,13 @@ import {
   resolveChapterElement
 } from './components/Timeline.ts';
 
+import type { EpubChapter } from './services/epub.js';
+
 // --- State ---
 let config: ZenoletConfig = {};
 let allBooks: CatalogBook[] = [];
 let activeBook: CatalogBook | null = null;
+let activeBookChapters: EpubChapter[] = [];
 let activeSlotIndex: number | null = null;
 let loadingSlotState: LoadingSlotState | null = null;
 
@@ -147,7 +150,9 @@ async function initApp() {
         DOM.pageIndicator,
         readerState,
         activeBook.id,
-        true
+        true,
+        false,
+        activeBookChapters
       );
     }
   });
@@ -267,9 +272,11 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
     // 1. Check if already stored offline in Cache API
     const offlineData = await getStoredBookOffline(book.id);
     let processedContent = '';
+    let chapters: EpubChapter[] = [];
 
     if (offlineData) {
       processedContent = offlineData.content;
+      chapters = offlineData.chapters || [];
     } else {
       // 2. Fetch binary EPUB via candidate URLs
       const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
@@ -295,6 +302,7 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
       // Parse & Stitch EPUB3 Archive
       const parsed = parseEpubArchive(epubBuffer);
       processedContent = parsed.htmlContent;
+      chapters = parsed.chapters || [];
     }
 
     const byteSize = new Blob([processedContent]).size;
@@ -307,7 +315,7 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
       byteSize
     };
 
-    await saveBookOffline(meta, { metadata: meta, content: processedContent }, targetSlotIndex);
+    await saveBookOffline(meta, { metadata: meta, content: processedContent, chapters }, targetSlotIndex);
   } catch (err) {
     console.error('[Zenolet] Failed to download book into slot:', err);
     alert(`Could not download "${book.title}". Please check your internet connection or proxy settings.`);
@@ -334,11 +342,13 @@ async function openBook(
 
   try {
     let processedContent = '';
+    activeBookChapters = [];
 
     // 1. Try Offline Cache API first
     const offlineData = await getStoredBookOffline(book.id);
     if (offlineData) {
       processedContent = offlineData.content;
+      activeBookChapters = offlineData.chapters || [];
       DOM.readerContent.innerHTML = processedContent;
 
       // Backfill byteSize if not already stored on shelf slot
@@ -392,6 +402,7 @@ async function openBook(
         // Parse & Stitch EPUB3 Archive
         const parsed = parseEpubArchive(epubBuffer);
         processedContent = parsed.htmlContent;
+        activeBookChapters = parsed.chapters || [];
         DOM.readerContent.innerHTML = processedContent;
 
         const byteSize = new Blob([processedContent]).size;
@@ -406,7 +417,11 @@ async function openBook(
           byteSize
         };
         const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-        await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
+        await saveBookOffline(
+          meta,
+          { metadata: meta, content: processedContent, chapters: activeBookChapters },
+          slotToSave
+        );
       } finally {
         loadingSlotState = null;
       }
@@ -440,7 +455,7 @@ async function openBook(
       );
     }
 
-    // Recalculate Columns & Page Spreads without preserving stale DOM scroll
+    // Recalculate Columns & Page Spreads without preserving stale DOM scroll or queueing progress=0
     recalculatePages(
       DOM.readerViewport,
       DOM.readerContent,
@@ -449,7 +464,9 @@ async function openBook(
       DOM.pageIndicator,
       readerState,
       book.id,
-      false
+      false,
+      true,
+      activeBookChapters
     );
 
     // Restore Progress Fraction from storage if available
@@ -486,6 +503,7 @@ function closeReaderAndReturnToLibrary() {
   DOM.libraryView.classList.remove('hidden');
   readerState.currentView = 'library';
   activeBook = null;
+  activeBookChapters = [];
   activeSlotIndex = null;
   DOM.readerViewport.scrollLeft = 0;
   if (window.location.hash) {
@@ -616,10 +634,10 @@ function setupEventListeners() {
     if (readerState.currentView !== 'reader') return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
-    if (e.key === 'ArrowLeft') {
+    if (e.key === 'ArrowLeft' || (e.key === ' ' && e.shiftKey)) {
       e.preventDefault();
       DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'auto' });
-    } else if (e.key === 'ArrowRight' || e.key === ' ') {
+    } else if (e.key === 'ArrowRight' || (e.key === ' ' && !e.shiftKey)) {
       e.preventDefault();
       DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
     }
@@ -692,7 +710,10 @@ function setupEventListeners() {
         DOM.progressFill,
         DOM.pageIndicator,
         readerState,
-        activeBook.id
+        activeBook.id,
+        true,
+        false,
+        activeBookChapters
       );
     }
   });

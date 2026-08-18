@@ -158,6 +158,72 @@ describe('Storage and Progress Math for Zenolet', () => {
     }
   });
 
+  it('purges replaced book cache and progress when saving over an occupied slot (COR-001)', async () => {
+    const { saveSlots, saveBookOffline, getStoredProgress } = await import('./storage.js');
+    const oldBook = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
+    const newBook = { id: '2701', title: 'Moby Dick', author: 'Herman Melville' };
+
+    const slots = new Array(8).fill(null);
+    slots[2] = oldBook;
+    saveSlots(slots);
+
+    localStorage.setItem(
+      'zenolet-reading-progress',
+      JSON.stringify({ '84': { progressFraction: 0.5, lastReadTime: Date.now() } })
+    );
+
+    const mockDelete = vi.fn().mockResolvedValue(true);
+    const mockPut = vi.fn().mockResolvedValue(undefined);
+    const mockCache = { delete: mockDelete, put: mockPut, match: vi.fn() };
+    const mockOpen = vi.fn().mockResolvedValue(mockCache);
+
+    // @ts-ignore
+    globalThis.caches = { open: mockOpen, delete: vi.fn(), has: vi.fn(), keys: vi.fn(), match: vi.fn() };
+
+    try {
+      await saveBookOffline(newBook, { metadata: newBook, content: '<p>Whale</p>' }, 2);
+      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v1');
+      expect(mockDelete).toHaveBeenCalledWith('/cached-books/84');
+      expect(mockPut).toHaveBeenCalledWith('/cached-books/2701', expect.anything());
+      expect(getStoredProgress('84')).toBeNull();
+    } finally {
+      // @ts-ignore
+      delete globalThis.caches;
+    }
+  });
+
+  it('purges Slot 0 cache when saving to a full shelf without a target slot (COR-001)', async () => {
+    const { saveSlots, saveBookOffline, getStoredSlots } = await import('./storage.js');
+    const fullSlots = Array.from({ length: 8 }, (_, i) => ({
+      id: `book-${i}`,
+      title: `Title ${i}`,
+      author: `Author ${i}`
+    }));
+    saveSlots(fullSlots);
+
+    const incomingBook = { id: 'book-new', title: 'New Title', author: 'New Author' };
+
+    const mockDelete = vi.fn().mockResolvedValue(true);
+    const mockPut = vi.fn().mockResolvedValue(undefined);
+    const mockCache = { delete: mockDelete, put: mockPut, match: vi.fn() };
+    const mockOpen = vi.fn().mockResolvedValue(mockCache);
+
+    // @ts-ignore
+    globalThis.caches = { open: mockOpen, delete: vi.fn(), has: vi.fn(), keys: vi.fn(), match: vi.fn() };
+
+    try {
+      await saveBookOffline(incomingBook, { metadata: incomingBook, content: '<p>New</p>' }, null);
+      expect(mockDelete).toHaveBeenCalledWith('/cached-books/book-0');
+      expect(mockPut).toHaveBeenCalledWith('/cached-books/book-new', expect.anything());
+      const updated = getStoredSlots();
+      expect(updated[0]?.id).toBe('book-new');
+      expect(updated[1]?.id).toBe('book-1');
+    } finally {
+      // @ts-ignore
+      delete globalThis.caches;
+    }
+  });
+
   it('formats byte sizes into clean human-readable strings via formatBytes', async () => {
     const { formatBytes } = await import('./storage.js');
     expect(formatBytes(undefined)).toBe('');

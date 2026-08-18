@@ -1,26 +1,31 @@
 // Cloudflare Worker CORS Proxy Script for Zenolet
-// Designed for https://rogerallen.github.io/zenolet with support for local dev & Tailscale domains.
-
-const ALLOWED_EXACT_ORIGINS = new Set(['https://rogerallen.github.io', 'https://rogerallen.github.io/zenolet']);
+// Designed for static deployments (GitHub Pages, Cloudflare Pages, Netlify, Vercel) with support for local dev & Tailscale domains.
 
 /**
  * Validates whether the incoming Origin is allowed to use this CORS proxy.
  */
-function isOriginAllowed(origin) {
+function isOriginAllowed(origin, env) {
   // Allow direct non-browser requests (e.g. curl, server-to-server, wrangler tail)
   if (!origin) return true;
 
-  if (ALLOWED_EXACT_ORIGINS.has(origin)) return true;
+  if (env && env.ALLOWED_ORIGIN && origin === env.ALLOWED_ORIGIN) return true;
 
   try {
     const url = new URL(origin);
     const host = url.hostname;
 
-    // GitHub Pages domain
-    if (host === 'rogerallen.github.io') return true;
-
     // Local development environments
     if (host === 'localhost' || host === '127.0.0.1') return true;
+
+    // Static hosting platforms
+    if (
+      host.endsWith('.github.io') ||
+      host.endsWith('.pages.dev') ||
+      host.endsWith('.netlify.app') ||
+      host.endsWith('.vercel.app')
+    ) {
+      return true;
+    }
 
     // Tailscale network domains (*.ts.net)
     if (host.endsWith('.ts.net')) return true;
@@ -34,8 +39,8 @@ function isOriginAllowed(origin) {
 /**
  * Returns standard CORS headers tailored to the requesting origin.
  */
-function getCorsHeaders(origin) {
-  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : 'https://rogerallen.github.io';
+function getCorsHeaders(origin, env) {
+  const allowedOrigin = origin && isOriginAllowed(origin, env) ? origin : '*';
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
@@ -47,24 +52,24 @@ function getCorsHeaders(origin) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const origin = request.headers.get('Origin');
 
     // 1. Preflight OPTIONS Handling
     if (request.method === 'OPTIONS') {
-      if (origin && !isOriginAllowed(origin)) {
+      if (origin && !isOriginAllowed(origin, env)) {
         console.warn(`[Zenolet Proxy] Rejected OPTIONS preflight from origin: ${origin}`);
         return new Response('Forbidden: Origin not allowed', { status: 403 });
       }
       console.log(`[Zenolet Proxy] Handled OPTIONS preflight for origin: ${origin || 'direct'}`);
       return new Response(null, {
         status: 204,
-        headers: getCorsHeaders(origin)
+        headers: getCorsHeaders(origin, env)
       });
     }
 
     // 2. Enforce Origin Security on GET/HEAD
-    if (origin && !isOriginAllowed(origin)) {
+    if (origin && !isOriginAllowed(origin, env)) {
       console.warn(`[Zenolet Proxy] Rejected ${request.method} from origin: ${origin}`);
       return new Response('Forbidden: Origin not allowed', {
         status: 403,
@@ -77,7 +82,7 @@ export default {
     if (!targetUrl) {
       return new Response('Missing ?url= parameter', {
         status: 400,
-        headers: getCorsHeaders(origin)
+        headers: getCorsHeaders(origin, env)
       });
     }
 
@@ -87,14 +92,14 @@ export default {
     } catch {
       return new Response('Invalid ?url= parameter', {
         status: 400,
-        headers: getCorsHeaders(origin)
+        headers: getCorsHeaders(origin, env)
       });
     }
 
     if (parsedTargetUrl.protocol !== 'https:' && parsedTargetUrl.protocol !== 'http:') {
       return new Response('Forbidden: Only HTTP/HTTPS URLs are permitted', {
         status: 403,
-        headers: getCorsHeaders(origin)
+        headers: getCorsHeaders(origin, env)
       });
     }
 
@@ -104,7 +109,7 @@ export default {
       console.warn(`[Zenolet Proxy] Rejected proxy request for non-Gutenberg host: "${targetHost}"`);
       return new Response('Forbidden: Target host not allowed. Only Project Gutenberg resources may be proxied.', {
         status: 403,
-        headers: getCorsHeaders(origin)
+        headers: getCorsHeaders(origin, env)
       });
     }
 
@@ -117,7 +122,7 @@ export default {
       });
 
       const responseHeaders = new Headers(response.headers);
-      const corsHeaders = getCorsHeaders(origin);
+      const corsHeaders = getCorsHeaders(origin, env);
       for (const [key, val] of Object.entries(corsHeaders)) {
         responseHeaders.set(key, val);
       }
@@ -161,7 +166,7 @@ export default {
       });
     } catch (err) {
       console.error(`[Zenolet Proxy] Error fetching "${targetUrl}": ${err.message}`);
-      const errHeaders = getCorsHeaders(origin);
+      const errHeaders = getCorsHeaders(origin, env);
       errHeaders['Content-Type'] = 'text/plain';
       return new Response(`Proxy error: ${err.message}`, {
         status: 500,
