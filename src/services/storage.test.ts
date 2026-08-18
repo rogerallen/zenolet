@@ -157,4 +157,22 @@ describe('Storage and Progress Math for Zenolet', () => {
       delete globalThis.caches;
     }
   });
+
+  it('formats byte sizes into clean human-readable strings via formatBytes', async () => {
+    const { formatBytes } = await import('./storage.js');
+    expect(formatBytes(undefined)).toBe('');
+    expect(formatBytes(0)).toBe('');
+    expect(formatBytes(500)).toBe('500 B');
+    expect(formatBytes(1024)).toBe('1 KB');
+    expect(formatBytes(512 * 1024)).toBe('512 KB');
+    expect(formatBytes(2.2 * 1024 * 1024)).toBe('2.2 MB');
+    expect(formatBytes(15.75 * 1024 * 1024)).toBe('15.8 MB');
+  });
+
+  it('formats library storage summary strings correctly via formatStorageSummary', async () => {
+    const { formatStorageSummary } = await import('./storage.js');
+    expect(formatStorageSummary(0, 0)).toBe('0 books, 0 MB used');
+    expect(formatStorageSummary(1, 1.2 * 1024 * 1024)).toBe('1 book, 1.2 MB used');
+    expect(formatStorageSummary(3, 3.8 * 1024 * 1024)).toBe('3 books, 3.8 MB used');
+  });
 });

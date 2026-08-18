@@ -1,5 +1,5 @@
 import type { CuratorConfig } from '../services/config.js';
-import { getStoredProgress, type BookMetadata } from '../services/storage.js';
+import { getStoredProgress, formatBytes, type BookMetadata } from '../services/storage.js';
 
 export function escapeHtml(str: string): string {
   return str
@@ -33,32 +33,88 @@ export function renderCuratorHeader(
   `;
 }
 
+export interface LoadingSlotState {
+  slotIndex: number;
+  book?: BookMetadata | null;
+}
+
 export function render8SlotGrid(
   gridContainer: HTMLElement,
   storedSlots: (BookMetadata | null)[],
   maxSlots: number = 8,
   onOpenBook: (bookId: string, slotIndex: number) => void,
   onRemoveBook: (bookId: string, slotIndex: number) => void,
-  onEmptySlotClick: (slotIndex: number) => void
+  onEmptySlotClick: (slotIndex: number) => void,
+  loadingSlot?: LoadingSlotState | null
 ): void {
   let html = '';
 
   for (let i = 0; i < maxSlots; i++) {
-    const book = storedSlots[i];
-    if (book) {
-      const progressFraction = getStoredProgress(book.id);
-      let progressHtml = '';
-      if (progressFraction !== null && progressFraction > 0) {
-        const pct = Math.round(progressFraction * 100);
-        progressHtml = `
-          <div class="slot-progress-bar-container" title="${pct}% read">
-            <span class="slot-progress-text">${pct >= 99 ? 'Finished 🎉' : `${pct}% read`}</span>
-            <div class="slot-progress-bar">
-              <div class="slot-progress-fill" style="width: ${pct}%"></div>
+    const isLoadingThisSlot = loadingSlot && loadingSlot.slotIndex === i;
+    const book = storedSlots[i] || (isLoadingThisSlot ? loadingSlot.book : null);
+
+    if (isLoadingThisSlot) {
+      if (book) {
+        const coverUrl = book.coverUrl;
+        const coverHtml = coverUrl
+          ? `
+            <div class="slot-cover-wrap">
+              <img class="slot-cover-img" src="${escapeHtml(coverUrl)}" alt="${escapeHtml(book.title)} cover" loading="lazy" />
+            </div>
+          `
+          : `
+            <div class="slot-cover-wrap slot-cover-placeholder">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </div>
+          `;
+
+        html += `
+          <div class="slot-card slot-filled slot-loading" data-slot-index="${i}">
+            <div class="slot-card-body">
+              ${coverHtml}
+              <div class="slot-card-content">
+                <h3 class="slot-card-title">${escapeHtml(book.title)}</h3>
+                <p class="slot-card-author">by ${escapeHtml(book.author)}</p>
+              </div>
+            </div>
+            <div class="slot-loading-indicator">
+              <div class="slot-spinner"></div>
+              <span class="slot-loading-text">Downloading...</span>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="slot-card slot-empty slot-loading" data-slot-index="${i}">
+            <div class="slot-empty-body">
+              <div class="slot-spinner"></div>
+              <span class="slot-empty-label">Downloading...</span>
+              <span class="slot-sub-text">Slot ${i + 1}</span>
             </div>
           </div>
         `;
       }
+      continue;
+    }
+
+    if (book) {
+      const progressFraction = getStoredProgress(book.id);
+      const pct = progressFraction !== null ? Math.round(progressFraction * 100) : 0;
+      const sizeStr = formatBytes(book.byteSize);
+      const progressHtml = `
+        <div class="slot-progress-bar-container" title="${pct}% read${sizeStr ? ` • ${sizeStr}` : ''}">
+          <div class="slot-progress-header">
+            <span class="slot-progress-text">${pct >= 99 ? 'Finished 🎉' : `${pct}% read`}</span>
+            ${sizeStr ? `<span class="slot-size-text">${escapeHtml(sizeStr)}</span>` : ''}
+          </div>
+          <div class="slot-progress-bar">
+            <div class="slot-progress-fill" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      `;
 
       const coverUrl = book.coverUrl;
       const coverHtml = coverUrl
@@ -110,7 +166,7 @@ export function render8SlotGrid(
   gridContainer.innerHTML = html;
 
   // Interactivity
-  gridContainer.querySelectorAll('.slot-filled').forEach((card) => {
+  gridContainer.querySelectorAll('.slot-filled:not(.slot-loading)').forEach((card) => {
     card.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).closest('.btn-remove-slot, .btn-trash-slot')) return;
       const id = card.getAttribute('data-book-id');
@@ -128,7 +184,7 @@ export function render8SlotGrid(
     });
   });
 
-  gridContainer.querySelectorAll('.slot-empty').forEach((card) => {
+  gridContainer.querySelectorAll('.slot-empty:not(.slot-loading)').forEach((card) => {
     card.addEventListener('click', () => {
       const idx = parseInt(card.getAttribute('data-slot-index') || '0', 10);
       onEmptySlotClick(idx);

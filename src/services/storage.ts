@@ -6,6 +6,49 @@ export interface BookMetadata {
   author: string;
   coverUrl?: string;
   epubUrl?: string;
+  byteSize?: number;
+}
+
+export function formatBytes(bytes?: number | null): string {
+  if (!bytes || bytes <= 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export async function getActualStorageUsage(): Promise<{ bookCount: number; totalBytes: number }> {
+  let totalBytes = 0;
+  const slots = getStoredSlots();
+  const bookCount = slots.filter((s) => s !== null).length;
+
+  if (typeof caches !== 'undefined') {
+    try {
+      const cache = await caches.open(BOOK_CACHE_NAME);
+      const keys = await cache.keys();
+      for (const req of keys) {
+        const res = await cache.match(req);
+        if (res) {
+          const blob = await res.blob();
+          totalBytes += blob.size;
+        }
+      }
+    } catch (e) {
+      console.warn('[Zenolet Storage] Failed to compute exact cache size:', e);
+    }
+  }
+
+  // Fallback to slot byteSize sum if Cache API is unavailable or returns 0 while books exist
+  if (totalBytes === 0 && bookCount > 0) {
+    totalBytes = slots.reduce((acc, s) => acc + (s?.byteSize || 0), 0);
+  }
+
+  return { bookCount, totalBytes };
+}
+
+export function formatStorageSummary(bookCount: number, totalBytes: number): string {
+  const bookLabel = bookCount === 1 ? 'book' : 'books';
+  const sizeFormatted = totalBytes > 0 ? formatBytes(totalBytes) : '0 MB';
+  return `${bookCount} ${bookLabel}, ${sizeFormatted} used`;
 }
 
 export interface BookDetails {
@@ -123,6 +166,14 @@ export async function saveBookOffline(
   data: BookDetails,
   targetSlotIndex?: number | null
 ): Promise<void> {
+  if (!book.byteSize && data.content) {
+    try {
+      book.byteSize = new Blob([data.content]).size;
+    } catch {
+      book.byteSize = data.content.length;
+    }
+  }
+
   const cacheUrl = `/cached-books/${encodeURIComponent(book.id)}`;
   if (typeof caches !== 'undefined') {
     try {

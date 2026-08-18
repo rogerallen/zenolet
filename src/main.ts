@@ -8,12 +8,15 @@ import {
   saveBookOffline,
   getStoredBookOffline,
   getStoredSlots,
+  saveSlots,
   removeBookFromSlot,
   getStoredProgress,
   restoreBookProgressByFraction,
+  getActualStorageUsage,
+  formatStorageSummary,
   type BookMetadata
 } from './services/storage.ts';
-import { renderCuratorHeader, render8SlotGrid } from './components/Bookshelf.ts';
+import { renderCuratorHeader, render8SlotGrid, type LoadingSlotState } from './components/Bookshelf.ts';
 import {
   setTheme,
   setFontSize,
@@ -31,6 +34,7 @@ let config: ZenoletConfig = {};
 let allBooks: CatalogBook[] = [];
 let activeBook: CatalogBook | null = null;
 let activeSlotIndex: number | null = null;
+let loadingSlotState: LoadingSlotState | null = null;
 
 const readerState: ReaderState = {
   currentView: 'library',
@@ -74,6 +78,7 @@ let DOM: {
   discoverClose: HTMLButtonElement;
   discoverSearchInput: HTMLInputElement;
   discoverResults: HTMLDivElement;
+  libraryStorageStatus: HTMLSpanElement;
 };
 
 // --- App Initialization ---
@@ -114,7 +119,8 @@ async function initApp() {
     discoverPanel: document.getElementById('discover-panel') as HTMLElement,
     discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
     discoverSearchInput: document.getElementById('discover-search-input') as HTMLInputElement,
-    discoverResults: document.getElementById('discover-results') as HTMLDivElement
+    discoverResults: document.getElementById('discover-results') as HTMLDivElement,
+    libraryStorageStatus: document.getElementById('library-storage-status') as HTMLSpanElement
   };
 
   // Load Curator Configuration (zenolet.config.json)
@@ -193,8 +199,16 @@ function update8SlotShelfView() {
     (slotIndex) => {
       activeSlotIndex = slotIndex;
       openSearchGUI();
-    }
+    },
+    loadingSlotState
   );
+
+  // Update actual storage usage summary in footer
+  getActualStorageUsage().then(({ bookCount, totalBytes }) => {
+    if (DOM?.libraryStorageStatus) {
+      DOM.libraryStorageStatus.textContent = formatStorageSummary(bookCount, totalBytes);
+    }
+  });
 }
 
 // --- Search GUI Operations ---
@@ -223,7 +237,77 @@ async function handleSelectBookForSlot(
     coverUrl
   };
 
-  await openBook(book, null, true, activeSlotIndex);
+  const targetSlot = typeof activeSlotIndex === 'number' ? activeSlotIndex : 0;
+  await loadBookIntoSlot(book, targetSlot);
+}
+
+// --- Slot Download Operations (Stay on Shelf) ---
+async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Promise<void> {
+  // Set slot spinner loading state while downloading
+  loadingSlotState = {
+    slotIndex: targetSlotIndex,
+    book: {
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      epubUrl: book.epubUrl,
+      coverUrl: book.coverUrl
+    }
+  };
+  update8SlotShelfView();
+
+  try {
+    // 1. Check if already stored offline in Cache API
+    const offlineData = await getStoredBookOffline(book.id);
+    let processedContent = '';
+
+    if (offlineData) {
+      processedContent = offlineData.content;
+    } else {
+      // 2. Fetch binary EPUB via candidate URLs
+      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
+      let lastErr: Error | null = null;
+      let epubBuffer: ArrayBuffer | null = null;
+
+      for (const candidate of candidateUrls) {
+        try {
+          const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
+          if (buffer && buffer.byteLength > 100) {
+            epubBuffer = buffer;
+            break;
+          }
+        } catch (err) {
+          lastErr = err as Error;
+        }
+      }
+
+      if (!epubBuffer) {
+        throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
+      }
+
+      // Parse & Stitch EPUB3 Archive
+      const parsed = parseEpubArchive(epubBuffer);
+      processedContent = parsed.htmlContent;
+    }
+
+    const byteSize = new Blob([processedContent]).size;
+    const meta: BookMetadata = {
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      epubUrl: book.epubUrl,
+      coverUrl: book.coverUrl,
+      byteSize
+    };
+
+    await saveBookOffline(meta, { metadata: meta, content: processedContent }, targetSlotIndex);
+  } catch (err) {
+    console.error('[Zenolet] Failed to download book into slot:', err);
+    alert(`Could not download "${book.title}". Please check your internet connection or proxy settings.`);
+  } finally {
+    loadingSlotState = null;
+    update8SlotShelfView();
+  }
 }
 
 // --- Book Reader Operations ---
@@ -249,43 +333,76 @@ async function openBook(
     if (offlineData) {
       processedContent = offlineData.content;
       DOM.readerContent.innerHTML = processedContent;
-    } else {
-      // 2. Fetch via candidate EPUB URLs
-      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
-      let lastErr: Error | null = null;
-      let epubBuffer: ArrayBuffer | null = null;
 
-      for (const candidate of candidateUrls) {
-        try {
-          const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
-          if (buffer && buffer.byteLength > 100) {
-            epubBuffer = buffer;
-            break;
-          }
-        } catch (err) {
-          lastErr = err as Error;
+      // Backfill byteSize if not already stored on shelf slot
+      const slotIndexToUpdate = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+      if (typeof slotIndexToUpdate === 'number') {
+        const slots = getStoredSlots();
+        if (slots[slotIndexToUpdate] && !slots[slotIndexToUpdate]?.byteSize) {
+          slots[slotIndexToUpdate]!.byteSize = new Blob([processedContent]).size;
+          saveSlots(slots);
         }
       }
-
-      if (!epubBuffer) {
-        throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
+    } else {
+      // Set slot spinner loading state while downloading EPUB
+      const slotIndexToLoad = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+      if (typeof slotIndexToLoad === 'number') {
+        loadingSlotState = {
+          slotIndex: slotIndexToLoad,
+          book: {
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            epubUrl: book.epubUrl,
+            coverUrl: book.coverUrl
+          }
+        };
+        update8SlotShelfView();
       }
 
-      // Parse & Stitch EPUB3 Archive
-      const parsed = parseEpubArchive(epubBuffer);
-      processedContent = parsed.htmlContent;
-      DOM.readerContent.innerHTML = processedContent;
+      try {
+        // 2. Fetch via candidate EPUB URLs
+        const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
+        let lastErr: Error | null = null;
+        let epubBuffer: ArrayBuffer | null = null;
 
-      // Always auto-save book offline into slot storage upon selection
-      const meta: BookMetadata = {
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        epubUrl: book.epubUrl,
-        coverUrl: book.coverUrl
-      };
-      const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-      await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
+        for (const candidate of candidateUrls) {
+          try {
+            const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
+            if (buffer && buffer.byteLength > 100) {
+              epubBuffer = buffer;
+              break;
+            }
+          } catch (err) {
+            lastErr = err as Error;
+          }
+        }
+
+        if (!epubBuffer) {
+          throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
+        }
+
+        // Parse & Stitch EPUB3 Archive
+        const parsed = parseEpubArchive(epubBuffer);
+        processedContent = parsed.htmlContent;
+        DOM.readerContent.innerHTML = processedContent;
+
+        const byteSize = new Blob([processedContent]).size;
+
+        // Always auto-save book offline into slot storage upon selection
+        const meta: BookMetadata = {
+          id: book.id,
+          title: book.title,
+          author: book.author,
+          epubUrl: book.epubUrl,
+          coverUrl: book.coverUrl,
+          byteSize
+        };
+        const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+        await saveBookOffline(meta, { metadata: meta, content: processedContent }, slotToSave);
+      } finally {
+        loadingSlotState = null;
+      }
     }
 
     // Switch View

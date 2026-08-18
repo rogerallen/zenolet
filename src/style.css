@@ -1419,13 +1419,27 @@ a:not([href]) {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+}
+
+.slot-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .slot-progress-text {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--accent-color);
+}
+
+.slot-size-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 .slot-progress-bar {
@@ -1440,6 +1454,52 @@ a:not([href]) {
   height: 100%;
   background-color: var(--accent-color);
   border-radius: 4px;
+}
+
+/* Loading Slot State */
+.slot-card.slot-loading {
+  cursor: wait !important;
+  pointer-events: none;
+}
+
+.slot-loading-indicator {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slot-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: slot-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.slot-empty-body .slot-spinner {
+  width: 28px;
+  height: 28px;
+  border-width: 2.5px;
+  margin-bottom: 8px;
+}
+
+@keyframes slot-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.slot-loading-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  letter-spacing: 0.02em;
 }
 
 /* Empty Slot Card */
@@ -1507,6 +1567,11 @@ a:not([href]) {
 
 .library-footer .version-tag {
   font-weight: 500;
+}
+
+.library-footer .storage-status-tag {
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .library-footer .dot-separator {
