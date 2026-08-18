@@ -72,7 +72,9 @@
           });
           if (window.caches) {
             caches.keys().then(function (keys) {
-              for (var j = 0; j < keys.length; j++) caches.delete(keys[j]);
+              for (var j = 0; j < keys.length; j++) {
+                if (keys[j] !== 'zenolet-books-v1') caches.delete(keys[j]);
+              }
             });
           }
         }
@@ -93,7 +95,7 @@
 
         <!-- Minimal Footer (Below Slots) -->
         <footer class="library-footer">
-          <span class="version-tag">Zenolet v0.14.0</span>
+          <span class="version-tag">Zenolet v0.15.0</span>
           <span class="dot-separator">•</span>
           <span id="library-storage-status" class="storage-status-tag">0 books, 0 MB used</span>
           <span class="dot-separator">•</span>
@@ -247,7 +249,7 @@
       </div>
 
       <!-- Settings Dropdown Panel (Available in Bookshelf & Reader) -->
-      <div id="settings-panel" class="settings-panel">
+      <div id="settings-panel" class="settings-panel" role="dialog" aria-label="Reading Settings">
         <div class="settings-group">
           <span class="settings-label">Theme</span>
           <div class="theme-options">
@@ -261,9 +263,9 @@
         <div class="settings-group">
           <span class="settings-label">Font Size</span>
           <div class="font-controls">
-            <button id="font-decrease" class="btn-font">A-</button>
+            <button id="font-decrease" class="btn-font" aria-label="Decrease font size">A-</button>
             <span id="font-size-display" style="font-weight: 600">18px</span>
-            <button id="font-increase" class="btn-font">A+</button>
+            <button id="font-increase" class="btn-font" aria-label="Increase font size">A+</button>
           </div>
         </div>
 
@@ -278,11 +280,11 @@
       </div>
 
       <!-- About Modal Dialog Overlay -->
-      <div id="about-modal" class="modal-overlay">
+      <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
         <div class="modal-card about-modal-card">
           <div class="modal-header">
-            <h3 class="modal-title">About Zenolet</h3>
-            <button id="about-close" class="btn-close" aria-label="Close">&times;</button>
+            <h3 id="about-modal-title" class="modal-title">About Zenolet</h3>
+            <button id="about-close" class="btn-close" aria-label="Close About Dialog">&times;</button>
           </div>
           <div class="about-modal-body">
             <p class="about-lead">
@@ -330,11 +332,11 @@
       </div>
 
       <!-- QR Code Mobile Handoff Modal Overlay -->
-      <div id="qr-modal" class="modal-overlay">
+      <div id="qr-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
         <div class="modal-card">
           <div class="modal-header">
-            <h3 class="modal-title">Read on Mobile</h3>
-            <button id="qr-close" class="btn-close">&times;</button>
+            <h3 id="qr-modal-title" class="modal-title">Read on Mobile</h3>
+            <button id="qr-close" class="btn-close" aria-label="Close QR Modal">&times;</button>
           </div>
           <p style="font-size: 0.9rem; color: var(--text-secondary)">
             Scan this QR code with your phone camera to transfer your book and reading position:
@@ -342,16 +344,22 @@
           <div class="qr-canvas-wrapper">
             <canvas id="qr-canvas"></canvas>
           </div>
-          <input type="text" id="qr-url-input" class="qr-url-input" readonly />
+          <input type="text" id="qr-url-input" class="qr-url-input" aria-label="Mobile reading URL" readonly />
         </div>
       </div>
 
       <!-- Search & Discover Modal Overlay -->
       <div id="discover-overlay" class="modal-overlay"></div>
-      <aside id="discover-panel" class="discover-panel">
+      <aside
+        id="discover-panel"
+        class="discover-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="discover-panel-title"
+      >
         <header class="discover-header">
-          <h3 style="font-family: var(--font-serif); font-size: 1.2rem">Add Book to Shelf</h3>
-          <button id="discover-close" class="btn-close">&times;</button>
+          <h3 id="discover-panel-title" style="font-family: var(--font-serif); font-size: 1.2rem">Add Book to Shelf</h3>
+          <button id="discover-close" class="btn-close" aria-label="Close Discover Drawer">&times;</button>
         </header>
         <div class="discover-body">
           <div class="search-input-wrapper">

@@ -81,6 +81,33 @@ export default {
       });
     }
 
+    let parsedTargetUrl;
+    try {
+      parsedTargetUrl = new URL(targetUrl);
+    } catch {
+      return new Response('Invalid ?url= parameter', {
+        status: 400,
+        headers: getCorsHeaders(origin)
+      });
+    }
+
+    if (parsedTargetUrl.protocol !== 'https:' && parsedTargetUrl.protocol !== 'http:') {
+      return new Response('Forbidden: Only HTTP/HTTPS URLs are permitted', {
+        status: 403,
+        headers: getCorsHeaders(origin)
+      });
+    }
+
+    const targetHost = parsedTargetUrl.hostname.toLowerCase();
+    const isAllowedHost = targetHost === 'gutenberg.org' || targetHost.endsWith('.gutenberg.org');
+    if (!isAllowedHost) {
+      console.warn(`[Zenolet Proxy] Rejected proxy request for non-Gutenberg host: "${targetHost}"`);
+      return new Response('Forbidden: Target host not allowed. Only Project Gutenberg resources may be proxied.', {
+        status: 403,
+        headers: getCorsHeaders(origin)
+      });
+    }
+
     console.log(`[Zenolet Proxy] ${request.method} request for: "${targetUrl}" | Origin: "${origin || 'direct'}"`);
 
     try {

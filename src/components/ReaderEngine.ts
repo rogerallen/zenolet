@@ -99,6 +99,12 @@ export function recalculatePages(
     snapPoints.appendChild(snapTarget);
   }
 
+  if (preserveDOMScroll && prevProgress > 0) {
+    restoreBookProgressByFraction(prevProgress, readerViewport);
+  } else if (!preserveDOMScroll) {
+    readerViewport.scrollLeft = 0;
+  }
+
   updatePaginationIndicator(
     readerViewport,
     readerContent,
@@ -115,10 +121,6 @@ export function recalculatePages(
       behavior: 'auto'
     });
   });
-
-  if (preserveDOMScroll && prevProgress > 0) {
-    restoreBookProgressByFraction(prevProgress, readerViewport);
-  }
 }
 
 export function updatePaginationIndicator(

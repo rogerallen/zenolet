@@ -122,6 +122,44 @@ describe('Worker Proxy Security & CORS Preflight', () => {
       global.fetch = originalFetch;
     }
   });
+
+  it('rejects proxy requests targeting non-Gutenberg domains with 403 Forbidden', async () => {
+    const req = new Request('https://proxy.workers.dev/?url=https://evil-site.com/exploit.epub', {
+      method: 'GET',
+      headers: {
+        Origin: 'https://rogerallen.github.io'
+      }
+    });
+
+    const res = await worker.fetch(req);
+    expect(res.status).toBe(403);
+    const text = await res.text();
+    expect(text).toContain('Only Project Gutenberg resources may be proxied');
+  });
+
+  it('rejects proxy requests targeting non-HTTP protocols with 403 Forbidden', async () => {
+    const req = new Request('https://proxy.workers.dev/?url=file:///etc/passwd', {
+      method: 'GET',
+      headers: {
+        Origin: 'https://rogerallen.github.io'
+      }
+    });
+
+    const res = await worker.fetch(req);
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects malformed target URLs with 400 Bad Request', async () => {
+    const req = new Request('https://proxy.workers.dev/?url=not-a-valid-url', {
+      method: 'GET',
+      headers: {
+        Origin: 'https://rogerallen.github.io'
+      }
+    });
+
+    const res = await worker.fetch(req);
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('getGutenbergCandidateUrls & fetchArrayBufferWithProxy', () => {

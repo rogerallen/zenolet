@@ -81,5 +81,8 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
 
     // Target scroll = 0.5 * 4500 = 2250 -> targetSpread = Math.round(2250 / 500) = 5 -> 5 * 500 = 2500
     expect(mockViewport.scrollLeft).toBe(2500);
+    expect(state.currentPageSpread).toBe(5);
+    expect(mockPageIndicator.textContent).toBe('Page 6 of 10');
+    expect(mockProgressFill.style.width).not.toBe('0%');
   });
 });

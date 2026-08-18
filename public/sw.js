@@ -88,7 +88,8 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          return caches.match('./');
+          // Do not return HTML index fallback for static subresources (JS/CSS/fonts/images)
+          return new Response(null, { status: 404, statusText: 'Offline Resource Not Found' });
         });
     })
   );

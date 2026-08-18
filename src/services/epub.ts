@@ -237,16 +237,19 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     const chapterRawText = strFromU8(zipEntries[chapterKey]);
     const chapterDoc = parseChapterDoc(chapterRawText, parser);
 
-    // Remove legacy scripts, external styles, and publisher headers
-    chapterDoc.querySelectorAll('script, link[rel="stylesheet"], style').forEach((n) => n.remove());
+    // Remove dangerous and disallowed elements
+    chapterDoc
+      .querySelectorAll('script, style, link, iframe, object, embed, applet, form, input, textarea, button, meta, base')
+      .forEach((n) => n.remove());
 
     const chapterDir = spineItem.fullPath.includes('/')
       ? spineItem.fullPath.substring(0, spineItem.fullPath.lastIndexOf('/'))
       : '';
 
-    // Rewrite inline <img> sources with inlined Data URLs
+    // Rewrite inline <img> sources with inlined Data URLs and strip external tracking URLs (PRI-001)
     chapterDoc.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');
+      let inlined = false;
       if (src) {
         const resolvedImgPath = resolveZipPath(chapterDir, src).toLowerCase();
         const dataUrl = imageMap.get(resolvedImgPath) || imageMap.get(src.toLowerCase());
@@ -258,7 +261,13 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
           img.style.maxHeight = 'calc(100vh - 160px)';
           img.style.height = 'auto';
           img.style.objectFit = 'contain';
+          inlined = true;
         }
+      }
+      if (!inlined) {
+        // Strip unresolvable or external image src to prevent unproxied network leaks
+        img.removeAttribute('src');
+        img.style.display = 'none';
       }
     });
 
@@ -278,7 +287,19 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
             newImg.style.height = 'auto';
             newImg.style.objectFit = 'contain';
             svg.replaceWith(newImg);
+            return;
           }
+        }
+      }
+    });
+
+    // Sanitize all attributes across all remaining elements (SEC-001)
+    chapterDoc.querySelectorAll('*').forEach((el) => {
+      const attrNames = el.getAttributeNames();
+      for (const attr of attrNames) {
+        // Strip inline event handler attributes (e.g. onload, onerror, onclick)
+        if (/^on/i.test(attr)) {
+          el.removeAttribute(attr);
         }
       }
     });
@@ -297,23 +318,30 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
       }
     });
 
-    // Rewrite intra-chapter anchor links (#anchor and rel.xhtml#anchor)
+    // Rewrite intra-chapter anchor links and sanitize dangerous href protocols (e.g. javascript:)
     chapterDoc.querySelectorAll('a[href]').forEach((a) => {
-      const href = a.getAttribute('href');
-      if (href) {
-        if (href.startsWith('#')) {
-          a.setAttribute('href', `#c${chapterIndex}_${href.slice(1)}`);
-        } else if (href.includes('#')) {
-          const [filePart, anchorPart] = href.split('#');
-          const targetSpineIdx = spineItems.findIndex((s) => s.href.endsWith(filePart));
-          if (targetSpineIdx !== -1) {
-            a.setAttribute('href', `#c${targetSpineIdx}_${anchorPart}`);
-          }
+      const href = a.getAttribute('href') || '';
+      const trimmedHref = href.trim();
+
+      // Disallow dangerous script URLs
+      if (/^(javascript|vbscript|data):/i.test(trimmedHref)) {
+        a.removeAttribute('href');
+        return;
+      }
+
+      if (trimmedHref.startsWith('#')) {
+        a.setAttribute('href', `#c${chapterIndex}_${trimmedHref.slice(1)}`);
+      } else if (trimmedHref.includes('#')) {
+        const [filePart, anchorPart] = trimmedHref.split('#');
+        const targetSpineIdx = spineItems.findIndex((s) => s.href.endsWith(filePart));
+        if (targetSpineIdx !== -1) {
+          a.setAttribute('href', `#c${targetSpineIdx}_${anchorPart}`);
         }
       }
     });
 
-    const bodyContent = chapterDoc.body ? chapterDoc.body.innerHTML : chapterRawText;
+    const bodyEl = chapterDoc.querySelector('body') || chapterDoc.body;
+    const bodyContent = bodyEl ? bodyEl.innerHTML : chapterRawText;
     if (bodyContent.trim().length > 0) {
       chapterHtmlSections.push(
         `<section class="epub-chapter" id="ch-${chapterIndex}" data-chapter-index="${chapterIndex}">\n${bodyContent}\n</section>`

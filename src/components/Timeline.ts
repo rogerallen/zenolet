@@ -561,10 +561,24 @@ export function renderTimeline(
     };
   }
 
+  const makeAccessibleDot = (dot: HTMLElement, label: string, jumpIndex: number) => {
+    dot.tabIndex = 0;
+    dot.setAttribute('role', 'button');
+    dot.setAttribute('aria-label', label);
+    dot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        onJumpToSpread(jumpIndex);
+      }
+    });
+  };
+
   const beginDot = document.createElement('div');
   beginDot.className = 'timeline-dot begin-dot';
   beginDot.style.left = '0%';
   beginDot.title = 'Begin';
+  makeAccessibleDot(beginDot, 'Jump to beginning of book', 0);
   beginDot.addEventListener('click', (e) => {
     e.stopPropagation();
     onJumpToSpread(0);
@@ -575,6 +589,7 @@ export function renderTimeline(
   endDot.className = 'timeline-dot end-dot';
   endDot.style.left = '100%';
   endDot.title = 'End';
+  makeAccessibleDot(endDot, 'Jump to end of book', totalPagesSpreads - 1);
   endDot.addEventListener('click', (e) => {
     e.stopPropagation();
     onJumpToSpread(totalPagesSpreads - 1);
@@ -587,6 +602,7 @@ export function renderTimeline(
     dot.className = 'timeline-dot chapter-dot';
     dot.style.left = `${percent}%`;
     dot.title = marker.title;
+    makeAccessibleDot(dot, `Jump to ${marker.title}`, marker.pageSpread);
 
     dot.addEventListener('click', (e) => {
       e.stopPropagation();

