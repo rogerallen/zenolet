@@ -202,4 +202,34 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     flushBookProgress();
     expect(getStoredProgress('2701')).toBe(0.85);
   });
+
+  it('safely handles localStorage.setItem exceptions in setTheme, setFontSize, and setLayoutColumns (REL-002)', async () => {
+    const { setTheme, setFontSize, setLayoutColumns } = await import('./ReaderEngine.js');
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 18,
+      layoutColumns: '1',
+      currentPageSpread: 0,
+      totalPagesSpreads: 10
+    };
+
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = () => {
+      throw new Error('QuotaExceededError');
+    };
+
+    try {
+      expect(() => setTheme('sepia', state)).not.toThrow();
+      expect(state.theme).toBe('sepia');
+
+      expect(() => setFontSize(22, state, () => {})).not.toThrow();
+      expect(state.fontSize).toBe(22);
+
+      expect(() => setLayoutColumns('2', state, () => {})).not.toThrow();
+      expect(state.layoutColumns).toBe('2');
+    } finally {
+      localStorage.setItem = originalSetItem;
+    }
+  });
 });

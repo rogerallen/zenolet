@@ -424,14 +424,16 @@ a:not([href]) {
   color: var(--text-primary);
 }
 
-.reader-content > * {
+.reader-content > *,
+.reader-content .epub-chapter > * {
   padding-left: 40px;
   padding-right: 40px;
   box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
-  .reader-content > * {
+  .reader-content > *,
+  .reader-content .epub-chapter > * {
     padding-left: 20px;
     padding-right: 20px;
   }

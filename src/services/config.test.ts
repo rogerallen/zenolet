@@ -89,4 +89,12 @@ describe('Zenolet Configuration & Curator Header', () => {
     expect(container.innerHTML).not.toContain('<a href=');
     expect(container.innerHTML).not.toContain('javascript:');
   });
+
+  it('safely handles null and undefined inputs in escapeHtml without throwing (REL-001)', async () => {
+    const { escapeHtml } = await import('../components/Bookshelf.js');
+    expect(escapeHtml(undefined)).toBe('');
+    expect(escapeHtml(null)).toBe('');
+    expect(escapeHtml('')).toBe('');
+    expect(escapeHtml('Hello <World> & "Friends"')).toBe('Hello &lt;World&gt; &amp; &quot;Friends&quot;');
+  });
 });

@@ -11,6 +11,7 @@ import {
   saveSlots,
   removeBookFromSlot,
   getStoredProgress,
+  getStoredProgressFraction,
   restoreBookProgressByFraction,
   flushBookProgress,
   getActualStorageUsage,
@@ -36,7 +37,7 @@ import {
   resolveChapterElement
 } from './components/Timeline.ts';
 
-import type { EpubChapter } from './services/epub.js';
+import type { EpubChapter } from './services/epub.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
@@ -493,8 +494,7 @@ async function openBook(
 
 function closeReaderAndReturnToLibrary() {
   if (activeBook) {
-    const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
-    const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+    const progressFraction = getStoredProgressFraction(DOM.readerViewport);
     flushBookProgress(activeBook.id, progressFraction);
   }
   closeChapterPopup();
@@ -515,8 +515,7 @@ function closeReaderAndReturnToLibrary() {
 // --- State & URL Encoding ---
 async function updateUrlHashState(pushHistory: boolean = false) {
   if (!activeBook) return;
-  const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
-  const progress = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+  const progress = getStoredProgressFraction(DOM.readerViewport);
 
   const appState: AppState = {
     bookId: activeBook.id,
@@ -622,13 +621,44 @@ function setupEventListeners() {
     DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
   });
 
-  // Keyboard Shortcuts (Arrow Left/Right, Space)
+  // Keyboard Shortcuts (Arrow Left/Right, Space, Modal Focus Traps)
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      DOM.aboutModal?.classList.remove('visible');
-      closeQRModal(DOM.qrModal);
-      closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
-      DOM.settingsPanel.classList.remove('visible');
+    const activeModal = [DOM.aboutModal, DOM.qrModal, DOM.discoverPanel, DOM.settingsPanel].find(
+      (m) => m && m.classList.contains('visible')
+    );
+
+    if (activeModal) {
+      if (e.key === 'Escape') {
+        DOM.aboutModal?.classList.remove('visible');
+        closeQRModal(DOM.qrModal);
+        closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
+        DOM.settingsPanel.classList.remove('visible');
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusable = activeModal.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const visibleFocusable = Array.from(focusable).filter(
+          (el) => el.offsetParent !== null || el.offsetWidth > 0 || el.offsetHeight > 0
+        );
+        if (visibleFocusable.length > 0) {
+          const first = visibleFocusable[0];
+          const last = visibleFocusable[visibleFocusable.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first || !activeModal.contains(document.activeElement)) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (document.activeElement === last || !activeModal.contains(document.activeElement)) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+        }
+      }
+      return;
     }
 
     if (readerState.currentView !== 'reader') return;
@@ -725,16 +755,14 @@ function setupEventListeners() {
   // Flush reading progress immediately on tab switch or page unload
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && activeBook) {
-      const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
-      const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+      const progressFraction = getStoredProgressFraction(DOM.readerViewport);
       flushBookProgress(activeBook.id, progressFraction);
     }
   });
 
   window.addEventListener('beforeunload', () => {
     if (activeBook) {
-      const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
-      const progressFraction = maxScroll > 0 ? DOM.readerViewport.scrollLeft / maxScroll : 0;
+      const progressFraction = getStoredProgressFraction(DOM.readerViewport);
       flushBookProgress(activeBook.id, progressFraction);
     }
   });

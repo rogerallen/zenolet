@@ -81,6 +81,19 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     expect(res.status).toBe(403);
   });
 
+  it('allows custom domain specified via env.ALLOWED_ORIGIN', async () => {
+    const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://my-custom-library.org'
+      }
+    });
+
+    const res = await worker.fetch(req, { ALLOWED_ORIGIN: 'https://my-custom-library.org' });
+    expect(res.status).toBe(204);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://my-custom-library.org');
+  });
+
   it('rejects GET requests from unauthorized origins', async () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'GET',

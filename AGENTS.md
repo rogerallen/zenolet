@@ -58,6 +58,7 @@ Whenever a feature, deploy, or version bump occurs:
 3. **Zero External Media Leaks**:
    - Only images packed inside the EPUB archive (inlined as local base64 Data URLs) may be rendered.
    - Any external `<img>`, SVG `<image>`, or unresolvable asset URL must have its source attribute stripped to prevent unproxied network requests, third-party tracking, or user IP leaks.
+   - Strip all `srcset`, `background`, and `poster` attributes pointing to remote URLs, as well as external SVG `<use>` elements (`href` or `xlink:href` pointing to non-hash URLs).
 
 4. **Protocol Whitelisting for External Links**:
    - All user-facing or config-driven links (e.g. curator `linkUrl`, external links inside book content) must validate and enforce safe HTTP/HTTPS protocols (`http:`, `https:`) before rendering clickable anchors. Disallow `javascript:` or other pseudo-protocols.
@@ -82,6 +83,8 @@ Whenever a feature, deploy, or version bump occurs:
 
 5. **Structured EPUB Table of Contents Integration**:
    - When present, structured EPUB Table of Contents navigation (`nav.xhtml` or `toc.ncx`) must be parsed into `EpubChapter[]` and persisted with offline book details.
+   - **TOC vs. Page List Separation**: EPUB Table of Contents parsing must strictly target chapter navigation (`nav[epub:type="toc"]`, `nav[role="doc-toc"]`, `nav#toc`) and explicitly exclude print page lists (`nav[epub:type="page-list"]`, `pageTarget`), landmark navigation, and illustration catalogs (`nav[epub:type="loi"]`). Timeline dots, popup chapter menus, and active chapter indicators must never display print page numbers (_"Page 1"_, _"p. 12"_) as chapters.
+   - **Nested Relative Path Resolution**: When navigation documents (`nav.xhtml` or `toc.ncx`) reside in a subfolder (e.g. `EPUB/navigation/nav.xhtml`), all relative chapter paths must be resolved against the navigation document directory (`resolveZipPath(navDir, ...)`).
    - Timeline markers and active chapter indicators must prioritize structured TOC chapters before falling back to DOM heading discovery.
 
 6. **Cross-Platform State Handoff (`state.ts`)**:
@@ -104,6 +107,16 @@ Whenever a feature, deploy, or version bump occurs:
 
 ---
 
+## 💾 Storage & Reliability Invariants
+
+1. **Safe Storage Exception Handling**:
+   - All `localStorage.setItem` invocations (theme, font size, layout columns, reading progress) must be wrapped in `try/catch` blocks to gracefully handle `QuotaExceededError` or restricted storage environments (such as private browsing).
+
+2. **Null-Safe String & HTML Escaping**:
+   - All text formatting and HTML escaping utilities (`escapeHtml`) must be null-safe and tolerate `undefined` or `null` inputs without throwing exceptions.
+
+---
+
 ## ♿ Accessibility (a11y) Invariants
 
 1. **Keyboard Operability**:
@@ -112,6 +125,7 @@ Whenever a feature, deploy, or version bump occurs:
 2. **Modal & Drawer Semantics and Focus Management**:
    - All overlays, drawer panels, and popup menus (Settings, About, QR Modal, Discover panel, Chapter popup) must have `role="dialog"`, `aria-modal="true"`, and appropriate `aria-labelledby` or `aria-label` attributes. All close buttons must have explicit `aria-label` attributes.
    - When opening modals or drawers, focus must be placed immediately into the primary input or dialog control (e.g. search input in Discover drawer, close button in About dialog, or selectable URL in QR modal).
+   - **Focus Trapping**: While any modal or drawer is open (`aboutModal`, `qrModal`, `discoverPanel`, `settingsPanel`), keyboard focus (`Tab` and `Shift + Tab`) must be strictly trapped within the active dialog's interactive controls, and `Escape` must close the dialog.
 
 ---
 

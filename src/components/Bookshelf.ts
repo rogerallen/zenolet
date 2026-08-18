@@ -1,8 +1,9 @@
 import type { CuratorConfig } from '../services/config.js';
 import { getStoredProgress, formatBytes, type BookMetadata } from '../services/storage.js';
 
-export function escapeHtml(str: string): string {
-  return str
+export function escapeHtml(str?: string | null): string {
+  if (!str) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

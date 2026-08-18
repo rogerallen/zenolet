@@ -1,5 +1,6 @@
 // --- Discover & Search GUI Component (Curated Offline Catalog Only) ---
 import type { CatalogBook } from '../services/catalog.js';
+import { escapeHtml } from './Bookshelf.js';
 
 export interface DiscoverState {
   nextUrl: string | null;
@@ -114,13 +115,4 @@ function renderCatalogCards(
       }
     });
   });
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }

@@ -16,7 +16,11 @@ export interface ReaderState {
 export function setTheme(theme: 'paper' | 'sepia' | 'charcoal' | 'night', state: ReaderState): void {
   state.theme = theme;
   document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('zenolet-theme', theme);
+  try {
+    localStorage.setItem('zenolet-theme', theme);
+  } catch (e) {
+    console.warn('[Zenolet Reader] Failed to save theme to localStorage:', e);
+  }
 
   document.querySelectorAll('.theme-btn').forEach((btn) => {
     if (btn.getAttribute('data-theme') === theme) {
@@ -34,13 +38,21 @@ export function setFontSize(size: number, state: ReaderState, recalculateFn: () 
 
   if (content) content.style.fontSize = `${size}px`;
   if (sizeDisplay) sizeDisplay.textContent = `${size}px`;
-  localStorage.setItem('zenolet-font-size', size.toString());
+  try {
+    localStorage.setItem('zenolet-font-size', size.toString());
+  } catch (e) {
+    console.warn('[Zenolet Reader] Failed to save font size to localStorage:', e);
+  }
   recalculateFn();
 }
 
 export function setLayoutColumns(cols: 'auto' | '1' | '2', state: ReaderState, recalculateFn: () => void): void {
   state.layoutColumns = cols;
-  localStorage.setItem('zenolet-layout-columns', cols);
+  try {
+    localStorage.setItem('zenolet-layout-columns', cols);
+  } catch (e) {
+    console.warn('[Zenolet Reader] Failed to save layout columns to localStorage:', e);
+  }
 
   document.querySelectorAll('.layout-btn').forEach((btn) => {
     if (btn.getAttribute('data-columns') === cols) {

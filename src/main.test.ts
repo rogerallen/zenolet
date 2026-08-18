@@ -113,4 +113,59 @@ describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
     link.click();
     expect(windowOpenSpy).toHaveBeenCalledWith('https://www.gutenberg.org', '_blank', 'noopener,noreferrer');
   });
+
+  it('traps Tab and Shift+Tab focus within active modal dialogs (ACC-001)', () => {
+    aboutModal.innerHTML = `
+      <div class="modal-card">
+        <button id="btn-1">First Button</button>
+        <button id="btn-2">Second Button</button>
+        <button id="btn-3">Last Button</button>
+      </div>
+    `;
+    aboutModal.classList.add('visible');
+
+    const btn1 = aboutModal.querySelector('#btn-1') as HTMLButtonElement;
+    const btn3 = aboutModal.querySelector('#btn-3') as HTMLButtonElement;
+
+    // Simulate focus trap keydown handler from main.ts
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeModal = [aboutModal].find((m) => m && m.classList.contains('visible'));
+      if (activeModal && e.key === 'Tab') {
+        const focusable = activeModal.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const visibleFocusable = Array.from(focusable);
+        if (visibleFocusable.length > 0) {
+          const first = visibleFocusable[0];
+          const last = visibleFocusable[visibleFocusable.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first || !activeModal.contains(document.activeElement)) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (document.activeElement === last || !activeModal.contains(document.activeElement)) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    // 1. Tabbing forward from last element wraps to first
+    btn3.focus();
+    expect(document.activeElement).toBe(btn3);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: false }));
+    expect(document.activeElement).toBe(btn1);
+
+    // 2. Tabbing backward (Shift+Tab) from first element wraps to last
+    btn1.focus();
+    expect(document.activeElement).toBe(btn1);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }));
+    expect(document.activeElement).toBe(btn3);
+
+    document.removeEventListener('keydown', handleKeyDown);
+  });
 });

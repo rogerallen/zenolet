@@ -151,7 +151,7 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
   }
 
   // Helper to map TOC link hrefs to stitched document anchor IDs
-  function resolveTocAnchorId(href: string): string {
+  function resolveTocAnchorId(href: string, navDir: string = ''): string {
     if (!href) return 'ch-0';
     const trimmed = href.trim();
     if (trimmed.startsWith('#')) {
@@ -160,7 +160,14 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     }
 
     const [filePart, anchorPart] = trimmed.split('#');
-    const spineIdx = spineItems.findIndex((s) => s.href.endsWith(filePart) || s.fullPath.endsWith(filePart));
+    const normalizedFilePart = resolveZipPath(navDir, filePart).toLowerCase();
+    const spineIdx = spineItems.findIndex(
+      (s) =>
+        s.fullPath.toLowerCase() === normalizedFilePart ||
+        s.href.toLowerCase() === normalizedFilePart ||
+        s.href.toLowerCase().endsWith(filePart.toLowerCase()) ||
+        s.fullPath.toLowerCase().endsWith(filePart.toLowerCase())
+    );
     if (spineIdx !== -1) {
       return anchorPart ? `c${spineIdx}_${anchorPart}` : `ch-${spineIdx}`;
     }
@@ -170,24 +177,53 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
   // 7. Extract Table of Contents (nav.xhtml or toc.ncx)
   const chapters: EpubChapter[] = [];
 
+  const isPageTitle = (title: string) =>
+    /^(page\s*\d+|\d+|p\.\s*\d+|\[\s*page\s*\d+\s*\]|\[\d+\])$/i.test(title.trim()) ||
+    /^(list of illustrations|illustrations|cover|title page|colophon|copyright)$/i.test(title.trim());
+
   // 7a. Check for EPUB3 nav.xhtml (properties="nav")
   const navItem = Array.from(manifestMap.values()).find((item) => item.properties?.includes('nav'));
   if (navItem) {
     const navKey = fileKeys.find((k) => k.toLowerCase() === navItem.fullPath.toLowerCase());
     if (navKey && zipEntries[navKey]) {
+      const navDir = navItem.fullPath.includes('/')
+        ? navItem.fullPath.substring(0, navItem.fullPath.lastIndexOf('/'))
+        : '';
       const navHtml = strFromU8(zipEntries[navKey]);
       const navDoc = parser.parseFromString(navHtml, 'text/html');
-      const navLinks = Array.from(navDoc.querySelectorAll('nav[epub\\:type="toc"] a, nav a'));
 
-      for (const link of navLinks) {
-        const linkTitle = link.textContent?.trim() || '';
-        const href = link.getAttribute('href') || '';
-        if (linkTitle && href) {
-          chapters.push({
-            title: linkTitle,
-            href,
-            anchorId: resolveTocAnchorId(href)
-          });
+      // Specifically target TOC navigation and exclude page-list / landmarks / loi / illustrations
+      const tocNav =
+        navDoc.querySelector('nav[epub\\:type="toc"], nav[role="doc-toc"], nav#toc') ||
+        Array.from(navDoc.querySelectorAll('nav')).find((n) => {
+          const type = (
+            n.getAttribute('epub:type') ||
+            n.getAttribute('role') ||
+            n.getAttribute('id') ||
+            ''
+          ).toLowerCase();
+          return (
+            !type.includes('page-list') &&
+            !type.includes('landmarks') &&
+            !type.includes('loi') &&
+            !type.includes('illustrations')
+          );
+        }) ||
+        navDoc.querySelector('nav');
+
+      if (tocNav) {
+        const navLinks = Array.from(tocNav.querySelectorAll('a[href]'));
+
+        for (const link of navLinks) {
+          const linkTitle = link.textContent?.trim() || '';
+          const href = link.getAttribute('href') || '';
+          if (linkTitle && href && !isPageTitle(linkTitle)) {
+            chapters.push({
+              title: linkTitle,
+              href,
+              anchorId: resolveTocAnchorId(href, navDir)
+            });
+          }
         }
       }
     }
@@ -201,6 +237,9 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     if (ncxItem) {
       const ncxKey = fileKeys.find((k) => k.toLowerCase() === ncxItem.fullPath.toLowerCase());
       if (ncxKey && zipEntries[ncxKey]) {
+        const ncxDir = ncxItem.fullPath.includes('/')
+          ? ncxItem.fullPath.substring(0, ncxItem.fullPath.lastIndexOf('/'))
+          : '';
         const ncxXml = strFromU8(zipEntries[ncxKey]);
         const ncxDoc = parser.parseFromString(ncxXml, 'application/xml');
         const navPoints = Array.from(ncxDoc.querySelectorAll('navPoint'));
@@ -208,11 +247,11 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
         for (const np of navPoints) {
           const label = np.querySelector('navLabel > text')?.textContent?.trim();
           const src = np.querySelector('content')?.getAttribute('src') || '';
-          if (label && src) {
+          if (label && src && !isPageTitle(label)) {
             chapters.push({
               title: label,
               href: src,
-              anchorId: resolveTocAnchorId(src)
+              anchorId: resolveTocAnchorId(src, ncxDir)
             });
           }
         }
@@ -265,6 +304,7 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
 
     // Rewrite inline <img> sources with inlined Data URLs and strip external tracking URLs (PRI-001)
     chapterDoc.querySelectorAll('img').forEach((img) => {
+      img.removeAttribute('srcset');
       const src = img.getAttribute('src');
       let inlined = false;
       if (src) {
@@ -288,8 +328,15 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
       }
     });
 
-    // Normalize SVG-wrapped cover images into standard <img> and strip external SVG image sources
+    // Normalize SVG-wrapped cover images into standard <img> and strip external SVG image sources / use tags
     chapterDoc.querySelectorAll('svg').forEach((svg) => {
+      svg.querySelectorAll('use').forEach((useEl) => {
+        const href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
+        if (href && !href.startsWith('#')) {
+          useEl.remove();
+        }
+      });
+
       const svgImages = svg.querySelectorAll('image');
       svgImages.forEach((svgImage) => {
         const href = svgImage.getAttribute('xlink:href') || svgImage.getAttribute('href');
@@ -318,12 +365,20 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     chapterDoc.querySelectorAll('*').forEach((el) => {
       const attrNames = el.getAttributeNames();
       for (const attr of attrNames) {
+        const attrLower = attr.toLowerCase();
         // Strip inline event handler attributes (e.g. onload, onerror, onclick)
         if (/^on/i.test(attr)) {
           el.removeAttribute(attr);
         }
+        // Strip background / poster attributes that leak external media
+        if (attrLower === 'background' || attrLower === 'poster') {
+          const bgVal = el.getAttribute(attr) || '';
+          if (!bgVal.startsWith('data:')) {
+            el.removeAttribute(attr);
+          }
+        }
         // Sanitize inline styles to strip url(...) declarations that leak external media/IPs
-        if (attr.toLowerCase() === 'style') {
+        if (attrLower === 'style') {
           const styleVal = el.getAttribute('style') || '';
           if (/url\s*\(/i.test(styleVal) || /@import/i.test(styleVal) || /expression\s*\(/i.test(styleVal)) {
             const sanitizedStyle = styleVal
@@ -365,7 +420,14 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
         a.setAttribute('href', `#c${chapterIndex}_${trimmedHref.slice(1)}`);
       } else if (trimmedHref.includes('#')) {
         const [filePart, anchorPart] = trimmedHref.split('#');
-        const targetSpineIdx = spineItems.findIndex((s) => s.href.endsWith(filePart));
+        const normalizedFilePart = resolveZipPath(chapterDir, filePart).toLowerCase();
+        const targetSpineIdx = spineItems.findIndex(
+          (s) =>
+            s.fullPath.toLowerCase() === normalizedFilePart ||
+            s.href.toLowerCase() === normalizedFilePart ||
+            s.href.toLowerCase().endsWith(filePart.toLowerCase()) ||
+            s.fullPath.toLowerCase().endsWith(filePart.toLowerCase())
+        );
         if (targetSpineIdx !== -1) {
           a.setAttribute('href', `#c${targetSpineIdx}_${anchorPart}`);
         }

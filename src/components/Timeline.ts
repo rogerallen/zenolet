@@ -126,11 +126,17 @@ export function getChapterMarkers(
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return markers;
 
+  const isPageTitle = (title: string) =>
+    /^(page\s*\d+|\d+|p\.\s*\d+|\[\s*page\s*\d+\s*\]|\[\d+\])$/i.test(title.trim()) ||
+    /^(list of illustrations|illustrations|cover|title page|colophon|copyright)$/i.test(title.trim());
+
   // 1. Primary: Use structured EPUB Table of Contents if available
   if (epubChapters && epubChapters.length > 0) {
     const seenIds = new Set<string>();
     for (const ch of epubChapters) {
       if (!ch.anchorId || seenIds.has(ch.anchorId)) continue;
+      if (isPageTitle(ch.title)) continue;
+
       const targetEl = resolveChapterElement(readerContent, ch.anchorId);
       if (targetEl) {
         const pageSpread = getElementSpreadIndex(targetEl, readerViewport, totalPagesSpreads);
@@ -178,7 +184,7 @@ export function getChapterMarkers(
         .replace(/\s+/g, ' ')
         .trim();
 
-      if (!title) title = id;
+      if (!title || isPageTitle(title)) return;
 
       const pageSpread = getElementSpreadIndex(resolvedEl, readerViewport, totalPagesSpreads);
 
@@ -190,7 +196,9 @@ export function getChapterMarkers(
   // 3. Fallback: Query all headings in rendered DOM
   if (markers.length === 0) {
     const headings = Array.from(
-      readerContent.querySelectorAll('h1, h2, h3, [id^="chap"], [id^="chapter"], .chapter h2, .chapter h3')
+      readerContent.querySelectorAll(
+        'h1, h2, h3, h4, .chapter > h2, .chapter > h3, .epub-chapter > h1, .epub-chapter > h2, .epub-chapter > h3'
+      )
     );
     const seenTexts = new Set<string>();
 
@@ -202,9 +210,7 @@ export function getChapterMarkers(
         .replace(/^[—\-\s\d.•·:~]+/, '')
         .replace(/\s+/g, ' ')
         .trim();
-      if (seenTexts.has(cleanText)) return;
-
-      if (/contents|illustrations|title page/i.test(cleanText)) return;
+      if (seenTexts.has(cleanText) || isPageTitle(cleanText)) return;
 
       const pageSpread = getElementSpreadIndex(el, readerViewport, totalPagesSpreads);
       seenTexts.add(cleanText);

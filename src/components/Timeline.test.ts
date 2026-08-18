@@ -124,4 +124,32 @@ describe('Timeline Component & Chapter Navigation (Timeline.ts)', () => {
       indicator.remove();
     }
   });
+
+  it('filters out page-list numbers and illustration entries from chapter markers', () => {
+    const mockContent = document.createElement('div');
+    mockContent.innerHTML = `
+      <h2 id="c0_chap1">A Scandal in Bohemia</h2>
+      <span id="c0_p1">Page 1 content</span>
+      <span id="c0_p2">Page 2 content</span>
+      <h2 id="c1_chap2">The Red-Headed League</h2>
+      <span id="c1_p3">Page 3 content</span>
+    `;
+
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    const mixedChapters: EpubChapter[] = [
+      { title: 'A Scandal in Bohemia', href: 'ch1.xhtml#chap1', anchorId: 'c0_chap1' },
+      { title: 'Page 1', href: 'ch1.xhtml#p1', anchorId: 'c0_p1' },
+      { title: 'Page 2', href: 'ch1.xhtml#p2', anchorId: 'c0_p2' },
+      { title: 'List of Illustrations', href: 'ch1.xhtml#loi', anchorId: 'c0_loi' },
+      { title: 'The Red-Headed League', href: 'ch2.xhtml#chap2', anchorId: 'c1_chap2' },
+      { title: 'Page 3', href: 'ch2.xhtml#p3', anchorId: 'c1_p3' }
+    ];
+
+    const markers = getChapterMarkers(mockContent, mockViewport, 10, false, mixedChapters);
+    expect(markers.length).toBe(2);
+    expect(markers[0].title).toBe('A Scandal in Bohemia');
+    expect(markers[1].title).toBe('The Red-Headed League');
+  });
 });

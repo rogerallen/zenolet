@@ -1,6 +1,12 @@
 // Cloudflare Worker CORS Proxy Script for Zenolet
 // Designed for static deployments (GitHub Pages, Cloudflare Pages, Netlify, Vercel) with support for local dev & Tailscale domains.
 
+// Custom allowed origins for your deployment (optional)
+const ALLOWED_ORIGINS = [
+  // 'https://<your-username>.github.io',
+  // 'https://my-custom-domain.com'
+];
+
 /**
  * Validates whether the incoming Origin is allowed to use this CORS proxy.
  */
@@ -8,7 +14,14 @@ function isOriginAllowed(origin, env) {
   // Allow direct non-browser requests (e.g. curl, server-to-server, wrangler tail)
   if (!origin) return true;
 
-  if (env && env.ALLOWED_ORIGIN && origin === env.ALLOWED_ORIGIN) return true;
+  // Check in-code ALLOWED_ORIGINS list
+  if (Array.isArray(ALLOWED_ORIGINS) && ALLOWED_ORIGINS.includes(origin)) return true;
+
+  // Check Cloudflare Worker environment variables (single origin or comma-separated)
+  if (env && env.ALLOWED_ORIGIN) {
+    const envOrigins = env.ALLOWED_ORIGIN.split(',').map((o) => o.trim());
+    if (envOrigins.includes(origin)) return true;
+  }
 
   try {
     const url = new URL(origin);
