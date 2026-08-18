@@ -22,7 +22,15 @@ export function renderCuratorHeader(
     ? `<a href="${escapeHtml(curator.linkUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
     : escapeHtml(name);
 
-  const blurbHtml = blurb ? `<p class="minimal-blurb">${escapeHtml(blurb)}</p>` : '';
+  let formattedBlurb = escapeHtml(blurb || '');
+  if (formattedBlurb.includes('Project Gutenberg')) {
+    formattedBlurb = formattedBlurb.replace(
+      /Project Gutenberg/g,
+      '<a href="https://www.gutenberg.org" target="_blank" rel="noopener" class="curator-link">Project Gutenberg</a>'
+    );
+  }
+
+  const blurbHtml = formattedBlurb ? `<p class="minimal-blurb">${formattedBlurb}</p>` : '';
 
   container.innerHTML = `
     <div class="minimal-header">
