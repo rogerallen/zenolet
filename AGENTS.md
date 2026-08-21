@@ -34,7 +34,7 @@ Whenever a feature, deploy, or version bump occurs:
    - **ALWAYS** summarize the exact staged files and proposed commit message before making git commits or pushing.
 
 2. **Automated Pre-Commit Verification**:
-   - Always run `npx vitest run`, `npm run lint`, `npm run format:check`, and `npm run build` to verify clean compilation, zero failing tests, and formatting compliance before proposing a commit or release.
+   - Always run `npm run audit`, `npx vitest run`, `npm run lint`, `npm run format:check`, and `npm run build` to verify zero production vulnerabilities, clean compilation, zero failing tests, and formatting compliance before proposing a commit or release.
 
 3. **Development Commands**:
    - Use `npm run dev:local` for single-command local testing (runs local Cloudflare Worker proxy on port 8787 and Vite UI on port 5173 concurrently).
