@@ -1,0 +1,15 @@
+{
+  "title": "My Curated Classics Library",
+  "blurb": "A hand-picked collection of timeless public domain literature ready for instant offline reading.",
+  "repoUrl": "https://github.com/<your-username>/zenolet",
+  "curator": {
+    "name": "Curator Name",
+    "linkUrl": "https://<your-username>.github.io"
+  },
+  "settings": {
+    "defaultTheme": "sepia",
+    "fontSize": 18,
+    "layoutColumns": "auto"
+  },
+  "proxyUrl": "https://zenolet-cors-proxy.<your-subdomain>.workers.dev"
+}

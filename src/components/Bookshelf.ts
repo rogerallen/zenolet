@@ -44,6 +44,39 @@ export function renderCuratorHeader(
   `;
 }
 
+export function renderAboutLibrarySection(
+  container: HTMLElement,
+  siteTitle?: string,
+  curator?: CuratorConfig,
+  blurb?: string
+): void {
+  const title = siteTitle || 'Curated Library';
+  const name = curator?.name || 'Curator';
+  const rawUrl = curator?.linkUrl?.trim() || '';
+  const isSafeUrl = /^https?:\/\//i.test(rawUrl);
+  const curatorHtml = isSafeUrl
+    ? `<a href="${escapeHtml(rawUrl)}" target="_blank" rel="noopener" class="curator-link">${escapeHtml(name)}</a>`
+    : escapeHtml(name);
+
+  let formattedBlurb = escapeHtml(blurb || '');
+  if (formattedBlurb.includes('Project Gutenberg')) {
+    formattedBlurb = formattedBlurb.replace(
+      /Project Gutenberg/g,
+      '<a href="https://www.gutenberg.org" target="_blank" rel="noopener" class="curator-link">Project Gutenberg</a>'
+    );
+  }
+
+  const blurbHtml = formattedBlurb ? `<p class="about-library-blurb">${formattedBlurb}</p>` : '';
+
+  container.innerHTML = `
+    <div class="about-library-section">
+      <h4 class="about-library-title">${escapeHtml(title)}</h4>
+      ${blurbHtml}
+      <p class="about-library-curator">Curated by ${curatorHtml}</p>
+    </div>
+  `;
+}
+
 export interface LoadingSlotState {
   slotIndex: number;
   book?: BookMetadata | null;

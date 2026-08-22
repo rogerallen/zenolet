@@ -131,7 +131,12 @@ export default {
     try {
       // 4. Fetch Target Resource
       const response = await fetch(targetUrl, {
-        headers: { 'User-Agent': 'Zenolet/1.0 (Cloudflare Worker Proxy)' }
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 (Zenolet CORS Proxy)',
+          Accept: 'application/epub+zip,image/*,*/*'
+        },
+        redirect: 'follow'
       });
 
       const responseHeaders = new Headers(response.headers);

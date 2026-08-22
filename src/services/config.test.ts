@@ -39,6 +39,49 @@ describe('Zenolet Configuration & Curator Header', () => {
     expect(loaded.settings?.fontSize).toBe(18);
   });
 
+  it('falls back to zenolet.config.json if curator/config.json is not found', async () => {
+    const mockConfig = {
+      title: 'Legacy Config Library',
+      curator: { name: 'Legacy Curator' }
+    };
+
+    globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('curator/config.json')) {
+        return Promise.resolve(new Response(null, { status: 404, statusText: 'Not Found' }));
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify(mockConfig), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      );
+    });
+
+    const loaded = await loadZenoletConfig();
+    expect(loaded.title).toBe('Legacy Config Library');
+    expect(loaded.curator?.name).toBe('Legacy Curator');
+  });
+
+  it('renders about library section properly with title, blurb, and curator', async () => {
+    const { renderAboutLibrarySection } = await import('../components/Bookshelf.js');
+    const container = document.createElement('div');
+    renderAboutLibrarySection(
+      container,
+      'My Curated Collection',
+      { name: 'Curator Jane', linkUrl: 'https://jane.example.com' },
+      'A wonderful collection of public domain books from Project Gutenberg.'
+    );
+
+    expect(container.innerHTML).toContain('<h4 class="about-library-title">My Curated Collection</h4>');
+    expect(container.innerHTML).toContain('<p class="about-library-blurb">');
+    expect(container.innerHTML).toContain(
+      '<a href="https://www.gutenberg.org" target="_blank" rel="noopener" class="curator-link">Project Gutenberg</a>'
+    );
+    expect(container.innerHTML).toContain(
+      'Curated by <a href="https://jane.example.com" target="_blank" rel="noopener" class="curator-link">Curator Jane</a>'
+    );
+  });
+
   it('renders curator header with active linkUrl when present', () => {
     const container = document.createElement('div');
     renderCuratorHeader(container, 'The Great Library', {

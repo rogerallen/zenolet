@@ -33,18 +33,21 @@ export function buildProxyUrl(targetUrl: string, proxyUrlSetting?: string): stri
 export function getGutenbergCandidateUrls(bookId: string, customEpubUrl?: string): string[] {
   const candidates: string[] = [];
 
-  // 1. Primary: EPUB3 with images
-  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub3.images`);
-  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images-3.epub`);
-  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub.images`);
-  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images.epub`);
-
-  // 2. Custom EPUB URL provided by catalog (if any)
-  if (customEpubUrl && !candidates.includes(customEpubUrl)) {
+  // 1. Custom EPUB URL provided by catalog (if any)
+  if (customEpubUrl) {
     candidates.push(customEpubUrl);
   }
 
-  return candidates;
+  // 2. Static CDN cache endpoints (most reliable and fast)
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images.epub`);
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}-images-3.epub`);
+  candidates.push(`https://www.gutenberg.org/cache/epub/${bookId}/pg${bookId}.epub`);
+
+  // 3. Dynamic generation endpoints (fallback)
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub3.images`);
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub.images`);
+
+  return [...new Set(candidates)];
 }
 
 /**

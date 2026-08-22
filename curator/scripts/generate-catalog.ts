@@ -86,7 +86,7 @@ async function generateCatalog() {
     }
   }
 
-  const outputPath = path.resolve(__dirname, '../public/catalog.json');
+  const outputPath = path.resolve(__dirname, '../catalog.json');
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, JSON.stringify(catalog, null, 2), 'utf-8');
 

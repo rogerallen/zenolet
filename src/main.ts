@@ -18,7 +18,12 @@ import {
   formatStorageSummary,
   type BookMetadata
 } from './services/storage.ts';
-import { renderCuratorHeader, render8SlotGrid, type LoadingSlotState } from './components/Bookshelf.ts';
+import {
+  renderCuratorHeader,
+  renderAboutLibrarySection,
+  render8SlotGrid,
+  type LoadingSlotState
+} from './components/Bookshelf.ts';
 import {
   setTheme,
   setFontSize,
@@ -78,8 +83,10 @@ let DOM: {
   pageIndicator: HTMLSpanElement;
   settingsPanel: HTMLDivElement;
   aboutModal: HTMLDivElement;
+  aboutLibraryContainer: HTMLElement;
   aboutToggle: HTMLButtonElement;
   aboutClose: HTMLButtonElement;
+  footerRepoLink: HTMLAnchorElement;
   qrModal: HTMLDivElement;
   qrClose: HTMLButtonElement;
   qrCanvas: HTMLCanvasElement;
@@ -120,8 +127,10 @@ async function initApp() {
     pageIndicator: document.getElementById('page-indicator') as HTMLSpanElement,
     settingsPanel: document.getElementById('settings-panel') as HTMLDivElement,
     aboutModal: document.getElementById('about-modal') as HTMLDivElement,
+    aboutLibraryContainer: document.getElementById('about-library-container') as HTMLElement,
     aboutToggle: document.getElementById('about-toggle') as HTMLButtonElement,
     aboutClose: document.getElementById('about-close') as HTMLButtonElement,
+    footerRepoLink: document.getElementById('footer-repo-link') as HTMLAnchorElement,
     qrModal: document.getElementById('qr-modal') as HTMLDivElement,
     qrClose: document.getElementById('qr-close') as HTMLButtonElement,
     qrCanvas: document.getElementById('qr-canvas') as HTMLCanvasElement,
@@ -134,11 +143,26 @@ async function initApp() {
     libraryStorageStatus: document.getElementById('library-storage-status') as HTMLSpanElement
   };
 
-  // Load Curator Configuration (zenolet.config.json)
+  // Load Curator Configuration (curator/config.json)
   config = await loadZenoletConfig();
+
+  // Dynamically set Document Title from Config
+  if (config.title) {
+    document.title = `${config.title} — Zenolet`;
+  }
+
+  // Dynamically set Footer GitHub Repository Link
+  if (config.repoUrl && DOM.footerRepoLink) {
+    DOM.footerRepoLink.href = config.repoUrl;
+  }
 
   // Render Curator Header from Config
   renderCuratorHeader(DOM.curatorHeaderContainer, config.title, config.curator, config.blurb);
+
+  // Render Curated Library Section in About Modal
+  if (DOM.aboutLibraryContainer) {
+    renderAboutLibrarySection(DOM.aboutLibraryContainer, config.title, config.curator, config.blurb);
+  }
 
   // Initialize Settings
   setupSettingsModal(DOM.settingsPanel, [DOM.btnSettings, DOM.btnLibrarySettings], readerState, () => {
@@ -304,6 +328,9 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
       const parsed = parseEpubArchive(epubBuffer);
       processedContent = parsed.htmlContent;
       chapters = parsed.chapters || [];
+      if (parsed.coverDataUrl) {
+        book.coverUrl = parsed.coverDataUrl;
+      }
     }
 
     const byteSize = new Blob([processedContent]).size;
@@ -414,7 +441,7 @@ async function openBook(
           title: book.title,
           author: book.author,
           epubUrl: book.epubUrl,
-          coverUrl: book.coverUrl,
+          coverUrl: parsed.coverDataUrl || book.coverUrl,
           byteSize
         };
         const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;

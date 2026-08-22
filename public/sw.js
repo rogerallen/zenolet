@@ -2,8 +2,8 @@ const CACHE_NAME = 'zenolet-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './zenolet.config.json',
-  './catalog.json',
+  './curator/config.json',
+  './curator/catalog.json',
   './manifest.json',
   './icon.svg'
 ];
@@ -51,6 +51,7 @@ self.addEventListener('fetch', (event) => {
     event.request.mode === 'navigate' ||
     url.pathname.endsWith('/') ||
     url.pathname.endsWith('/index.html') ||
+    url.pathname.endsWith('/curator/config.json') ||
     url.pathname.endsWith('/zenolet.config.json');
 
   if (isHtmlOrConfig) {

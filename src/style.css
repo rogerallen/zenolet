@@ -769,6 +769,37 @@ a:not([href]) {
   background-color: var(--text-muted);
 }
 
+.about-library-section {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about-library-title {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.about-library-blurb {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.about-library-curator {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .about-lead {
   font-size: 0.98rem;
   line-height: 1.65;

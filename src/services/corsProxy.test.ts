@@ -180,12 +180,12 @@ describe('getGutenbergCandidateUrls & fetchArrayBufferWithProxy', () => {
     vi.restoreAllMocks();
   });
 
-  it('prioritizes EPUB candidate URLs exclusively', () => {
-    const candidates = getGutenbergCandidateUrls('2701');
-    expect(candidates[0]).toBe('https://www.gutenberg.org/ebooks/2701.epub3.images');
-    expect(candidates[1]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images-3.epub');
-    expect(candidates[2]).toBe('https://www.gutenberg.org/ebooks/2701.epub.images');
-    expect(candidates[3]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images.epub');
+  it('prioritizes static cache EPUB candidate URLs and custom URLs exclusively', () => {
+    const candidates = getGutenbergCandidateUrls('2701', 'https://www.gutenberg.org/custom-2701.epub');
+    expect(candidates[0]).toBe('https://www.gutenberg.org/custom-2701.epub');
+    expect(candidates[1]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images.epub');
+    expect(candidates[2]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images-3.epub');
+    expect(candidates[3]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701.epub');
     // Ensure no legacy raw HTML URLs are returned
     expect(candidates.some((c) => c.endsWith('.html') || c.endsWith('.htm'))).toBe(false);
   });

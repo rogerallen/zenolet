@@ -2,4 +2,5 @@ dist
 node_modules
 .wrangler
 public/catalog.json
+curator/catalog.json
 package-lock.json
