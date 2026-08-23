@@ -9,6 +9,11 @@ export interface ReaderSettingsConfig {
   layoutColumns?: 'auto' | '1' | '2';
 }
 
+export interface WorkerConfig {
+  proxyUrl?: string;
+  allowedOrigins?: string[];
+}
+
 export interface ZenoletConfig {
   title?: string;
   blurb?: string;
@@ -17,6 +22,7 @@ export interface ZenoletConfig {
   curator?: CuratorConfig;
   settings?: ReaderSettingsConfig;
   proxyUrl?: string;
+  worker?: WorkerConfig;
 }
 
 export async function loadZenoletConfig(): Promise<ZenoletConfig> {
@@ -34,9 +40,17 @@ export async function loadZenoletConfig(): Promise<ZenoletConfig> {
     console.warn('[Zenolet] Could not load curator/config.json, using defaults:', err);
   }
 
+  // Support worker.proxyUrl with fallback to root proxyUrl
+  if (cfg.worker?.proxyUrl) {
+    cfg.proxyUrl = cfg.worker.proxyUrl;
+  }
+
   // Allow VITE_PROXY_URL env variable to override proxyUrl (useful for single-command local testing)
   if (import.meta.env.VITE_PROXY_URL) {
     cfg.proxyUrl = import.meta.env.VITE_PROXY_URL;
+    if (cfg.worker) {
+      cfg.worker.proxyUrl = import.meta.env.VITE_PROXY_URL;
+    }
   }
 
   return cfg;

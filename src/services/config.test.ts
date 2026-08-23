@@ -20,7 +20,10 @@ describe('Zenolet Configuration & Curator Header', () => {
         fontSize: 18,
         layoutColumns: 'auto'
       },
-      proxyUrl: 'https://proxy.example.com'
+      worker: {
+        proxyUrl: 'https://proxy.example.com',
+        allowedOrigins: ['https://janedoe.example.com']
+      }
     };
 
     globalThis.fetch = vi.fn().mockResolvedValue(
@@ -37,6 +40,9 @@ describe('Zenolet Configuration & Curator Header', () => {
     expect(loaded.curator?.linkUrl).toBe('https://janedoe.example.com');
     expect(loaded.settings?.defaultTheme).toBe('sepia');
     expect(loaded.settings?.fontSize).toBe(18);
+    expect(loaded.proxyUrl).toBe('https://proxy.example.com');
+    expect(loaded.worker?.proxyUrl).toBe('https://proxy.example.com');
+    expect(loaded.worker?.allowedOrigins).toEqual(['https://janedoe.example.com']);
   });
 
   it('falls back to zenolet.config.json if curator/config.json is not found', async () => {

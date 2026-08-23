@@ -1,11 +1,7 @@
 // Cloudflare Worker CORS Proxy Script for Zenolet
-// Designed for static deployments (GitHub Pages, Cloudflare Pages, Netlify, Vercel) with support for local dev & Tailscale domains.
+// Restricts access to authorized origins defined in curator/config.json or Cloudflare env vars.
 
-// Custom allowed origins for your deployment (optional)
-const ALLOWED_ORIGINS = [
-  // 'https://<your-username>.github.io',
-  // 'https://my-custom-domain.com'
-];
+import curatorConfig from '../curator/config.json';
 
 /**
  * Validates whether the incoming Origin is allowed to use this CORS proxy.
@@ -14,10 +10,11 @@ function isOriginAllowed(origin, env) {
   // Allow direct non-browser requests (e.g. curl, server-to-server, wrangler tail)
   if (!origin) return true;
 
-  // Check in-code ALLOWED_ORIGINS list
-  if (Array.isArray(ALLOWED_ORIGINS) && ALLOWED_ORIGINS.includes(origin)) return true;
+  // 1. Check in-config worker.allowedOrigins list
+  const allowedOrigins = curatorConfig?.worker?.allowedOrigins;
+  if (Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)) return true;
 
-  // Check Cloudflare Worker environment variables (single origin or comma-separated)
+  // 2. Check Cloudflare Worker environment variables (single origin or comma-separated)
   if (env && env.ALLOWED_ORIGIN) {
     const envOrigins = env.ALLOWED_ORIGIN.split(',').map((o) => o.trim());
     if (envOrigins.includes(origin)) return true;
@@ -29,19 +26,6 @@ function isOriginAllowed(origin, env) {
 
     // Local development environments
     if (host === 'localhost' || host === '127.0.0.1') return true;
-
-    // Static hosting platforms
-    if (
-      host.endsWith('.github.io') ||
-      host.endsWith('.pages.dev') ||
-      host.endsWith('.netlify.app') ||
-      host.endsWith('.vercel.app')
-    ) {
-      return true;
-    }
-
-    // Tailscale network domains (*.ts.net)
-    if (host.endsWith('.ts.net')) return true;
   } catch {
     // Ignore URL parse failures
   }

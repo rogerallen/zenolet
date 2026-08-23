@@ -112,7 +112,10 @@ To personalize your Zenolet deployment, edit `curator/config.json`:
     "fontSize": 18,
     "layoutColumns": "auto"
   },
-  "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev"
+  "worker": {
+    "proxyUrl": "https://zenolet-cors-proxy.rallen-e12.workers.dev",
+    "allowedOrigins": ["https://rogerallen.github.io"]
+  }
 }
 ```
 

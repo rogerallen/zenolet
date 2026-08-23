@@ -1,8 +1,8 @@
 # 📖 Curator's Guide: Creating Your Own Curated Library
 
-**Zenolet** is designed from the ground up as a **sovereign, forkable micro-library**. You can fork this repository to publish your own standalone, curated literary collection (e.g., 50 philosophy classics, a sci-fi anthology, poetry collections, or an educational reading list) hosted completely free on **GitHub Pages**, **Cloudflare Pages**, **Netlify**, or any static host.
+**Zenolet** is designed from the ground up as a **sovereign, forkable micro-library**. You can fork this repository to publish your own standalone, curated literary collection (e.g., 50 philosophy classics, a sci-fi anthology, poetry collections, or an educational reading list) hosted completely free on **GitHub Pages**, **Cloudflare Pages**, **Netlify**, or any static host. (Note that only Github Pages has been tested).
 
-The best part? **You only ever need to edit the `curator/` directory.** The core reader engine in `src/` remains untouched.
+**You only ever need to edit the `curator/` directory.** The core reader engine in `src/` remains untouched.
 
 ---
 
@@ -18,24 +18,15 @@ The best part? **You only ever need to edit the `curator/` directory.** The core
    npm install
    ```
 
----
+At this point, you should be able to test it on your dev machine via
 
-### Step 2: Deploy Your Free Cloudflare Worker Proxy
-
-Project Gutenberg book archives and images require a CORS proxy for in-browser downloading. Zenolet includes a minimal, zero-cost Cloudflare Worker proxy (`worker/index.js`).
-
-1. Log in to Cloudflare and deploy the worker proxy:
-   ```bash
-   npx wrangler login
-   npx wrangler deploy
-   ```
-2. Note your deployed Worker URL (e.g. `https://zenolet-cors-proxy.<your-subdomain>.workers.dev`).
-
-> **Note:** The included worker automatically permits static host domains (`*.github.io`, `*.pages.dev`, `*.netlify.app`, `*.vercel.app`) as well as local development (`localhost`).
+```bash
+npm run dev:local
+```
 
 ---
 
-### Step 3: Configure Your Library (`curator/config.json`)
+### Step 2: Configure Your Library (`curator/config.json`)
 
 Edit `curator/config.json` with your library's identity:
 
@@ -53,7 +44,10 @@ Edit `curator/config.json` with your library's identity:
     "fontSize": 18,
     "layoutColumns": "auto"
   },
-  "proxyUrl": "https://zenolet-cors-proxy.<your-subdomain>.workers.dev"
+  "worker": {
+    "proxyUrl": "https://zenolet-cors-proxy.<your-subdomain>.workers.dev",
+    "allowedOrigins": ["https://<your-username>.github.io"]
+  }
 }
 ```
 
@@ -65,7 +59,24 @@ Edit `curator/config.json` with your library's identity:
 - **`curator.name`**: Your name or organization name.
 - **`curator.linkUrl`**: Your personal website, blog, or profile URL.
 - **`settings`**: Default reader preferences (`defaultTheme`: `paper` | `sepia` | `charcoal` | `night`, `fontSize`: `14..28`, `layoutColumns`: `auto` | `1` | `2`).
-- **`proxyUrl`**: The URL of your deployed Cloudflare Worker CORS proxy from Step 2.
+- **`worker.proxyUrl`**: The URL of your deployed Cloudflare Worker CORS proxy (filled in after Step 3).
+- **`worker.allowedOrigins`**: Array of authorized website domains (e.g. `["https://<your-username>.github.io"]`) allowed to use your proxy. Localhost is always enabled for testing.
+
+> **Important:** Make sure to set `worker.allowedOrigins` to your site's domain before deploying the worker in Step 3. Cloudflare Wrangler bundles `curator/config.json` into the worker during deployment.
+
+---
+
+### Step 3: Deploy Your Free Cloudflare Worker Proxy
+
+Using Zenolet to download book archives and images requires a Cross-Origin Resource Sharing (CORS) proxy for in-browser downloading. Zenolet includes a minimal, zero-cost Cloudflare Worker proxy (`worker/index.js`). You will need to deploy this before testing on your live `github.io` site.
+
+1. Log in to Cloudflare (you will need a free account) and deploy the worker proxy:
+   ```bash
+   npx wrangler login
+   npx wrangler deploy
+   ```
+2. Note your deployed Worker URL (e.g. `https://zenolet-cors-proxy.<your-subdomain>.workers.dev`).
+3. Paste this URL into `worker.proxyUrl` in `curator/config.json`.
 
 ---
 

@@ -11,5 +11,7 @@
     "fontSize": 18,
     "layoutColumns": "auto"
   },
-  "proxyUrl": "https://zenolet-cors-proxy.<your-subdomain>.workers.dev"
+  "worker": {
+    "allowedOrigins": ["https://<your-username>.github.io"]
+  }
 }

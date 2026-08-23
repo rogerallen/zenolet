@@ -56,7 +56,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('http://localhost:5173');
   });
 
-  it('handles OPTIONS preflight request for Tailscale domain', async () => {
+  it('handles OPTIONS preflight request for custom domain via env.ALLOWED_ORIGIN', async () => {
     const req = new Request('https://proxy.workers.dev/?url=https://example.com', {
       method: 'OPTIONS',
       headers: {
@@ -64,7 +64,7 @@ describe('Worker Proxy Security & CORS Preflight', () => {
       }
     });
 
-    const res = await worker.fetch(req);
+    const res = await worker.fetch(req, { ALLOWED_ORIGIN: 'https://my-server.ts.net' });
     expect(res.status).toBe(204);
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://my-server.ts.net');
   });

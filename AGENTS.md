@@ -163,7 +163,6 @@ Whenever a feature, deploy, or version bump occurs:
 ## 🍴 Forkable Architecture Invariants
 
 1. **Config Externalization**:
-   - All site branding, curator metadata (`name`, `linkUrl`), site `title`, `blurb`, `repoUrl`, default reader settings, and `proxyUrl` MUST remain fully externalized in `curator/config.json`.
    - Never hardcode personal URLs or site names into core application logic or components.
 
 2. **Self-Contained Static Deployment**:
