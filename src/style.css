@@ -848,7 +848,8 @@ a:not([href]) {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 20px;
-  width: 280px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
   box-shadow: var(--shadow-lg);
   z-index: 200;
   display: none;
@@ -871,6 +872,7 @@ a:not([href]) {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
 }
 
 .settings-label {
@@ -885,26 +887,34 @@ a:not([href]) {
 .layout-options {
   display: flex;
   gap: 8px;
+  width: 100%;
 }
 
 .theme-btn,
 .layout-btn {
   flex: 1;
-  padding: 8px;
+  min-width: 0;
+  padding: 8px 4px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 0.85rem;
+  text-align: center;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.theme-btn.active,
+.theme-btn:hover,
+.layout-btn:hover {
+  border-color: var(--accent-color);
+}
+
 .layout-btn.active {
   border-color: var(--accent-color);
-  background-color: var(--accent-color);
-  color: #ffffff;
+  box-shadow: 0 0 0 1.5px var(--accent-color);
+  font-weight: 600;
 }
 
 .font-controls {
@@ -915,6 +925,7 @@ a:not([href]) {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 6px 12px;
+  width: 100%;
 }
 
 .btn-font {
@@ -1532,6 +1543,24 @@ a:not([href]) {
   .btn-icon {
     padding: 6px 7px;
     border-radius: 8px;
+  }
+
+  .settings-panel {
+    right: 16px;
+    width: calc(100vw - 32px);
+    max-width: 320px;
+    padding: 16px;
+  }
+
+  .settings-panel.panel-from-footer {
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .theme-btn,
+  .layout-btn {
+    font-size: 0.8rem;
+    padding: 7px 2px;
   }
 
   .library-footer {

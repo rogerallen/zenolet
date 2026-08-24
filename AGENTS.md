@@ -20,10 +20,9 @@ Zenolet follows strict Semantic Versioning formatted as `MAJOR.MINOR.BUGFIX` (e.
 
 Whenever a feature, deploy, or version bump occurs:
 
-1. Update `"version"` in `package.json`.
-2. Update the version indicator in `index.html` (`Zenolet vMAJOR.MINOR.BUGFIX`).
-3. Update version references in `README.md`.
-4. Ask for explicit user confirmation before running `git push`.
+1. Update `"version"` in `package.json` (the single source of truth; automatically injected into `index.html` via `%APP_VERSION%` in Vite).
+2. Update version references in `README.md` (if applicable).
+3. Ask for explicit user confirmation before running `git push`.
 
 ---
 
