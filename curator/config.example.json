@@ -8,7 +8,7 @@
   },
   "settings": {
     "defaultTheme": "sepia",
-    "fontSize": 18,
+    "fontSize": 16,
     "layoutColumns": "auto"
   },
   "worker": {

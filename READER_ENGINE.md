@@ -77,6 +77,12 @@ The reader's DOM structure cleanly separates the scroll container from the conte
 
 When content exceeds the vertical height of the viewport, the browser automatically breaks and continues the text in the next column to the right.
 
+4. **Chapter & Line Break Pagination**:
+   - **Inter-Spine Chapters**: `.epub-chapter` enforces `break-before: column; page-break-before: always;` (with `.epub-chapter:first-child` set to `break-before: auto;`), ensuring each new chapter starts at the top of a new column/page spread.
+   - **General `<hr>` Elements**: Transformed into invisible column breaks (`border: 0; visibility: hidden; break-before: column;`), replacing horizontal rule lines with natural vertical whitespace at the bottom of the ending page and advancing to the top of the next page.
+   - **Scene & Thought Breaks**: Intra-chapter scene breaks (`hr.tb`, `hr.short`, `hr.r5`..`hr.r50`, `hr.thought-break`, `hr.footnotes`) are styled with generous vertical whitespace (`margin: 1.8em 0; break-before: auto;`) without forcing an unwanted page turn.
+   - **Redundant Break Suppression**: Leading (`hr:first-child`), trailing (`hr:last-child`), and consecutive (`hr + hr`) horizontal rules are suppressed (`display: none !important;`) to prevent accidental blank pages.
+
 ---
 
 ## 🧮 3. The Layout & Pagination Algorithm

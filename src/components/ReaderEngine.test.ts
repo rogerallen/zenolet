@@ -24,7 +24,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '1',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -64,7 +64,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '1',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -104,7 +104,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'sepia',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '2',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -141,7 +141,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '3',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -179,7 +179,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: 'auto',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -283,7 +283,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '1',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -311,7 +311,7 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const state: ReaderState = {
       currentView: 'reader',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: '1',
       currentPageSpread: 0,
       totalPagesSpreads: 10
@@ -334,5 +334,29 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     } finally {
       localStorage.setItem = originalSetItem;
     }
+  });
+
+  it('includes CSS rules for column breaks on chapters, hr breaks, scene break vertical whitespace, and redundant break suppression', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const cssPath = path.resolve(__dirname, '../style.css');
+    const css = fs.readFileSync(cssPath, 'utf-8');
+
+    // 1. Chapter break rules
+    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*height:\s*100%;/);
+    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*break-before:\s*column;/);
+    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*opacity:\s*0;/);
+
+    // 2. General HR column break & hidden bar
+    expect(css).toMatch(/\.reader-content\s+hr\s*\{[^}]*break-before:\s*column;/);
+    expect(css).toMatch(/\.reader-content\s+hr\s*\{[^}]*opacity:\s*0;/);
+
+    // 3. Scene & thought break vertical whitespace (no column break)
+    expect(css).toMatch(/\.reader-content\s+hr\.tb[^}]*break-before:\s*auto;/);
+    expect(css).toMatch(/\.reader-content\s+hr\.tb[^}]*margin:\s*1\.8em\s+0;/);
+
+    // 4. Redundant break suppression
+    expect(css).toMatch(/\.reader-content\s+\.epub-chapter\s*>\s*hr:first-child[\s\S]*?display:\s*none\s*!important;/);
+    expect(css).toMatch(/\.reader-content\s+hr\s*\+\s*hr[\s\S]*?display:\s*none\s*!important;/);
   });
 });

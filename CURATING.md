@@ -41,7 +41,7 @@ Edit `curator/config.json` with your library's identity:
   },
   "settings": {
     "defaultTheme": "sepia",
-    "fontSize": 18,
+    "fontSize": 16,
     "layoutColumns": "auto"
   },
   "worker": {

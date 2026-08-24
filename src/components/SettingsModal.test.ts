@@ -27,7 +27,7 @@ describe('SettingsModal Component', () => {
           <span class="settings-label">Font Size</span>
           <div class="font-controls">
             <button id="font-decrease" class="btn-font">A-</button>
-            <span id="font-size-display">18px</span>
+            <span id="font-size-display">16px</span>
             <button id="font-increase" class="btn-font">A+</button>
           </div>
         </div>
@@ -50,7 +50,7 @@ describe('SettingsModal Component', () => {
     state = {
       currentView: 'library',
       theme: 'paper',
-      fontSize: 18,
+      fontSize: 16,
       layoutColumns: 'auto',
       currentPageSpread: 1,
       totalPagesSpreads: 1
@@ -107,13 +107,13 @@ describe('SettingsModal Component', () => {
     const fontInc = panel.querySelector('#font-increase') as HTMLButtonElement;
     fontInc.click();
 
-    expect(state.fontSize).toBe(19);
+    expect(state.fontSize).toBe(17);
     expect(onRecalculate).toHaveBeenCalled();
 
     const fontDec = panel.querySelector('#font-decrease') as HTMLButtonElement;
     fontDec.click();
 
-    expect(state.fontSize).toBe(18);
+    expect(state.fontSize).toBe(16);
   });
 
   it('updates layout columns and triggers recalculate', () => {

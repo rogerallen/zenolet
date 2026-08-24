@@ -417,6 +417,7 @@ a:not([href]) {
   column-gap: 0;
 
   font-family: var(--font-serif);
+  font-size: 16px;
   line-height: 1.7;
   color: var(--text-primary);
 }
@@ -491,6 +492,117 @@ a:not([href]) {
   break-inside: avoid;
   page-break-inside: avoid;
   margin: 1em auto;
+}
+
+.reader-content table {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+.reader-content tbody {
+  display: block;
+  width: 100%;
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+.reader-content tr {
+  display: block;
+  width: 100%;
+  margin: 0.25em 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.reader-content td,
+.reader-content th {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  box-sizing: border-box;
+}
+
+/* Chapter & Section Breaks (Column / Page Breaks) */
+.reader-content .epub-chapter {
+  break-before: auto;
+  page-break-before: auto;
+}
+
+.reader-content .epub-chapter-separator {
+  display: block;
+  clear: both;
+  border: none;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-column-break-before: always;
+  -webkit-column-break-after: always;
+  break-before: column;
+  break-after: column;
+  page-break-before: always;
+  page-break-after: always;
+}
+
+/* General Horizontal Rules -> Column / Page Break */
+.reader-content hr {
+  display: block;
+  clear: both;
+  border: none;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-column-break-before: always;
+  -webkit-column-break-after: always;
+  break-before: column;
+  break-after: column;
+  page-break-before: always;
+  page-break-after: always;
+}
+
+/* Scene / Thought Breaks (Dinkus / Asterisms) -> Generous Vertical Whitespace */
+.reader-content hr.tb,
+.reader-content hr.short,
+.reader-content hr.half,
+.reader-content hr[class*='r5'],
+.reader-content hr[class*='r10'],
+.reader-content hr[class*='r20'],
+.reader-content hr[class*='r30'],
+.reader-content hr[class*='r50'],
+.reader-content hr.thought-break,
+.reader-content hr.footnotes,
+.reader-content hr.fn,
+.reader-content hr.notes {
+  display: block;
+  border: none;
+  height: 1px;
+  margin: 1.8em 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-column-break-before: auto;
+  -webkit-column-break-after: auto;
+  break-before: auto;
+  page-break-before: auto;
+  break-after: auto;
+  page-break-after: auto;
+}
+
+/* Redundant Break Suppression: only suppress if <hr> is the very first element (index 0) or consecutive */
+.reader-content .epub-chapter > hr:first-child,
+.reader-content hr + hr,
+.reader-content .epub-chapter-separator + hr,
+.reader-content hr + .epub-chapter-separator {
+  display: none !important;
 }
 
 /* Timeline Footer */

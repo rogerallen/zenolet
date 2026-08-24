@@ -55,7 +55,7 @@ let loadingSlotState: LoadingSlotState | null = null;
 const readerState: ReaderState = {
   currentView: 'library',
   theme: 'sepia',
-  fontSize: 18,
+  fontSize: 16,
   layoutColumns: 'auto',
   currentPageSpread: 1,
   totalPagesSpreads: 1
@@ -182,14 +182,26 @@ async function initApp() {
     }
   });
 
-  // Apply Initial Theme & Column Settings
-  const initialTheme = (localStorage.getItem('zenolet-theme') as ReaderState['theme']) || 'sepia';
+  // Apply Initial Theme, Font Size & Column Settings
+  const initialTheme =
+    (localStorage.getItem('zenolet-theme') as ReaderState['theme']) || config.settings?.defaultTheme || 'sepia';
   setTheme(initialTheme, readerState);
 
+  const savedFontSize = parseInt(localStorage.getItem('zenolet-font-size') || '', 10);
+  const initialFontSize =
+    savedFontSize >= 12 && savedFontSize <= 32
+      ? savedFontSize
+      : config.settings?.fontSize && config.settings.fontSize >= 12 && config.settings.fontSize <= 32
+        ? config.settings.fontSize
+        : 16;
+  setFontSize(initialFontSize, readerState, () => {});
+
   const savedColumns = localStorage.getItem('zenolet-layout-columns') as ReaderState['layoutColumns'];
-  if (savedColumns && ['auto', '1', '2', '3'].includes(savedColumns)) {
-    setLayoutColumns(savedColumns, readerState, () => {});
-  }
+  const initialColumns =
+    savedColumns && ['auto', '1', '2', '3'].includes(savedColumns)
+      ? savedColumns
+      : config.settings?.layoutColumns || 'auto';
+  setLayoutColumns(initialColumns, readerState, () => {});
 
   // Initial Bookshelf Render (8 discrete slots)
   update8SlotShelfView();
