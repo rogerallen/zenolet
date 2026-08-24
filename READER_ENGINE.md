@@ -77,11 +77,12 @@ The reader's DOM structure cleanly separates the scroll container from the conte
 
 When content exceeds the vertical height of the viewport, the browser automatically breaks and continues the text in the next column to the right.
 
-4. **Chapter & Line Break Pagination**:
-   - **Inter-Spine Chapters**: `.epub-chapter` enforces `break-before: column; page-break-before: always;` (with `.epub-chapter:first-child` set to `break-before: auto;`), ensuring each new chapter starts at the top of a new column/page spread.
-   - **General `<hr>` Elements**: Transformed into invisible column breaks (`border: 0; visibility: hidden; break-before: column;`), replacing horizontal rule lines with natural vertical whitespace at the bottom of the ending page and advancing to the top of the next page.
-   - **Scene & Thought Breaks**: Intra-chapter scene breaks (`hr.tb`, `hr.short`, `hr.r5`..`hr.r50`, `hr.thought-break`, `hr.footnotes`) are styled with generous vertical whitespace (`margin: 1.8em 0; break-before: auto;`) without forcing an unwanted page turn.
-   - **Redundant Break Suppression**: Leading (`hr:first-child`), trailing (`hr:last-child`), and consecutive (`hr + hr`) horizontal rules are suppressed (`display: none !important;`) to prevent accidental blank pages.
+4. **Chapter & Section Break Pagination (`alignChapterPageBreaks`)**:
+   - **Dynamic Column Break Alignment**: In CSS multi-column layouts, browsers (Blink and Gecko) frequently ignore `break-before: column` or treat nested containers/headings inconsistently. Zenolet employs a deterministic box-model technique via `alignChapterPageBreaks()` in `ReaderEngine.ts`: it measures the vertical offset of each chapter separator and section break within its column (`(rect.top - contentTop) % columnHeight`) and dynamically sets the separator's height to consume the remaining vertical height of that specific column. This mathematically guarantees that the next chapter or section begins at `y = 0` at the top of the next column across all browsers with zero empty blank pages.
+   - **Table Column Fragmentation**: Reader `table`, `tbody`, `tr`, and `td` elements are styled with block formatting (`display: block`). This prevents Firefox (Gecko) from treating multi-row tables (such as EPUB Tables of Contents) as monolithic unbreakable blocks that get pushed entirely to the next page as orphaned headings.
+   - **General `<hr>` Elements**: Transformed into invisible column break spacers, replacing horizontal rule lines with natural vertical whitespace at the bottom of the ending page and advancing to the top of the next page.
+   - **Scene & Thought Breaks**: Intra-chapter scene breaks (`hr.tb`, `hr.short`, `hr.r5`..`hr.r50`, `hr.thought-break`, `hr.footnotes`, `hr.notes`) are styled with generous vertical whitespace (`margin: 1.8em 0; height: 1px; break-before: auto;`) without forcing a page break.
+   - **Redundant Break Suppression**: Leading (`hr:first-child`), trailing (`hr:last-child`), and consecutive (`hr + hr`) horizontal rules are suppressed (`display: none !important;`) to prevent duplicate breaks and accidental blank columns.
 
 ---
 
@@ -92,14 +93,15 @@ The core layout calculation is handled by `recalculatePages()` in [`src/componen
 ```mermaid
 flowchart TD
     A["1. Async Image Pre-Decoding<br/><code>Promise.all(img.decode())</code>"] --> B["2. Measure Viewport Width<br/><code>pageWidth = readerViewport.clientWidth</code>"]
-    B --> C["3. Determine Column Count<br/>1 Col (Mobile) or 2 Cols (Desktop)"]
-    C --> D["4. Apply CSS columnWidth<br/><code>pageWidth</code> or <code>pageWidth / 2</code>"]
-    D --> E["5. Measure Total Scroll Width<br/><code>totalScrollWidth = readerContent.scrollWidth</code>"]
-    E --> F["6. Calculate Total Spreads<br/><code>numSpreads = Math.ceil(totalScrollWidth / pageWidth)</code>"]
-    F --> G["7. Lock Container Width<br/><code>readerContent.style.width = numSpreads * pageWidth</code>"]
-    G --> H["8. Populate .snap-points<br/>Create <code>numSpreads</code> snap target elements"]
-    H --> I["9. Restore Reading Progress<br/>Restore scroll position via normalized fraction"]
-    I --> J["10. Update Indicators & Timeline<br/>Update 'Page X of Y' & chapter markers"]
+    B --> C["3. Determine Column Count<br/>1 Col (Mobile), 2 Cols (Desktop), 3 Cols (Wide)"]
+    C --> D["4. Apply CSS columnWidth<br/><code>pageWidth / actualCols</code>"]
+    D --> E["5. Dynamic Break Alignment<br/><code>alignChapterPageBreaks(readerContent)</code>"]
+    E --> F["6. Measure Total Scroll Width<br/><code>totalScrollWidth = readerContent.scrollWidth</code>"]
+    F --> G["7. Calculate Total Spreads<br/><code>numSpreads = Math.ceil(totalScrollWidth / pageWidth)</code>"]
+    G --> H["8. Lock Container Width<br/><code>readerContent.style.width = numSpreads * pageWidth</code>"]
+    H --> I["9. Populate .snap-points<br/>Create <code>numSpreads</code> snap target elements"]
+    I --> J["10. Restore Reading Progress<br/>Restore scroll position via normalized fraction"]
+    J --> K["11. Update Indicators & Timeline<br/>Update 'Page X of Y' & chapter markers"]
 ```
 
 ### Step 1: Asynchronous Image Pre-Decoding
