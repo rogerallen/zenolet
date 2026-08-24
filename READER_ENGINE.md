@@ -212,10 +212,10 @@ The reader then scrolls smoothly to `spreadIndex * pageWidth`.
 
 The reader engine supports multiple simultaneous input modalities:
 
-1. **Touch Swiping & Trackpad Gestures**:
-   Native touch and trackpad momentum scrolling automatically trigger CSS scroll snapping.
-2. **Mouse Drag-to-Scroll** ([`setupDragToScroll`](./src/components/ReaderEngine.ts)):
-   Allows clicking and dragging the page horizontally with a grab/grabbing cursor, while ignoring small micro-movements to preserve native text selection and link clicking.
+1. **Touch Swiping & Mobile Gestures**:
+   Hardware-accelerated native touch gestures and momentum swipe on mobile and tablet devices (iPad, iPhone, Android) automatically trigger CSS scroll snapping to discrete page spreads.
+2. **Desktop Text Selection**:
+   Standard cursor over book content allows natural text selection, highlighting, and copying without interfering with viewport scrolling.
 3. **Keyboard Shortcuts**:
    - `ArrowRight` / `Space`: Turn forward one page spread.
    - `ArrowLeft` / `Shift + Space`: Turn backward one page spread.
@@ -226,7 +226,7 @@ The reader engine supports multiple simultaneous input modalities:
 
 ## 🔗 Key Source Files
 
-- [`src/components/ReaderEngine.ts`](./src/components/ReaderEngine.ts): Multi-column layout recalculation, pagination indicators, themes, font sizing, and drag-to-scroll.
+- [`src/components/ReaderEngine.ts`](./src/components/ReaderEngine.ts): Multi-column layout recalculation, pagination indicators, themes, and font sizing.
 - [`src/style.css`](./src/style.css): Multi-column CSS rules, viewport scroll snapping, and reader typography.
 - [`src/components/Timeline.ts`](./src/components/Timeline.ts): Structured TOC / heading discovery, chapter markers, and element spread index calculation.
 - [`src/services/storage.ts`](./src/services/storage.ts): Scale-invariant reading progress fraction persistence and restoration.

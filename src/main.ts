@@ -28,7 +28,6 @@ import {
   setTheme,
   setFontSize,
   setLayoutColumns,
-  setupDragToScroll,
   recalculatePages,
   updatePaginationIndicator,
   type ReaderState
@@ -742,9 +741,6 @@ function setupEventListeners() {
       }
     }
   });
-
-  // Viewport Drag to Scroll
-  setupDragToScroll(DOM.readerViewport);
 
   // Viewport Scroll Listener for Progress Indicator & URL State
   let scrollTimeout: ReturnType<typeof setTimeout> | null = null;

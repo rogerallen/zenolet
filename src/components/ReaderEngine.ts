@@ -203,37 +203,3 @@ export function updatePaginationIndicator(
 
   updateActiveChapterLabel(readerContent, readerViewport, state.currentPageSpread, state.totalPagesSpreads);
 }
-
-export function setupDragToScroll(viewport: HTMLDivElement): void {
-  let isDown = false;
-  let startX = 0;
-  let scrollLeft = 0;
-
-  viewport.addEventListener('mousedown', (e) => {
-    if (e.button !== 0 || (e.target as HTMLElement).closest('a, button, input, [role="button"]')) return;
-    isDown = true;
-    startX = e.pageX - viewport.offsetLeft;
-    scrollLeft = viewport.scrollLeft;
-  });
-
-  viewport.addEventListener('mouseleave', () => {
-    isDown = false;
-    viewport.classList.remove('active');
-  });
-
-  viewport.addEventListener('mouseup', () => {
-    isDown = false;
-    viewport.classList.remove('active');
-  });
-
-  viewport.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    const x = e.pageX - viewport.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    if (Math.abs(walk) > 8) {
-      viewport.classList.add('active');
-      e.preventDefault();
-      viewport.scrollLeft = scrollLeft - walk;
-    }
-  });
-}

@@ -378,17 +378,13 @@ a:not([href]) {
   scroll-behavior: auto;
   position: relative;
   user-select: text;
-  cursor: grab;
+  cursor: default;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 .reader-viewport::-webkit-scrollbar {
   display: none;
-}
-
-.reader-viewport.active {
-  cursor: grabbing;
 }
 
 .snap-points {

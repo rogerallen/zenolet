@@ -91,7 +91,7 @@ Whenever a feature, deploy, or version bump occurs:
 
 7. **Keyboard & Desktop Interaction**:
    - Keyboard navigation must support `ArrowRight` / `Space` for forward page turns, and `ArrowLeft` / `Shift + Space` for backward page turns.
-   - Mouse drag-to-scroll must not suppress native text selection or click events on small pointer movements or interactive elements.
+   - Touch devices (iPad, iPhone, Android) utilize native hardware-accelerated CSS scroll snapping for touch swipe page turns, while desktop environments provide standard text cursor selection without grab/drag viewport panning.
 
 ---
 
