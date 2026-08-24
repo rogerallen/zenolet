@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { recalculatePages, type ReaderState } from './ReaderEngine.js';
+import { recalculatePages, alignChapterPageBreaks, type ReaderState } from './ReaderEngine.js';
 import { clearBookProgress } from '../services/storage.js';
 
 describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
@@ -342,13 +342,11 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     const cssPath = path.resolve(__dirname, '../style.css');
     const css = fs.readFileSync(cssPath, 'utf-8');
 
-    // 1. Chapter break rules
-    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*height:\s*100%;/);
-    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*break-before:\s*column;/);
+    // 1. Chapter and separator styles
+    expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*display:\s*block;/);
     expect(css).toMatch(/\.reader-content\s+\.epub-chapter-separator\s*\{[^}]*opacity:\s*0;/);
 
-    // 2. General HR column break & hidden bar
-    expect(css).toMatch(/\.reader-content\s+hr\s*\{[^}]*break-before:\s*column;/);
+    // 2. General HR hidden bar & opacity
     expect(css).toMatch(/\.reader-content\s+hr\s*\{[^}]*opacity:\s*0;/);
 
     // 3. Scene & thought break vertical whitespace (no column break)
@@ -358,5 +356,49 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     // 4. Redundant break suppression
     expect(css).toMatch(/\.reader-content\s+\.epub-chapter\s*>\s*hr:first-child[\s\S]*?display:\s*none\s*!important;/);
     expect(css).toMatch(/\.reader-content\s+hr\s*\+\s*hr[\s\S]*?display:\s*none\s*!important;/);
+  });
+
+  it('alignChapterPageBreaks sets separator height to fill remaining column space', () => {
+    const container = document.createElement('div');
+    container.className = 'reader-content';
+    Object.defineProperty(container, 'clientHeight', { value: 680 });
+    container.style.paddingTop = '40px';
+    container.style.paddingBottom = '40px';
+
+    const sep = document.createElement('hr');
+    sep.className = 'epub-chapter-separator';
+    container.appendChild(sep);
+    document.body.appendChild(container);
+
+    // Mock getBoundingClientRect
+    container.getBoundingClientRect = () => ({
+      top: 40,
+      bottom: 720,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 680,
+      x: 0,
+      y: 40,
+      toJSON: () => {}
+    });
+    sep.getBoundingClientRect = () => ({
+      top: 280,
+      bottom: 280,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 0,
+      x: 0,
+      y: 280,
+      toJSON: () => {}
+    });
+
+    alignChapterPageBreaks(container);
+
+    // columnHeight = 680 - 80 = 600. topInsideColumn = 280 - (40+40) = 200. remainingHeight = 600 - 200 = 400.
+    expect(sep.style.height).toBe('400px');
+
+    document.body.removeChild(container);
   });
 });

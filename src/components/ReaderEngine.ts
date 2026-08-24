@@ -110,6 +110,8 @@ export function recalculatePages(
     readerContent.style.columnWidth = `${pageWidth}px`;
   }
 
+  alignChapterPageBreaks(readerContent);
+
   const totalScrollWidth = readerContent.scrollWidth;
   const numSpreads = Math.max(1, Math.ceil(totalScrollWidth / pageWidth));
 
@@ -202,4 +204,46 @@ export function updatePaginationIndicator(
   }
 
   updateActiveChapterLabel(readerContent, readerViewport, state.currentPageSpread, state.totalPagesSpreads);
+}
+
+/**
+ * Dynamically fills remaining column height at chapter boundaries and horizontal rules
+ * so the next chapter/section begins cleanly at the top of the next column across all browsers.
+ */
+export function alignChapterPageBreaks(readerContent: HTMLElement): void {
+  if (typeof window === 'undefined' || typeof window.getComputedStyle !== 'function') return;
+
+  const contentStyle = window.getComputedStyle(readerContent);
+  const paddingTop = parseFloat(contentStyle.paddingTop) || 0;
+  const paddingBottom = parseFloat(contentStyle.paddingBottom) || 0;
+  const columnHeight = readerContent.clientHeight - paddingTop - paddingBottom;
+  if (columnHeight <= 0) return;
+
+  const contentRect = readerContent.getBoundingClientRect();
+  const contentTop = contentRect.top + paddingTop;
+
+  const separators = readerContent.querySelectorAll<HTMLElement>(
+    '.epub-chapter-separator, hr:not(.tb):not(.short):not(.half):not([class*="r"]):not(.thought-break):not(.footnotes):not(.fn):not(.notes)'
+  );
+
+  // 1. Reset all separator heights to 0 to measure natural layout
+  for (const sep of separators) {
+    sep.style.height = '0px';
+  }
+
+  // 2. Measure and set each visible separator to fill the remaining column height
+  for (const sep of separators) {
+    if (window.getComputedStyle(sep).display === 'none') continue;
+    const rect = sep.getBoundingClientRect();
+    const topInsideColumn = (rect.top - contentTop) % columnHeight;
+    const normalizedTop = topInsideColumn < 0 ? topInsideColumn + columnHeight : topInsideColumn;
+    const remainingHeight = columnHeight - normalizedTop;
+
+    // If remainingHeight > 2 and less than columnHeight - 2, fill the remaining column space
+    if (remainingHeight > 2 && remainingHeight < columnHeight - 2) {
+      sep.style.height = `${remainingHeight}px`;
+    } else {
+      sep.style.height = '0px';
+    }
+  }
 }

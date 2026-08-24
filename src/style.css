@@ -536,18 +536,11 @@ a:not([href]) {
   display: block;
   clear: both;
   border: none;
-  height: 100%;
-  max-height: 100%;
+  height: 0;
   margin: 0;
   padding: 0;
   opacity: 0;
   pointer-events: none;
-  -webkit-column-break-before: always;
-  -webkit-column-break-after: always;
-  break-before: column;
-  break-after: column;
-  page-break-before: always;
-  page-break-after: always;
 }
 
 /* General Horizontal Rules -> Column / Page Break */
@@ -555,18 +548,11 @@ a:not([href]) {
   display: block;
   clear: both;
   border: none;
-  height: 100%;
-  max-height: 100%;
+  height: 0;
   margin: 0;
   padding: 0;
   opacity: 0;
   pointer-events: none;
-  -webkit-column-break-before: always;
-  -webkit-column-break-after: always;
-  break-before: column;
-  break-after: column;
-  page-break-before: always;
-  page-break-after: always;
 }
 
 /* Scene / Thought Breaks (Dinkus / Asterisms) -> Generous Vertical Whitespace */
@@ -597,8 +583,13 @@ a:not([href]) {
   page-break-after: auto;
 }
 
-/* Redundant Break Suppression: only suppress if <hr> is the very first element (index 0) or consecutive */
+/* Redundant Break Suppression: suppress leading/trailing chapter <hr> and consecutive separators */
+.reader-content .epub-chapter > hr:last-child,
+.reader-content .epub-chapter > .chapter > hr:last-child,
+.reader-content .epub-chapter > div > hr:last-child,
 .reader-content .epub-chapter > hr:first-child,
+.reader-content .epub-chapter > .chapter > hr:first-child,
+.reader-content .epub-chapter > div > hr:first-child,
 .reader-content hr + hr,
 .reader-content .epub-chapter-separator + hr,
 .reader-content hr + .epub-chapter-separator {
