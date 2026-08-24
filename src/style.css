@@ -495,7 +495,6 @@ a:not([href]) {
 }
 
 .reader-content table {
-  display: block;
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
@@ -503,27 +502,9 @@ a:not([href]) {
   page-break-inside: auto;
 }
 
-.reader-content tbody {
-  display: block;
-  width: 100%;
-  break-inside: auto;
-  page-break-inside: auto;
-}
-
 .reader-content tr {
-  display: block;
-  width: 100%;
-  margin: 0.25em 0;
   break-inside: avoid;
   page-break-inside: avoid;
-}
-
-.reader-content td,
-.reader-content th {
-  display: block;
-  width: 100%;
-  padding: 2px 0;
-  box-sizing: border-box;
 }
 
 /* Chapter & Section Breaks (Column / Page Breaks) */
