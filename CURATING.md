@@ -58,7 +58,7 @@ Edit `curator/config.json` with your library's identity:
 - **`repoUrl`**: The link to your GitHub repository (rendered in the footer).
 - **`curator.name`**: Your name or organization name.
 - **`curator.linkUrl`**: Your personal website, blog, or profile URL.
-- **`settings`**: Default reader preferences (`defaultTheme`: `paper` | `sepia` | `charcoal` | `night`, `fontSize`: `14..28`, `layoutColumns`: `auto` | `1` | `2`).
+- **`settings`**: Default reader preferences (`defaultTheme`: `paper` | `sepia` | `slate` | `night`, `fontSize`: `14..28`, `layoutColumns`: `auto` | `1` | `2` | `3`).
 - **`worker.proxyUrl`**: The URL of your deployed Cloudflare Worker CORS proxy (filled in after Step 3).
 - **`worker.allowedOrigins`**: Array of authorized website domains (e.g. `["https://<your-username>.github.io"]`) allowed to use your proxy. Localhost is always enabled for testing.
 

@@ -30,7 +30,7 @@ zenolet/
 │   │   ├── QRModal.ts           # QR code overlay for desktop-to-phone handoff
 │   │   ├── ReaderEngine.ts      # CSS multi-column engine, page math, swiping, typography
 │   │   ├── ReaderEngine.test.ts # Unit tests for page layout and scroll restoration
-│   │   ├── SettingsModal.ts     # Reading themes (Paper, Sepia, Charcoal, Night) & font sizing
+│   │   ├── SettingsModal.ts     # Reading themes (Paper, Sepia, Slate, Night) & font sizing
 │   │   └── Timeline.ts          # TOC scanner, chapter dots, reading timeline footer
 │   ├── services/
 │   │   ├── catalog.ts           # Catalog search & genre classification service

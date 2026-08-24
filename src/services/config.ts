@@ -4,9 +4,9 @@ export interface CuratorConfig {
 }
 
 export interface ReaderSettingsConfig {
-  defaultTheme?: 'paper' | 'sepia' | 'charcoal' | 'night';
+  defaultTheme?: 'paper' | 'sepia' | 'slate' | 'charcoal' | 'night';
   fontSize?: number;
-  layoutColumns?: 'auto' | '1' | '2';
+  layoutColumns?: 'auto' | '1' | '2' | '3';
 }
 
 export interface WorkerConfig {

@@ -27,6 +27,7 @@ import {
 import {
   setTheme,
   setFontSize,
+  setLayoutColumns,
   setupDragToScroll,
   recalculatePages,
   updatePaginationIndicator,
@@ -182,9 +183,14 @@ async function initApp() {
     }
   });
 
-  // Apply Initial Theme
+  // Apply Initial Theme & Column Settings
   const initialTheme = (localStorage.getItem('zenolet-theme') as ReaderState['theme']) || 'sepia';
   setTheme(initialTheme, readerState);
+
+  const savedColumns = localStorage.getItem('zenolet-layout-columns') as ReaderState['layoutColumns'];
+  if (savedColumns && ['auto', '1', '2', '3'].includes(savedColumns)) {
+    setLayoutColumns(savedColumns, readerState, () => {});
+  }
 
   // Initial Bookshelf Render (8 discrete slots)
   update8SlotShelfView();

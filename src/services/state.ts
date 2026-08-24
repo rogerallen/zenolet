@@ -3,7 +3,7 @@ import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
 export interface AppState {
   bookId: string;
   progress: number; // 0.0 to 1.0
-  theme?: string; // 'paper' | 'sepia' | 'charcoal' | 'night'
+  theme?: string; // 'paper' | 'sepia' | 'slate' | 'night' | 'charcoal'
   fontSize?: number;
 }
 

@@ -54,7 +54,7 @@ export function setupSettingsModal(
   // Theme Buttons
   panel.querySelectorAll('.theme-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const theme = btn.getAttribute('data-theme') as 'paper' | 'sepia' | 'charcoal' | 'night';
+      const theme = btn.getAttribute('data-theme') as 'paper' | 'sepia' | 'slate' | 'charcoal' | 'night';
       if (theme) setTheme(theme, state);
     });
   });
@@ -82,7 +82,7 @@ export function setupSettingsModal(
   // Column layout buttons
   panel.querySelectorAll('.layout-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const cols = btn.getAttribute('data-columns') as 'auto' | '1' | '2';
+      const cols = btn.getAttribute('data-columns') as 'auto' | '1' | '2' | '3';
       if (cols) setLayoutColumns(cols, state, onRecalculate);
     });
   });

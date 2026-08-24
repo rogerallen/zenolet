@@ -125,6 +125,109 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     expect(mockPageIndicator.textContent).toContain('Pages 1–2 of 20');
   });
 
+  it('correctly calculates three-column spreads and indicators', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 1500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 15000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 15000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 18,
+      layoutColumns: '3',
+      currentPageSpread: 0,
+      totalPagesSpreads: 10
+    };
+
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false
+    );
+
+    expect(mockContent.classList.contains('three-columns')).toBe(true);
+    expect(mockContent.style.columnWidth).toBe('500px');
+    expect(mockPageIndicator.textContent).toContain('Pages 1–3 of 30');
+  });
+
+  it('auto-switches columns based on window.innerWidth breakpoints in auto mode', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 1000, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 10000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 10000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 18,
+      layoutColumns: 'auto',
+      currentPageSpread: 0,
+      totalPagesSpreads: 10
+    };
+
+    // 1. Large screen (>= 1500px) -> 3 columns
+    Object.defineProperty(window, 'innerWidth', { value: 1920, configurable: true });
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false
+    );
+    expect(mockContent.classList.contains('three-columns')).toBe(true);
+
+    // 2. Medium screen (768px < w < 1500px) -> 2 columns
+    Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false
+    );
+    expect(mockContent.classList.contains('two-columns')).toBe(true);
+
+    // 3. Mobile screen (<= 768px) -> 1 column
+    Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
+    recalculatePages(
+      mockViewport,
+      mockContent,
+      mockSnapPoints,
+      mockProgressFill,
+      mockPageIndicator,
+      state,
+      '2701',
+      false
+    );
+    expect(mockContent.classList.contains('one-column')).toBe(true);
+  });
+
   it('uses cached chapter markers during active chapter updates without layout thrashing (PER-001)', async () => {
     const { updateActiveChapterLabel, invalidateChapterMarkers } = await import('./Timeline.js');
 

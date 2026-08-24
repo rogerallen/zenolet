@@ -45,7 +45,8 @@
   --shadow-lg: 0 16px 40px rgba(67, 52, 34, 0.15);
 }
 
-/* Charcoal Theme */
+/* Slate Theme (formerly Charcoal) */
+[data-theme='slate'],
 [data-theme='charcoal'] {
   --bg-primary: #20222a;
   --bg-secondary: #1a1b21;
@@ -429,6 +430,18 @@ a:not([href]) {
   padding-left: 40px;
   padding-right: 40px;
   box-sizing: border-box;
+}
+
+@media (min-width: 1500px) {
+  .reader-content {
+    padding: 48px 0;
+  }
+
+  .reader-content > *,
+  .reader-content .epub-chapter > * {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -911,6 +924,7 @@ a:not([href]) {
   border-color: var(--accent-color);
 }
 
+.theme-btn.active,
 .layout-btn.active {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 1.5px var(--accent-color);

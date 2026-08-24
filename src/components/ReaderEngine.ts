@@ -6,24 +6,26 @@ import type { EpubChapter } from '../services/epub.js';
 
 export interface ReaderState {
   currentView: 'library' | 'reader';
-  theme: 'paper' | 'sepia' | 'charcoal' | 'night';
+  theme: 'paper' | 'sepia' | 'slate' | 'charcoal' | 'night';
   fontSize: number;
-  layoutColumns: 'auto' | '1' | '2';
+  layoutColumns: 'auto' | '1' | '2' | '3';
   currentPageSpread: number;
   totalPagesSpreads: number;
 }
 
-export function setTheme(theme: 'paper' | 'sepia' | 'charcoal' | 'night', state: ReaderState): void {
-  state.theme = theme;
-  document.body.setAttribute('data-theme', theme);
+export function setTheme(theme: 'paper' | 'sepia' | 'slate' | 'charcoal' | 'night', state: ReaderState): void {
+  const normalizedTheme = (theme === 'charcoal' ? 'slate' : theme) as 'paper' | 'sepia' | 'slate' | 'night';
+  state.theme = normalizedTheme;
+  document.body.setAttribute('data-theme', normalizedTheme);
   try {
-    localStorage.setItem('zenolet-theme', theme);
+    localStorage.setItem('zenolet-theme', normalizedTheme);
   } catch (e) {
     console.warn('[Zenolet Reader] Failed to save theme to localStorage:', e);
   }
 
   document.querySelectorAll('.theme-btn').forEach((btn) => {
-    if (btn.getAttribute('data-theme') === theme) {
+    const btnTheme = btn.getAttribute('data-theme');
+    if (btnTheme === normalizedTheme || (btnTheme === 'slate' && theme === 'charcoal')) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -46,7 +48,7 @@ export function setFontSize(size: number, state: ReaderState, recalculateFn: () 
   recalculateFn();
 }
 
-export function setLayoutColumns(cols: 'auto' | '1' | '2', state: ReaderState, recalculateFn: () => void): void {
+export function setLayoutColumns(cols: 'auto' | '1' | '2' | '3', state: ReaderState, recalculateFn: () => void): void {
   state.layoutColumns = cols;
   try {
     localStorage.setItem('zenolet-layout-columns', cols);
@@ -85,13 +87,22 @@ export function recalculatePages(
   readerContent.style.width = 'auto';
   readerContent.style.columnWidth = `${pageWidth}px`;
 
+  const isLarge = window.innerWidth >= 1500;
   const isWide = window.innerWidth > 768;
   const layoutCols = state.layoutColumns;
-  const actualCols = layoutCols === '2' || (layoutCols === 'auto' && isWide) ? 2 : 1;
+  const actualCols =
+    layoutCols === '3' || (layoutCols === 'auto' && isLarge)
+      ? 3
+      : layoutCols === '2' || (layoutCols === 'auto' && isWide)
+        ? 2
+        : 1;
 
-  readerContent.classList.remove('one-column', 'two-columns');
+  readerContent.classList.remove('one-column', 'two-columns', 'three-columns');
 
-  if (actualCols === 2) {
+  if (actualCols === 3) {
+    readerContent.classList.add('three-columns');
+    readerContent.style.columnWidth = `${pageWidth / 3}px`;
+  } else if (actualCols === 2) {
     readerContent.classList.add('two-columns');
     readerContent.style.columnWidth = `${pageWidth / 2}px`;
   } else {
@@ -159,7 +170,9 @@ export function updatePaginationIndicator(
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
 
-  const cols = actualCols ?? (readerContent.classList.contains('two-columns') ? 2 : 1);
+  const cols =
+    actualCols ??
+    (readerContent.classList.contains('three-columns') ? 3 : readerContent.classList.contains('two-columns') ? 2 : 1);
   const scrollLeft = readerViewport.scrollLeft;
   const currentSpread = Math.min(state.totalPagesSpreads - 1, Math.max(0, Math.round(scrollLeft / pageWidth)));
 
@@ -171,13 +184,14 @@ export function updatePaginationIndicator(
   if (cols === 1) {
     pageIndicator.textContent = `Page ${currentSpread + 1} of ${state.totalPagesSpreads}`;
   } else {
-    const startPage = currentSpread * 2 + 1;
-    const endPage = Math.min(state.totalPagesSpreads * 2, currentSpread * 2 + 2);
+    const totalPages = state.totalPagesSpreads * cols;
+    const startPage = currentSpread * cols + 1;
+    const endPage = Math.min(totalPages, currentSpread * cols + cols);
 
     if (startPage === endPage) {
-      pageIndicator.textContent = `Page ${startPage} of ${state.totalPagesSpreads * 2}`;
+      pageIndicator.textContent = `Page ${startPage} of ${totalPages}`;
     } else {
-      pageIndicator.textContent = `Pages ${startPage}–${endPage} of ${state.totalPagesSpreads * 2}`;
+      pageIndicator.textContent = `Pages ${startPage}–${endPage} of ${totalPages}`;
     }
   }
 

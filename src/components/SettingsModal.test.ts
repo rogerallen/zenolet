@@ -19,7 +19,7 @@ describe('SettingsModal Component', () => {
           <div class="theme-options">
             <button class="theme-btn active" data-theme="paper">Paper</button>
             <button class="theme-btn" data-theme="sepia">Sepia</button>
-            <button class="theme-btn" data-theme="charcoal">Charcoal</button>
+            <button class="theme-btn" data-theme="slate">Slate</button>
             <button class="theme-btn" data-theme="night">Night</button>
           </div>
         </div>
@@ -37,6 +37,7 @@ describe('SettingsModal Component', () => {
             <button class="layout-btn active" data-columns="auto">Auto</button>
             <button class="layout-btn" data-columns="1">1 Col</button>
             <button class="layout-btn" data-columns="2">2 Col</button>
+            <button class="layout-btn" data-columns="3">3 Col</button>
           </div>
         </div>
       </div>
@@ -86,14 +87,18 @@ describe('SettingsModal Component', () => {
     expect(panel.classList.contains('visible')).toBe(false);
   });
 
-  it('updates theme when a theme button is clicked', () => {
+  it('updates theme and active button outline state when a theme button is clicked', () => {
     setupSettingsModal(panel, [readerSettingsBtn], state, onRecalculate);
 
+    const paperBtn = panel.querySelector('.theme-btn[data-theme="paper"]') as HTMLButtonElement;
     const sepiaBtn = panel.querySelector('.theme-btn[data-theme="sepia"]') as HTMLButtonElement;
+
     sepiaBtn.click();
 
     expect(state.theme).toBe('sepia');
     expect(document.body.getAttribute('data-theme')).toBe('sepia');
+    expect(sepiaBtn.classList.contains('active')).toBe(true);
+    expect(paperBtn.classList.contains('active')).toBe(false);
   });
 
   it('adjusts font size and triggers recalculate when increase/decrease is clicked', () => {
@@ -119,5 +124,11 @@ describe('SettingsModal Component', () => {
 
     expect(state.layoutColumns).toBe('2');
     expect(onRecalculate).toHaveBeenCalled();
+
+    const threeColBtn = panel.querySelector('.layout-btn[data-columns="3"]') as HTMLButtonElement;
+    threeColBtn.click();
+
+    expect(state.layoutColumns).toBe('3');
+    expect(onRecalculate).toHaveBeenCalledTimes(2);
   });
 });

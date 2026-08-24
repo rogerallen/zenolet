@@ -119,8 +119,9 @@ _Why this matters:_ If `scrollWidth` is calculated while images are still decodi
 
 Based on the screen size and user preference:
 
-- **1-Column (Single Page)**: `columnWidth = pageWidth`
-- **2-Column (Two-Page Spread)**: `columnWidth = pageWidth / 2`
+- **1-Column (Single Page)**: `columnWidth = pageWidth` (< 768px in Auto mode)
+- **2-Column (Two-Page Spread)**: `columnWidth = pageWidth / 2` (768px–1499px in Auto mode)
+- **3-Column (Three-Page Spread)**: `columnWidth = pageWidth / 3` (≥ 1500px in Auto mode)
 
 ### Step 3: Spread Counting & Snap Point Injection
 
@@ -177,6 +178,7 @@ const currentSpread = Math.min(state.totalPagesSpreads - 1, Math.max(0, Math.rou
 
 - In **1-column mode**: `"Page {currentSpread + 1} of {totalPagesSpreads}"`
 - In **2-column mode**: `"Pages {currentSpread * 2 + 1}–{currentSpread * 2 + 2} of {totalPagesSpreads * 2}"`
+- In **3-column mode**: `"Pages {currentSpread * 3 + 1}–{currentSpread * 3 + 3} of {totalPagesSpreads * 3}"`
 
 ### Anchor & Chapter Resolution ([`src/components/Timeline.ts`](./src/components/Timeline.ts))
 
