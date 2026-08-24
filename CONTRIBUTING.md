@@ -53,6 +53,7 @@ zenolet/
 ├── AGENTS.md                    # Invariants, versioning rules, & development guidelines
 ├── CONTRIBUTING.md              # Contributor guide for engine developers
 ├── CURATING.md                  # Comprehensive step-by-step curation handbook
+├── READER_ENGINE.md             # Reader engine architecture & pagination algorithm guide
 ├── eslint.config.js             # Modern ESLint 9+ flat configuration
 ├── index.html                   # Main HTML5 SPA shell
 ├── package.json                 # Dependencies & scripts
