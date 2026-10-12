@@ -2,7 +2,8 @@ import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
 
 export interface AppState {
   bookId: string;
-  progress: number; // 0.0 to 1.0
+  progress: number; // 0.0 to 1.0 (fractional progress within chapter)
+  chapter?: number; // discrete chapter index (0-based)
   theme?: string; // 'paper' | 'sepia' | 'slate' | 'night' | 'charcoal'
   fontSize?: number;
 }

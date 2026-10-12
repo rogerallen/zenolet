@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-const PROTECTED_CACHES = new Set([CACHE_NAME, 'zenolet-books-v1']);
+const PROTECTED_CACHES = new Set([CACHE_NAME, 'zenolet-books-v2']);
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(

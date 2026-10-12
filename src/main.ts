@@ -6,9 +6,7 @@ import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
   getStoredSlots,
   removeBookFromSlot,
-  getStoredProgress,
-  getStoredProgressFraction,
-  restoreBookProgressByFraction,
+  getStoredProgressDetails,
   flushBookProgress,
   getActualStorageUsage,
   formatStorageSummary
@@ -25,22 +23,44 @@ import {
   setLayoutColumns,
   recalculatePages,
   updatePaginationIndicator,
+  clearMeasuredSpreadsCache,
+  setReaderParsedChapters,
   type ReaderState,
   type ReaderElements
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
-import { closeChapterPopup, invalidateChapterMarkers } from './components/Timeline.ts';
-import { handleKeyboardEvent, handleContentLinkClick, type NavigationOptions } from './components/Navigation.ts';
+import {
+  closeChapterPopup,
+  invalidateChapterMarkers,
+  resolveChapterElement,
+  getElementSpreadIndex
+} from './components/Timeline.ts';
+import {
+  navigateForward,
+  navigateBackward,
+  handleKeyboardEvent,
+  handleContentLinkClick,
+  type NavigationOptions
+} from './components/Navigation.ts';
 import type { CatalogBook } from './types.ts';
-import type { EpubChapter } from './services/epub.ts';
+import type { EpubChapter, ParsedChapter } from './services/epub.ts';
+import {
+  computeChapterWeights,
+  calculateGlobalProgress,
+  findChapterForGlobalProgress,
+  type ChapterWeights
+} from './services/virtualization.ts';
 
 // --- State ---
 let config: ZenoletConfig = {};
 let allBooks: CatalogBook[] = [];
 let activeBook: CatalogBook | null = null;
 let activeBookChapters: EpubChapter[] = [];
+let activeParsedChapters: ParsedChapter[] = [];
+let activeChapterIndex: number = 0;
+let activeChapterWeights: ChapterWeights = { baseFractions: [0], spanFractions: [1] };
 let activeSlotIndex: number | null = null;
 let loadingSlotState: LoadingSlotState | null = null;
 
@@ -315,13 +335,139 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
   }
 }
 
-// --- Book Reader Operations ---
+async function mountChapter(
+  chapterIndex: number,
+  targetSpreadOrKeyword: number | 'last' | 'fraction' | string = 0,
+  targetFraction: number = 0,
+  skipSaveProgress: boolean = false
+): Promise<void> {
+  if (!activeBook || activeParsedChapters.length === 0) return;
+  const clampedIndex = Math.min(activeParsedChapters.length - 1, Math.max(0, chapterIndex));
+  activeChapterIndex = clampedIndex;
+
+  readerState.currentChapterIndex = clampedIndex;
+  readerState.totalChapters =
+    activeBookChapters && activeBookChapters.length > 0 ? undefined : activeParsedChapters.length;
+
+  // Mount only active chapter HTML
+  DOM.readerContent.innerHTML = activeParsedChapters[clampedIndex].htmlContent;
+
+  // Ensure all inlined images in this chapter are decoded before measuring layout dimensions
+  const images = Array.from(DOM.readerContent.querySelectorAll('img'));
+  if (images.length > 0) {
+    await Promise.all(
+      images.map((img) => {
+        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+        if (typeof img.decode === 'function') {
+          return img.decode().catch(() => {});
+        }
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+        });
+      })
+    );
+  }
+
+  // Recalculate columns & spreads for mounted chapter
+  recalculatePages(getReaderElements(), readerState, activeBook.id, {
+    preserveDOMScroll: false,
+    skipSaveProgress: true,
+    epubChapters: activeBookChapters,
+    parsedChapters: activeParsedChapters,
+    onJumpToChapter: (chIdx, spread) => handleJumpToChapter(chIdx, spread)
+  });
+
+  // Calculate target spread position within this chapter
+  let targetSpread: number;
+  if (targetSpreadOrKeyword === 'last') {
+    targetSpread = Math.max(0, readerState.totalPagesSpreads - 1);
+  } else if (targetSpreadOrKeyword === 'fraction') {
+    targetSpread = Math.min(
+      readerState.totalPagesSpreads - 1,
+      Math.max(0, Math.round(targetFraction * (readerState.totalPagesSpreads - 1)))
+    );
+  } else if (typeof targetSpreadOrKeyword === 'string') {
+    const targetEl = resolveChapterElement(DOM.readerContent, targetSpreadOrKeyword);
+    if (targetEl && readerState.totalPagesSpreads > 0) {
+      targetSpread = getElementSpreadIndex(targetEl, DOM.readerViewport, readerState.totalPagesSpreads);
+    } else {
+      targetSpread = 0;
+    }
+  } else {
+    targetSpread = Math.min(readerState.totalPagesSpreads - 1, Math.max(0, targetSpreadOrKeyword));
+  }
+
+  const pageWidth = DOM.readerViewport.clientWidth;
+  DOM.readerViewport.scrollLeft = targetSpread * pageWidth;
+
+  // Compute global reading progress
+  const globalProgress = calculateGlobalProgress(
+    clampedIndex,
+    targetSpread,
+    readerState.totalPagesSpreads,
+    activeChapterWeights
+  );
+  readerState.globalProgress = globalProgress;
+
+  updatePaginationIndicator(
+    getReaderElements(),
+    readerState,
+    activeBook.id,
+    undefined,
+    skipSaveProgress,
+    activeParsedChapters
+  );
+}
+
+async function handleJumpToChapter(
+  chapterIndex: number,
+  targetSpreadOrFraction?: number | 'last' | string
+): Promise<void> {
+  if (targetSpreadOrFraction === 'last') {
+    await mountChapter(chapterIndex, 'last');
+  } else if (typeof targetSpreadOrFraction === 'string') {
+    await mountChapter(chapterIndex, targetSpreadOrFraction);
+  } else if (typeof targetSpreadOrFraction === 'number' && targetSpreadOrFraction > 0 && targetSpreadOrFraction < 1) {
+    await mountChapter(chapterIndex, 'fraction', targetSpreadOrFraction);
+  } else if (typeof targetSpreadOrFraction === 'number') {
+    await mountChapter(chapterIndex, targetSpreadOrFraction);
+  } else {
+    await mountChapter(chapterIndex, 0);
+  }
+  await updateUrlHashState();
+}
+
+async function handleNextPage(): Promise<void> {
+  if (!activeBook) return;
+  navigateForward(DOM.readerViewport, readerState, async () => {
+    if (activeChapterIndex < activeParsedChapters.length - 1) {
+      await mountChapter(activeChapterIndex + 1, 0);
+      await updateUrlHashState();
+    }
+  });
+}
+
+async function handlePrevPage(): Promise<void> {
+  if (!activeBook) return;
+  navigateBackward(DOM.readerViewport, readerState, async () => {
+    if (activeChapterIndex > 0) {
+      await mountChapter(activeChapterIndex - 1, 'last');
+      await updateUrlHashState();
+    }
+  });
+}
+
 async function openBook(
   book: CatalogBook,
   initialProgressFraction: number | null = null,
   pushHistory: boolean = true,
-  targetSlotIndex?: number | null
+  targetSlotIndex?: number | null,
+  initialChapterIndex?: number | null
 ) {
+  closeChapterPopup();
+  invalidateChapterMarkers();
+  clearMeasuredSpreadsCache();
   activeBook = book;
   if (typeof targetSlotIndex === 'number') {
     activeSlotIndex = targetSlotIndex;
@@ -348,11 +494,25 @@ async function openBook(
 
     try {
       const result = await loadBookPipeline(book, config.proxyUrl, slotIndexToLoad);
-      activeBookChapters = result.chapters;
+      activeBookChapters = result.tocChapters || [];
+      activeParsedChapters =
+        result.chapters && result.chapters.length > 0
+          ? result.chapters
+          : [
+              {
+                index: 0,
+                id: 'ch-0',
+                title: book.title,
+                href: '',
+                htmlContent: result.content
+              }
+            ];
+      activeChapterWeights = computeChapterWeights(activeParsedChapters);
+      setReaderParsedChapters(activeParsedChapters);
+
       if (result.coverUrl) {
         book.coverUrl = result.coverUrl;
       }
-      DOM.readerContent.innerHTML = result.content;
     } finally {
       loadingSlotState = null;
     }
@@ -368,36 +528,37 @@ async function openBook(
     // Ensure DOM viewport scroll is clean before opening new book
     DOM.readerViewport.scrollLeft = 0;
 
-    // Ensure all inlined images are decoded before measuring layout dimensions
-    const images = Array.from(DOM.readerContent.querySelectorAll('img'));
-    if (images.length > 0) {
-      await Promise.all(
-        images.map((img) => {
-          if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-          if (typeof img.decode === 'function') {
-            return img.decode().catch(() => {});
-          }
-          return new Promise<void>((resolve) => {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          });
-        })
-      );
+    // Determine initial chapter index and progress
+    let targetChapterIdx = 0;
+    let targetSpreadMode: number | 'fraction' = 0;
+    let targetFraction = 0;
+
+    if (
+      typeof initialChapterIndex === 'number' &&
+      initialChapterIndex >= 0 &&
+      initialChapterIndex < activeParsedChapters.length
+    ) {
+      targetChapterIdx = initialChapterIndex;
+      targetSpreadMode = 'fraction';
+      targetFraction = initialProgressFraction !== null ? initialProgressFraction : 0;
+    } else {
+      const storedDetails = getStoredProgressDetails(book.id);
+      const targetGlobalFraction =
+        initialProgressFraction !== null ? initialProgressFraction : (storedDetails?.progressFraction ?? null);
+
+      if (typeof storedDetails?.chapterIndex === 'number' && initialProgressFraction === null) {
+        targetChapterIdx = storedDetails.chapterIndex;
+        targetSpreadMode = 'fraction';
+        targetFraction = storedDetails.chapterProgress ?? 0;
+      } else if (targetGlobalFraction !== null && targetGlobalFraction > 0) {
+        const found = findChapterForGlobalProgress(targetGlobalFraction, activeChapterWeights);
+        targetChapterIdx = found.chapterIndex;
+        targetSpreadMode = 'fraction';
+        targetFraction = found.chapterFraction;
+      }
     }
 
-    // Recalculate Columns & Page Spreads without preserving stale DOM scroll or queueing progress=0
-    recalculatePages(getReaderElements(), readerState, book.id, {
-      preserveDOMScroll: false,
-      skipSaveProgress: true,
-      epubChapters: activeBookChapters
-    });
-
-    // Restore Progress Fraction from storage if available
-    const targetFraction = initialProgressFraction !== null ? initialProgressFraction : getStoredProgress(book.id);
-    if (targetFraction !== null && targetFraction > 0) {
-      restoreBookProgressByFraction(targetFraction, DOM.readerViewport);
-      updatePaginationIndicator(getReaderElements(), readerState, book.id);
-    }
+    await mountChapter(targetChapterIdx, targetSpreadMode, targetFraction, true);
 
     // Update URL state hash (push new entry if opening book, replace if restored)
     await updateUrlHashState(pushHistory);
@@ -409,16 +570,27 @@ async function openBook(
 
 function closeReaderAndReturnToLibrary() {
   if (activeBook) {
-    const progressFraction = getStoredProgressFraction(DOM.readerViewport);
-    flushBookProgress(activeBook.id, progressFraction);
+    const currentSpread = readerState.currentPageSpread;
+    const totalSpreads = readerState.totalPagesSpreads;
+    const chapterFrac = totalSpreads > 1 ? currentSpread / (totalSpreads - 1) : 0;
+    const globalProgress = calculateGlobalProgress(
+      activeChapterIndex,
+      currentSpread,
+      totalSpreads,
+      activeChapterWeights
+    );
+    flushBookProgress(activeBook.id, globalProgress, activeChapterIndex, chapterFrac);
   }
   closeChapterPopup();
   invalidateChapterMarkers();
+  clearMeasuredSpreadsCache();
+  setReaderParsedChapters(undefined);
   DOM.readerView.classList.add('hidden');
   DOM.libraryView.classList.remove('hidden');
   readerState.currentView = 'library';
   activeBook = null;
   activeBookChapters = [];
+  activeParsedChapters = [];
   activeSlotIndex = null;
   DOM.readerViewport.scrollLeft = 0;
   if (window.location.hash) {
@@ -430,11 +602,14 @@ function closeReaderAndReturnToLibrary() {
 // --- State & URL Encoding ---
 async function updateUrlHashState(pushHistory: boolean = false) {
   if (!activeBook) return;
-  const progress = getStoredProgressFraction(DOM.readerViewport);
+  const currentSpread = readerState.currentPageSpread;
+  const totalSpreads = readerState.totalPagesSpreads;
+  const chapterProgress = totalSpreads > 1 ? currentSpread / (totalSpreads - 1) : 0;
 
   const appState: AppState = {
     bookId: activeBook.id,
-    progress: parseFloat(progress.toFixed(4)),
+    chapter: activeChapterIndex,
+    progress: parseFloat(chapterProgress.toFixed(4)),
     theme: readerState.theme,
     fontSize: readerState.fontSize
   };
@@ -480,7 +655,7 @@ async function handleUrlHashState() {
   };
 
   activeSlotIndex = null;
-  await openBook(book, state.progress, false);
+  await openBook(book, state.progress, false, null, state.chapter);
 }
 
 // --- Event Listeners Setup ---
@@ -530,10 +705,10 @@ function setupEventListeners() {
 
   // Navigation Arrow Button Clicks
   DOM.prevPageBtn.addEventListener('click', () => {
-    DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'auto' });
+    handlePrevPage();
   });
   DOM.nextPageBtn.addEventListener('click', () => {
-    DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
+    handleNextPage();
   });
 
   // Navigation, Keyboard Shortcuts & Modal Focus Traps
@@ -549,21 +724,83 @@ function setupEventListeners() {
     },
     readerViewport: DOM.readerViewport,
     readerState,
-    readerContent: DOM.readerContent
+    readerContent: DOM.readerContent,
+    onNextChapter: () => handleNextPage(),
+    onPrevChapter: () => handlePrevPage()
   };
 
   document.addEventListener('keydown', (e) => handleKeyboardEvent(e, navOptions));
 
+  // Touch Swipe Boundary Handling on Reader Viewport
+  let touchStartX = 0;
+  let touchStartY = 0;
+  DOM.readerViewport.addEventListener(
+    'touchstart',
+    (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    },
+    { passive: true }
+  );
+
+  DOM.readerViewport.addEventListener(
+    'touchend',
+    (e: TouchEvent) => {
+      if (e.changedTouches.length === 1) {
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > 2 * Math.abs(deltaY)) {
+          if (deltaX < 0 && readerState.currentPageSpread >= readerState.totalPagesSpreads - 1) {
+            handleNextPage();
+          } else if (deltaX > 0 && readerState.currentPageSpread === 0) {
+            handlePrevPage();
+          }
+        }
+      }
+    },
+    { passive: true }
+  );
+
   // Intercept links inside book content (TOC chapter links, footnotes, external URLs)
   DOM.readerContent.addEventListener('click', (e: MouseEvent) => {
-    handleContentLinkClick(e, DOM.readerContent, DOM.readerViewport, readerState);
+    handleContentLinkClick(
+      e,
+      DOM.readerContent,
+      DOM.readerViewport,
+      readerState,
+      async (targetChapterIndex, anchorId) => {
+        await mountChapter(targetChapterIndex, 0);
+        const targetEl = resolveChapterElement(DOM.readerContent, anchorId);
+        if (targetEl && readerState.totalPagesSpreads > 0) {
+          const targetSpread = getElementSpreadIndex(targetEl, DOM.readerViewport, readerState.totalPagesSpreads);
+          const pageWidth = DOM.readerViewport.clientWidth;
+          if (pageWidth > 0) {
+            DOM.readerViewport.scrollTo({
+              left: targetSpread * pageWidth,
+              behavior: 'smooth'
+            });
+          }
+        }
+        await updateUrlHashState();
+      },
+      activeParsedChapters
+    );
   });
 
   // Viewport Scroll Listener for Progress Indicator & URL State
   let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
   DOM.readerViewport.addEventListener('scroll', () => {
     if (!activeBook) return;
-    updatePaginationIndicator(getReaderElements(), readerState, activeBook.id);
+    const globalProgress = calculateGlobalProgress(
+      activeChapterIndex,
+      readerState.currentPageSpread,
+      readerState.totalPagesSpreads,
+      activeChapterWeights
+    );
+    readerState.globalProgress = globalProgress;
+    updatePaginationIndicator(getReaderElements(), readerState, activeBook.id, undefined, false, activeParsedChapters);
 
     if (scrollTimeout) clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => updateUrlHashState(), 400);
@@ -572,10 +809,13 @@ function setupEventListeners() {
   // Resize Listener
   window.addEventListener('resize', () => {
     if (activeBook && readerState.currentView === 'reader') {
+      clearMeasuredSpreadsCache();
       recalculatePages(getReaderElements(), readerState, activeBook.id, {
         preserveDOMScroll: true,
         skipSaveProgress: false,
-        epubChapters: activeBookChapters
+        epubChapters: activeBookChapters,
+        parsedChapters: activeParsedChapters,
+        onJumpToChapter: (chIdx, spread) => handleJumpToChapter(chIdx, spread)
       });
     }
   });
@@ -587,15 +827,31 @@ function setupEventListeners() {
   // Flush reading progress immediately on tab switch or page unload
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && activeBook) {
-      const progressFraction = getStoredProgressFraction(DOM.readerViewport);
-      flushBookProgress(activeBook.id, progressFraction);
+      const currentSpread = readerState.currentPageSpread;
+      const totalSpreads = readerState.totalPagesSpreads;
+      const chapterFrac = totalSpreads > 1 ? currentSpread / (totalSpreads - 1) : 0;
+      const globalProgress = calculateGlobalProgress(
+        activeChapterIndex,
+        currentSpread,
+        totalSpreads,
+        activeChapterWeights
+      );
+      flushBookProgress(activeBook.id, globalProgress, activeChapterIndex, chapterFrac);
     }
   });
 
   window.addEventListener('beforeunload', () => {
     if (activeBook) {
-      const progressFraction = getStoredProgressFraction(DOM.readerViewport);
-      flushBookProgress(activeBook.id, progressFraction);
+      const currentSpread = readerState.currentPageSpread;
+      const totalSpreads = readerState.totalPagesSpreads;
+      const chapterFrac = totalSpreads > 1 ? currentSpread / (totalSpreads - 1) : 0;
+      const globalProgress = calculateGlobalProgress(
+        activeChapterIndex,
+        currentSpread,
+        totalSpreads,
+        activeChapterWeights
+      );
+      flushBookProgress(activeBook.id, globalProgress, activeChapterIndex, chapterFrac);
     }
   });
 }

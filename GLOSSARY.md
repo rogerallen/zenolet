@@ -32,6 +32,22 @@ _Avoid_: Progress bar, scrubber, seek bar
 A discrete visual milestone on the Timeline representing an EPUB Table of Contents chapter or major heading.
 _Avoid_: Chapter dot, milestone, tick
 
+**Chapter Virtualization**:
+The rendering architecture that mounts only the active chapter into the reader DOM, bounded memory usage and eliminating multi-column layout thrashing on large books.
+_Avoid_: Lazy loading, DOM pagination, infinite scroll
+
+**Spine Chapter**:
+A discrete XHTML document element defined in the EPUB spine (`<spine>`), packaged in `ParsedChapter` and mounted individually into the reader viewport during virtualization.
+_Avoid_: Chunk, HTML section, page file
+
+**Table of Contents Chapter**:
+A navigation entry defined in the EPUB navigation document (`nav.xhtml` or `toc.ncx`), mapped to an anchor or relative target within a Spine Chapter.
+_Avoid_: Subchapter, TOC link, heading target
+
+**Chapter Boundary**:
+The transition point between adjacent chapters where reading advances to page spread 1 of the next chapter.
+_Avoid_: Chapter break, page gap
+
 **State Handoff**:
 A compressed, URL-safe hash payload (`#s=...`) encoding book ID, progress fraction, and reader preferences for QR code or cross-device transfer.
 _Avoid_: Share link, sync token, deep link

@@ -104,7 +104,10 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
     // TOC Navigation Verification
     expect(parsed.chapters.length).toBe(2);
     expect(parsed.chapters[0].title).toBe('Chapter 1: Loomings');
+    expect(parsed.chapters[0].htmlContent).toContain('Call me Ishmael.');
     expect(parsed.chapters[1].title).toBe('Chapter 2: The Carpet-Bag');
+    expect(parsed.chapters[1].htmlContent).toContain('I stuffed a shirt or two');
+    expect(parsed.tocChapters.length).toBe(2);
 
     // Spine Stitching Verification
     expect(parsed.htmlContent).toContain('Call me Ishmael.');
@@ -429,9 +432,9 @@ describe('Gutenberg EPUB3 Parser & Document Stitcher (parseEpubArchive)', () => 
     });
 
     const parsed = parseEpubArchive(nestedNavEpub.buffer);
-    expect(parsed.chapters.length).toBe(2);
-    expect(parsed.chapters[0].anchorId).toBe('c0_start');
-    expect(parsed.chapters[1].anchorId).toBe('ch-1');
+    expect(parsed.tocChapters.length).toBe(2);
+    expect(parsed.tocChapters[0].anchorId).toBe('c0_start');
+    expect(parsed.tocChapters[1].anchorId).toBe('ch-1');
   });
 
   it('excludes page-list and landmarks navs, extracting only genuine TOC chapters', () => {

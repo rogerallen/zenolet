@@ -50,15 +50,16 @@ export function formatStorageSummary(bookCount: number, totalBytes: number): str
   return `${bookCount} ${bookLabel}, ${sizeFormatted} used`;
 }
 
-import type { EpubChapter } from './epub.js';
+import type { EpubChapter, ParsedChapter } from './epub.js';
 
 export interface BookDetails {
   metadata: BookMetadata;
-  content: string;
-  chapters?: EpubChapter[];
+  chapters?: ParsedChapter[];
+  tocChapters?: EpubChapter[];
+  content?: string;
 }
 
-export const BOOK_CACHE_NAME = 'zenolet-books-v1';
+export const BOOK_CACHE_NAME = 'zenolet-books-v2';
 export const NUM_SLOTS = 8;
 export const STORAGE_KEY_SLOTS = 'zenolet-slots';
 
@@ -144,11 +145,12 @@ export async function saveBookOffline(
   data: BookDetails,
   targetSlotIndex?: number | null
 ): Promise<void> {
-  if (!book.byteSize && data.content) {
+  if (!book.byteSize) {
+    const rawContent = data.content || (data.chapters || []).map((c) => c.htmlContent).join('');
     try {
-      book.byteSize = new Blob([data.content]).size;
+      book.byteSize = new Blob([rawContent]).size;
     } catch {
-      book.byteSize = data.content.length;
+      book.byteSize = rawContent.length;
     }
   }
 
@@ -225,10 +227,27 @@ export async function getStoredBookOffline(bookId: string): Promise<BookDetails 
 }
 
 // --- Reading Progress Storage (localStorage) ---
-let saveProgressTimeout: ReturnType<typeof setTimeout> | null = null;
-let pendingSave: { bookId: string; progressFraction: number } | null = null;
+export interface StoredReadingProgress {
+  progressFraction: number;
+  chapterIndex?: number;
+  chapterProgress?: number;
+  lastReadTime: number;
+}
 
-export function flushBookProgress(bookId?: string, progressFraction?: number): void {
+let saveProgressTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingSave: {
+  bookId: string;
+  progressFraction: number;
+  chapterIndex?: number;
+  chapterProgress?: number;
+} | null = null;
+
+export function flushBookProgress(
+  bookId?: string,
+  progressFraction?: number,
+  chapterIndex?: number,
+  chapterProgress?: number
+): void {
   if (saveProgressTimeout) {
     clearTimeout(saveProgressTimeout);
     saveProgressTimeout = null;
@@ -236,6 +255,8 @@ export function flushBookProgress(bookId?: string, progressFraction?: number): v
 
   const targetBookId = bookId || pendingSave?.bookId;
   const targetFraction = typeof progressFraction === 'number' ? progressFraction : pendingSave?.progressFraction;
+  const targetChapterIndex = typeof chapterIndex === 'number' ? chapterIndex : pendingSave?.chapterIndex;
+  const targetChapterProgress = typeof chapterProgress === 'number' ? chapterProgress : pendingSave?.chapterProgress;
 
   if (targetBookId && typeof targetFraction === 'number') {
     try {
@@ -243,6 +264,8 @@ export function flushBookProgress(bookId?: string, progressFraction?: number): v
       const progressMap = JSON.parse(progressMapRaw);
       progressMap[targetBookId] = {
         progressFraction: targetFraction,
+        chapterIndex: typeof targetChapterIndex === 'number' ? targetChapterIndex : undefined,
+        chapterProgress: typeof targetChapterProgress === 'number' ? targetChapterProgress : undefined,
         lastReadTime: Date.now()
       };
       localStorage.setItem('zenolet-reading-progress', JSON.stringify(progressMap));
@@ -253,8 +276,13 @@ export function flushBookProgress(bookId?: string, progressFraction?: number): v
   pendingSave = null;
 }
 
-export function saveBookProgress(bookId: string, progressFraction: number): void {
-  pendingSave = { bookId, progressFraction };
+export function saveBookProgress(
+  bookId: string,
+  progressFraction: number,
+  chapterIndex?: number,
+  chapterProgress?: number
+): void {
+  pendingSave = { bookId, progressFraction, chapterIndex, chapterProgress };
   if (saveProgressTimeout) clearTimeout(saveProgressTimeout);
   saveProgressTimeout = setTimeout(() => {
     flushBookProgress();
@@ -285,16 +313,21 @@ export function clearBookProgress(bookId?: string): void {
   }
 }
 
-export function getStoredProgress(bookId: string): number | null {
+export function getStoredProgressDetails(bookId: string): StoredReadingProgress | null {
   try {
     const progressMapRaw = localStorage.getItem('zenolet-reading-progress');
     if (!progressMapRaw) return null;
     const progressMap = JSON.parse(progressMapRaw);
     const item = progressMap[bookId];
-    return item && typeof item.progressFraction === 'number' ? item.progressFraction : null;
+    return item && typeof item.progressFraction === 'number' ? (item as StoredReadingProgress) : null;
   } catch {
     return null;
   }
+}
+
+export function getStoredProgress(bookId: string): number | null {
+  const details = getStoredProgressDetails(bookId);
+  return details ? details.progressFraction : null;
 }
 
 export function getStoredProgressFraction(viewport: HTMLDivElement): number {

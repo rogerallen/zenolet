@@ -150,7 +150,7 @@ describe('Storage and Progress Math for Zenolet', () => {
 
     try {
       await removeBookFromSlot(3);
-      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v1');
+      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v2');
       expect(mockDelete).toHaveBeenCalledWith('/cached-books/1342');
     } finally {
       // @ts-ignore
@@ -182,7 +182,7 @@ describe('Storage and Progress Math for Zenolet', () => {
 
     try {
       await saveBookOffline(newBook, { metadata: newBook, content: '<p>Whale</p>' }, 2);
-      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v1');
+      expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v2');
       expect(mockDelete).toHaveBeenCalledWith('/cached-books/84');
       expect(mockPut).toHaveBeenCalledWith('/cached-books/2701', expect.anything());
       expect(getStoredProgress('84')).toBeNull();
@@ -243,12 +243,18 @@ describe('Storage and Progress Math for Zenolet', () => {
   });
 
   it('immediately flushes debounced reading progress on demand via flushBookProgress (COR-002)', async () => {
-    const { saveBookProgress, flushBookProgress, getStoredProgress } = await import('./storage.js');
-    saveBookProgress('2701', 0.85);
+    const { saveBookProgress, flushBookProgress, getStoredProgress, getStoredProgressDetails } =
+      await import('./storage.js');
+    saveBookProgress('2701', 0.85, 4, 0.25);
 
     // Before timeout fires, calling flushBookProgress immediately persists to localStorage
-    flushBookProgress('2701', 0.85);
+    flushBookProgress('2701', 0.85, 4, 0.25);
     expect(getStoredProgress('2701')).toBe(0.85);
+
+    const details = getStoredProgressDetails('2701');
+    expect(details?.progressFraction).toBe(0.85);
+    expect(details?.chapterIndex).toBe(4);
+    expect(details?.chapterProgress).toBe(0.25);
   });
 
   it('safely normalizes NaN or out-of-range fractions in restoreBookProgressByFraction', async () => {

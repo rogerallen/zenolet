@@ -1,5 +1,5 @@
 // Canonical Domain Types for Zenolet
-import type { EpubChapter } from './services/epub.js';
+import type { EpubChapter, ParsedChapter } from './services/epub.js';
 
 export interface BaseBook {
   id: string;
@@ -20,6 +20,7 @@ export interface BookMetadata extends BaseBook {
 
 export interface StoredBookData {
   metadata: BookMetadata;
-  content: string;
-  chapters?: EpubChapter[];
+  chapters?: ParsedChapter[];
+  tocChapters?: EpubChapter[];
+  content?: string;
 }

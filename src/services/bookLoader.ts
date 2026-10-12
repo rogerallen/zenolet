@@ -1,12 +1,13 @@
 // --- Book Loader Service for Zenolet ---
 import { getGutenbergCandidateUrls, fetchArrayBufferWithProxy } from './corsProxy.js';
-import { parseEpubArchive, type EpubChapter } from './epub.js';
+import { parseEpubArchive, type EpubChapter, type ParsedChapter } from './epub.js';
 import { getStoredBookOffline, saveBookOffline, getStoredSlots, saveSlots } from './storage.js';
 import type { BaseBook, BookMetadata } from '../types.js';
 
 export interface BookLoadResult {
   content: string;
-  chapters: EpubChapter[];
+  chapters: ParsedChapter[];
+  tocChapters: EpubChapter[];
   coverUrl?: string;
   fromCache: boolean;
 }
@@ -23,8 +24,10 @@ export async function loadBookPipeline(
   // 1. Check if already stored offline in Cache API
   const offlineData = await getStoredBookOffline(book.id);
   if (offlineData) {
-    const content = offlineData.content;
     const chapters = offlineData.chapters || [];
+    const content =
+      offlineData.content || chapters.map((c) => c.htmlContent).join('\n<hr class="epub-chapter-separator">\n');
+    const tocChapters = offlineData.tocChapters || [];
 
     // Backfill byteSize on slot if not already recorded
     if (typeof targetSlotIndex === 'number') {
@@ -38,6 +41,7 @@ export async function loadBookPipeline(
     return {
       content,
       chapters,
+      tocChapters,
       coverUrl: book.coverUrl,
       fromCache: true
     };
@@ -67,7 +71,8 @@ export async function loadBookPipeline(
   // 3. Parse & stitch EPUB archive
   const parsed = parseEpubArchive(epubBuffer);
   const content = parsed.htmlContent;
-  const chapters = parsed.chapters || [];
+  const chapters = parsed.chapters;
+  const tocChapters = parsed.tocChapters;
   const coverUrl = parsed.coverDataUrl || book.coverUrl;
   const byteSize = new Blob([content]).size;
 
@@ -82,12 +87,13 @@ export async function loadBookPipeline(
 
   // 4. Save offline to Cache API and slot storage if slot index is specified
   if (targetSlotIndex !== undefined) {
-    await saveBookOffline(metadata, { metadata, content, chapters }, targetSlotIndex);
+    await saveBookOffline(metadata, { metadata, content, chapters, tocChapters }, targetSlotIndex);
   }
 
   return {
     content,
     chapters,
+    tocChapters,
     coverUrl,
     fromCache: false
   };

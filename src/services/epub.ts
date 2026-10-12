@@ -5,13 +5,23 @@ export interface EpubChapter {
   title: string;
   href: string;
   anchorId: string;
+  spineIndex?: number;
+}
+
+export interface ParsedChapter {
+  index: number;
+  id: string;
+  title: string;
+  href: string;
+  htmlContent: string;
 }
 
 export interface ParsedEpub {
   title: string;
   author: string;
   htmlContent: string;
-  chapters: EpubChapter[];
+  chapters: ParsedChapter[];
+  tocChapters: EpubChapter[];
   coverDataUrl?: string;
 }
 
@@ -150,13 +160,13 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     }
   }
 
-  // Helper to map TOC link hrefs to stitched document anchor IDs
-  function resolveTocAnchorId(href: string, navDir: string = ''): string {
-    if (!href) return 'ch-0';
+  // Helper to map TOC link hrefs to stitched document anchor IDs and spine file index
+  function resolveTocAnchor(href: string, navDir: string = ''): { anchorId: string; spineIndex: number } {
+    if (!href) return { anchorId: 'ch-0', spineIndex: 0 };
     const trimmed = href.trim();
     if (trimmed.startsWith('#')) {
       const rawAnchor = trimmed.slice(1);
-      return rawAnchor ? `c0_${rawAnchor}` : 'ch-0';
+      return { anchorId: rawAnchor ? `c0_${rawAnchor}` : 'ch-0', spineIndex: 0 };
     }
 
     const [filePart, anchorPart] = trimmed.split('#');
@@ -169,9 +179,12 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
         s.fullPath.toLowerCase().endsWith(filePart.toLowerCase())
     );
     if (spineIdx !== -1) {
-      return anchorPart ? `c${spineIdx}_${anchorPart}` : `ch-${spineIdx}`;
+      return {
+        anchorId: anchorPart ? `c${spineIdx}_${anchorPart}` : `ch-${spineIdx}`,
+        spineIndex: spineIdx
+      };
     }
-    return anchorPart ? `c0_${anchorPart}` : 'ch-0';
+    return { anchorId: anchorPart ? `c0_${anchorPart}` : 'ch-0', spineIndex: 0 };
   }
 
   // 7. Extract Table of Contents (nav.xhtml or toc.ncx)
@@ -218,10 +231,12 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
           const linkTitle = link.textContent?.trim() || '';
           const href = link.getAttribute('href') || '';
           if (linkTitle && href && !isPageTitle(linkTitle)) {
+            const resolved = resolveTocAnchor(href, navDir);
             chapters.push({
               title: linkTitle,
               href,
-              anchorId: resolveTocAnchorId(href, navDir)
+              anchorId: resolved.anchorId,
+              spineIndex: resolved.spineIndex
             });
           }
         }
@@ -248,10 +263,12 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
           const label = np.querySelector('navLabel > text')?.textContent?.trim();
           const src = np.querySelector('content')?.getAttribute('src') || '';
           if (label && src && !isPageTitle(label)) {
+            const resolved = resolveTocAnchor(src, ncxDir);
             chapters.push({
               title: label,
               href: src,
-              anchorId: resolveTocAnchorId(src, ncxDir)
+              anchorId: resolved.anchorId,
+              spineIndex: resolved.spineIndex
             });
           }
         }
@@ -283,6 +300,7 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
 
   // 8. Stitch Spine XHTML Chapters into Unified Clean HTML
   const chapterHtmlSections: string[] = [];
+  const parsedChapters: ParsedChapter[] = [];
 
   spineItems.forEach((spineItem, chapterIndex) => {
     const chapterKey = fileKeys.find((k) => k.toLowerCase() === spineItem.fullPath.toLowerCase());
@@ -441,9 +459,35 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
         ? chapterDoc.documentElement.innerHTML
         : '';
     if (bodyContent.trim().length > 0) {
-      chapterHtmlSections.push(
-        `<section class="epub-chapter" id="ch-${chapterIndex}" data-chapter-index="${chapterIndex}">\n${bodyContent}\n</section>`
-      );
+      const isCover =
+        spineItem.href.toLowerCase().includes('cover') ||
+        spineItem.id.toLowerCase().includes('cover') ||
+        spineItem.properties?.includes('cover-image') ||
+        (chapterDoc.body?.classList.contains('x-ebookmaker-coverpage') ?? false);
+      const matchingToc = chapters.find((c) => {
+        const hrefBase = c.href.split('#')[0].toLowerCase();
+        const spineBase = spineItem.href.toLowerCase();
+        return hrefBase === spineBase || hrefBase.endsWith(spineBase) || spineBase.endsWith(hrefBase);
+      });
+      const heading = chapterDoc.querySelector('h1, h2, h3, h4');
+      const headingText = heading?.textContent?.trim();
+      const chapterTitle = matchingToc?.title || headingText || (isCover ? 'Cover' : `Chapter ${chapterIndex + 1}`);
+
+      const escapedTitle = chapterTitle
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      const sectionHtml = `<section class="epub-chapter" id="ch-${chapterIndex}" data-chapter-index="${chapterIndex}" data-chapter-title="${escapedTitle}">\n${bodyContent}\n</section>`;
+      chapterHtmlSections.push(sectionHtml);
+
+      parsedChapters.push({
+        index: chapterIndex,
+        id: `ch-${chapterIndex}`,
+        title: chapterTitle,
+        href: spineItem.href,
+        htmlContent: sectionHtml
+      });
     }
   });
 
@@ -453,7 +497,8 @@ export function parseEpubArchive(buffer: ArrayBuffer): ParsedEpub {
     title,
     author,
     htmlContent,
-    chapters,
+    chapters: parsedChapters,
+    tocChapters: chapters,
     coverDataUrl
   };
 }

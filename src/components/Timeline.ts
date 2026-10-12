@@ -1,9 +1,18 @@
-import type { EpubChapter } from '../services/epub.js';
+import type { EpubChapter, ParsedChapter } from '../services/epub.js';
+import {
+  computeChapterWeights,
+  computeTocMarkers,
+  findChapterForGlobalProgress,
+  type ChapterWeights
+} from '../services/virtualization.js';
 
 export interface ChapterMarker {
   id: string;
   title: string;
   pageSpread: number;
+  chapterIndex?: number;
+  globalFraction?: number;
+  targetAnchorId?: string;
 }
 
 export function getElementSpreadIndex(
@@ -116,10 +125,50 @@ export function getChapterMarkers(
   readerViewport: HTMLDivElement,
   totalPagesSpreads: number,
   useCache: boolean = false,
-  epubChapters?: EpubChapter[]
+  epubChapters?: EpubChapter[],
+  parsedChapters?: ParsedChapter[],
+  chapterWeights?: ChapterWeights
 ): ChapterMarker[] {
   if (useCache && cachedChapterMarkers) {
     return cachedChapterMarkers;
+  }
+
+  // If discrete parsed chapters are provided and multiple exist
+  if (parsedChapters && parsedChapters.length > 1) {
+    const weights = chapterWeights || computeChapterWeights(parsedChapters);
+
+    // 1. Primary: Use structured EPUB Table of Contents if available
+    if (epubChapters && epubChapters.length > 0) {
+      const isPageTitle = (title: string) =>
+        /^(page\s*\d+|\d+|p\.\s*\d+|\[\s*page\s*\d+\s*\]|\[\d+\])$/i.test(title.trim()) ||
+        /^(list of illustrations|illustrations|cover|title page|colophon|copyright)$/i.test(title.trim());
+
+      const validToc = epubChapters.filter((c) => c.title && !isPageTitle(c.title));
+      if (validToc.length > 0) {
+        const tocMarkers = computeTocMarkers(validToc, parsedChapters, weights);
+        const markers: ChapterMarker[] = tocMarkers.map((tm) => ({
+          id: tm.anchorId || `spine-${tm.spineIndex}`,
+          title: tm.title,
+          pageSpread: 0,
+          chapterIndex: tm.spineIndex,
+          globalFraction: tm.globalFraction,
+          targetAnchorId: tm.anchorId
+        }));
+        cachedChapterMarkers = markers;
+        return markers;
+      }
+    }
+
+    // Fallback: If no TOC available, use parsedChapters spine items directly
+    const markers: ChapterMarker[] = parsedChapters.map((ch, idx) => ({
+      id: ch.id,
+      title: ch.title,
+      pageSpread: 0,
+      chapterIndex: idx,
+      globalFraction: weights.baseFractions[idx]
+    }));
+    cachedChapterMarkers = markers;
+    return markers;
   }
 
   const markers: ChapterMarker[] = [];
@@ -232,10 +281,24 @@ export function updateActiveChapterLabel(
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
   currentPageSpread: number,
-  totalPagesSpreads: number
+  totalPagesSpreads: number,
+  activeChapterTitle?: string
 ): void {
   const indicator = document.getElementById('active-chapter-indicator');
   if (!indicator) return;
+
+  if (activeChapterTitle) {
+    indicator.textContent = activeChapterTitle;
+    return;
+  }
+
+  const section = readerContent.querySelector<HTMLElement>('.epub-chapter');
+  const sectionTitle =
+    section?.getAttribute('data-chapter-title') || section?.querySelector('h1, h2, h3, h4')?.textContent?.trim();
+  if (sectionTitle) {
+    indicator.textContent = sectionTitle;
+    return;
+  }
 
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0 || totalPagesSpreads <= 1) {
@@ -270,10 +333,10 @@ export function updateActiveChapterLabel(
 
 let activePopupElement: HTMLElement | null = null;
 let activePopupCleanup: (() => void) | null = null;
-let activeTargetSpread: number | null = null;
+let activeTargetKey: string | number | null = null;
 
 export function closeChapterPopup(): void {
-  activeTargetSpread = null;
+  activeTargetKey = null;
   if (activePopupCleanup) {
     activePopupCleanup();
     activePopupCleanup = null;
@@ -291,40 +354,63 @@ export function showChapterPopup(
   clickClientX: number,
   trackRect: DOMRect,
   totalPagesSpreads: number,
-  onJumpToSpread: (spreadIndex: number) => void
+  onJumpToSpread: (spreadIndex: number) => void,
+  onJumpToChapter?: (chapterIndex: number, targetSpread?: number | 'last' | string) => void,
+  currentChapterIndex?: number,
+  currentGlobalProgress?: number
 ): void {
-  if (activePopupElement && activeTargetSpread === targetSpread) {
-    // Already rendered and displayed for this spread position; avoid glitchy re-rendering
-    return;
-  }
-
-  closeChapterPopup();
-  activeTargetSpread = targetSpread;
-
   if (!markers || markers.length === 0) return;
 
-  // Find which chapter corresponds to the user's active reading position
-  let activeMarkerId: string | null = null;
-  for (let i = 0; i < markers.length; i++) {
-    if (markers[i].pageSpread <= currentReadingSpread) {
-      activeMarkerId = markers[i].id;
-    } else {
-      break;
-    }
-  }
-  if (!activeMarkerId && markers.length > 0) {
-    activeMarkerId = markers[0].id;
-  }
+  const isMultiChapter = Boolean(markers[0] && typeof markers[0].globalFraction === 'number');
+  const clickRatio =
+    trackRect.width > 0 ? Math.max(0, Math.min(1, (clickClientX - trackRect.left) / trackRect.width)) : 0;
 
-  // Find the closest marker index to the clicked target spread
+  // Find the closest marker index to the clicked target spread/ratio
   let closestIdx = 0;
   let minDiff = Infinity;
   for (let i = 0; i < markers.length; i++) {
-    const diff = Math.abs(markers[i].pageSpread - targetSpread);
+    const diff = isMultiChapter
+      ? Math.abs((markers[i].globalFraction ?? 0) - clickRatio)
+      : Math.abs(markers[i].pageSpread - targetSpread);
     if (diff < minDiff) {
       minDiff = diff;
       closestIdx = i;
     }
+  }
+
+  const targetKey = isMultiChapter ? `ch_${closestIdx}` : `sp_${targetSpread}`;
+  if (activePopupElement && activeTargetKey === targetKey) {
+    // Already rendered and displayed for this spread/chapter position; avoid glitchy re-rendering
+    return;
+  }
+
+  closeChapterPopup();
+  activeTargetKey = targetKey;
+
+  // Find which chapter corresponds to the user's active reading position
+  let activeMarkerId: string | null = null;
+  if (isMultiChapter && typeof currentGlobalProgress === 'number') {
+    for (let i = 0; i < markers.length; i++) {
+      if ((markers[i].globalFraction ?? 0) <= currentGlobalProgress + 0.005) {
+        activeMarkerId = markers[i].id;
+      } else {
+        break;
+      }
+    }
+  } else if (isMultiChapter && typeof currentChapterIndex === 'number') {
+    const match = markers.find((m) => m.chapterIndex === currentChapterIndex);
+    if (match) activeMarkerId = match.id;
+  } else {
+    for (let i = 0; i < markers.length; i++) {
+      if (markers[i].pageSpread <= currentReadingSpread) {
+        activeMarkerId = markers[i].id;
+      } else {
+        break;
+      }
+    }
+  }
+  if (!activeMarkerId && markers.length > 0) {
+    activeMarkerId = markers[0].id;
   }
 
   // Guarantee displaying up to 12-14 chapters centered around the region
@@ -375,7 +461,10 @@ export function showChapterPopup(
 
     const spreadSpan = document.createElement('span');
     spreadSpan.className = 'chapter-item-spread';
-    const percent = Math.round((marker.pageSpread / Math.max(1, totalPagesSpreads - 1)) * 100);
+    const percent =
+      typeof marker.globalFraction === 'number'
+        ? Math.round(marker.globalFraction * 100)
+        : Math.round((marker.pageSpread / Math.max(1, totalPagesSpreads - 1)) * 100);
     spreadSpan.textContent = `${percent}%`;
 
     item.appendChild(titleSpan);
@@ -384,7 +473,11 @@ export function showChapterPopup(
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       closeChapterPopup();
-      onJumpToSpread(marker.pageSpread);
+      if (typeof marker.chapterIndex === 'number' && onJumpToChapter) {
+        onJumpToChapter(marker.chapterIndex, marker.targetAnchorId || 0);
+      } else {
+        onJumpToSpread(marker.pageSpread);
+      }
     });
 
     list.appendChild(item);
@@ -447,30 +540,59 @@ export function renderTimeline(
   readerViewport: HTMLDivElement,
   totalPagesSpreads: number,
   onJumpToSpread: (spreadIndex: number) => void,
-  epubChapters?: EpubChapter[]
+  epubChapters?: EpubChapter[],
+  parsedChapters?: ParsedChapter[],
+  onJumpToChapter?: (chapterIndex: number, targetSpread?: number | 'last' | string) => void,
+  currentChapterIndex?: number,
+  currentGlobalProgress?: number
 ): void {
   const timelineTicks = document.getElementById('timeline-ticks');
   if (!timelineTicks) return;
   timelineTicks.innerHTML = '';
   closeChapterPopup();
 
+  const isMultiChapter = Boolean(parsedChapters && parsedChapters.length > 1);
   const pageWidth = readerViewport.clientWidth;
-  if (pageWidth <= 0 || totalPagesSpreads <= 1) return;
+  if (pageWidth <= 0 || (!isMultiChapter && totalPagesSpreads <= 1)) return;
 
-  const markers = getChapterMarkers(readerContent, readerViewport, totalPagesSpreads, false, epubChapters);
+  const weights = isMultiChapter && parsedChapters ? computeChapterWeights(parsedChapters) : null;
+  const markers = getChapterMarkers(
+    readerContent,
+    readerViewport,
+    totalPagesSpreads,
+    false,
+    epubChapters,
+    parsedChapters,
+    weights || undefined
+  );
 
-  // Filter markers to avoid overcrowding on books with many chapters (e.g. Moby Dick)
-  const minSpreadDistance = Math.max(1, Math.floor(totalPagesSpreads * 0.035));
   const candidateMarkers: ChapterMarker[] = [];
-  let lastSpread = -minSpreadDistance;
+  if (isMultiChapter) {
+    // Filter markers to avoid overcrowding across omnibus books with many TOC chapters
+    const minFractionDistance = 0.035;
+    let lastFraction = -minFractionDistance;
 
-  markers.forEach((marker) => {
-    if (marker.pageSpread <= 0 || marker.pageSpread >= totalPagesSpreads - 1) return;
-    if (marker.pageSpread - lastSpread >= minSpreadDistance) {
-      candidateMarkers.push(marker);
-      lastSpread = marker.pageSpread;
-    }
-  });
+    markers.forEach((marker) => {
+      const frac = marker.globalFraction ?? 0;
+      if (frac <= 0.005 || frac >= 0.995) return;
+      if (frac - lastFraction >= minFractionDistance) {
+        candidateMarkers.push(marker);
+        lastFraction = frac;
+      }
+    });
+  } else {
+    // Filter markers to avoid overcrowding on books with many chapters (e.g. single-spine books)
+    const minSpreadDistance = Math.max(1, Math.floor(totalPagesSpreads * 0.035));
+    let lastSpread = -minSpreadDistance;
+
+    markers.forEach((marker) => {
+      if (marker.pageSpread <= 0 || marker.pageSpread >= totalPagesSpreads - 1) return;
+      if (marker.pageSpread - lastSpread >= minSpreadDistance) {
+        candidateMarkers.push(marker);
+        lastSpread = marker.pageSpread;
+      }
+    });
+  }
 
   // Cap maximum chapter dots to 14 to keep timeline clean on mobile & desktop
   const maxDots = 14;
@@ -518,7 +640,10 @@ export function renderTimeline(
           clientX,
           rect,
           totalPagesSpreads,
-          onJumpToSpread
+          onJumpToSpread,
+          onJumpToChapter,
+          currentChapterIndex,
+          currentGlobalProgress
         );
       }, 350);
     };
@@ -539,8 +664,13 @@ export function renderTimeline(
         const rect = progressTrack.getBoundingClientRect();
         const clickX = clientX - rect.left;
         const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-        const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
-        onJumpToSpread(targetSpread);
+        if (isMultiChapter && onJumpToChapter && weights) {
+          const { chapterIndex, chapterFraction } = findChapterForGlobalProgress(ratio, weights);
+          onJumpToChapter(chapterIndex, chapterFraction);
+        } else {
+          const targetSpread = Math.round(ratio * (totalPagesSpreads - 1));
+          onJumpToSpread(targetSpread);
+        }
       } else {
         // Absorb subsequent synthetic click / contextmenu events from browser
         longPressResetTimer = window.setTimeout(() => {
@@ -615,13 +745,16 @@ export function renderTimeline(
           e.clientX,
           rect,
           totalPagesSpreads,
-          onJumpToSpread
+          onJumpToSpread,
+          onJumpToChapter,
+          currentChapterIndex,
+          currentGlobalProgress
         );
       }
     };
   }
 
-  const makeAccessibleDot = (dot: HTMLElement, label: string, jumpIndex: number) => {
+  const makeAccessibleDot = (dot: HTMLElement, label: string, action: () => void) => {
     dot.tabIndex = 0;
     dot.setAttribute('role', 'button');
     dot.setAttribute('aria-label', label);
@@ -629,7 +762,7 @@ export function renderTimeline(
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         e.stopPropagation();
-        onJumpToSpread(jumpIndex);
+        action();
       }
     });
   };
@@ -638,10 +771,17 @@ export function renderTimeline(
   beginDot.className = 'timeline-dot begin-dot';
   beginDot.style.left = '0%';
   beginDot.title = 'Begin';
-  makeAccessibleDot(beginDot, 'Jump to beginning of book', 0);
+  const beginAction = () => {
+    if (isMultiChapter && onJumpToChapter) {
+      onJumpToChapter(0, 0);
+    } else {
+      onJumpToSpread(0);
+    }
+  };
+  makeAccessibleDot(beginDot, 'Jump to beginning of book', beginAction);
   beginDot.addEventListener('click', (e) => {
     e.stopPropagation();
-    onJumpToSpread(0);
+    beginAction();
   });
   timelineTicks.appendChild(beginDot);
 
@@ -649,24 +789,43 @@ export function renderTimeline(
   endDot.className = 'timeline-dot end-dot';
   endDot.style.left = '100%';
   endDot.title = 'End';
-  makeAccessibleDot(endDot, 'Jump to end of book', totalPagesSpreads - 1);
+  const endAction = () => {
+    if (isMultiChapter && onJumpToChapter && parsedChapters) {
+      onJumpToChapter(parsedChapters.length - 1, 'last');
+    } else {
+      onJumpToSpread(totalPagesSpreads - 1);
+    }
+  };
+  makeAccessibleDot(endDot, 'Jump to end of book', endAction);
   endDot.addEventListener('click', (e) => {
     e.stopPropagation();
-    onJumpToSpread(totalPagesSpreads - 1);
+    endAction();
   });
   timelineTicks.appendChild(endDot);
 
   displayedMarkers.forEach((marker) => {
-    const percent = (marker.pageSpread / (totalPagesSpreads - 1)) * 100;
+    const percent =
+      typeof marker.globalFraction === 'number'
+        ? marker.globalFraction * 100
+        : (marker.pageSpread / (totalPagesSpreads - 1)) * 100;
     const dot = document.createElement('div');
     dot.className = 'timeline-dot chapter-dot';
-    dot.style.left = `${percent}%`;
+    dot.style.left = `${percent.toFixed(1)}%`;
     dot.title = marker.title;
-    makeAccessibleDot(dot, `Jump to ${marker.title}`, marker.pageSpread);
+
+    const dotAction = () => {
+      if (typeof marker.chapterIndex === 'number' && onJumpToChapter) {
+        onJumpToChapter(marker.chapterIndex, marker.targetAnchorId || 0);
+      } else {
+        onJumpToSpread(marker.pageSpread);
+      }
+    };
+
+    makeAccessibleDot(dot, `Jump to ${marker.title}`, dotAction);
 
     dot.addEventListener('click', (e) => {
       e.stopPropagation();
-      onJumpToSpread(marker.pageSpread);
+      dotAction();
     });
 
     timelineTicks.appendChild(dot);

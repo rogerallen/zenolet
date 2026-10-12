@@ -441,4 +441,142 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     expect(mockViewport.scrollLeft).toBe(0);
     expect(mockProgressFill.style.width).toBe('0%');
   });
+
+  it('formats pagination indicators with chapter prefix when totalChapters > 1', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 1500, configurable: true });
+    mockViewport.scrollLeft = 500; // Spread 1 of 3
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 1500, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const testState: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 16,
+      layoutColumns: '1',
+      currentPageSpread: 0,
+      totalPagesSpreads: 3,
+      currentChapterIndex: 2,
+      totalChapters: 12,
+      globalProgress: 0.25
+    };
+
+    recalculatePages(
+      {
+        readerViewport: mockViewport,
+        readerContent: mockContent,
+        snapPoints: mockSnapPoints,
+        progressFill: mockProgressFill,
+        pageIndicator: mockPageIndicator
+      },
+      testState,
+      'omnibus-book',
+      { preserveDOMScroll: true, skipSaveProgress: true }
+    );
+
+    // Ch. 3 of 12 · Page 2 of 3
+    expect(mockPageIndicator.textContent).toBe('Ch. 3 of 12 · Page 2 of 3');
+    // Global progress 0.25 -> 25%
+    expect(mockProgressFill.style.width).toBe('25%');
+  });
+
+  it('formats multi-column pagination indicators with chapter prefix', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 1000, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 2000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 2000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const testState: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 16,
+      layoutColumns: '2',
+      currentPageSpread: 0,
+      totalPagesSpreads: 2,
+      currentChapterIndex: 0,
+      totalChapters: 5,
+      globalProgress: 0.1
+    };
+
+    recalculatePages(
+      {
+        readerViewport: mockViewport,
+        readerContent: mockContent,
+        snapPoints: mockSnapPoints,
+        progressFill: mockProgressFill,
+        pageIndicator: mockPageIndicator
+      },
+      testState,
+      'omnibus-book-2col',
+      { preserveDOMScroll: false, skipSaveProgress: true }
+    );
+
+    // Ch. 1 of 5 · Pages 1–2 of 4
+    expect(mockPageIndicator.textContent).toBe('Ch. 1 of 5 · Pages 1–2 of 4');
+    expect(mockProgressFill.style.width).toBe('10%');
+  });
+
+  it('calculates and displays book-wide page numbers across multi-chapter books', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 1000, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 2000, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 2000, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const chapters = [
+      { index: 0, id: 'c0', title: 'Ch 1', href: 'c0.xhtml', htmlContent: 'x'.repeat(1000) },
+      { index: 1, id: 'c1', title: 'Ch 2', href: 'c1.xhtml', htmlContent: 'x'.repeat(3000) }
+    ];
+
+    const testState: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 16,
+      layoutColumns: '2',
+      currentPageSpread: 0,
+      totalPagesSpreads: 2,
+      currentChapterIndex: 1
+    };
+
+    recalculatePages(
+      {
+        readerViewport: mockViewport,
+        readerContent: mockContent,
+        snapPoints: mockSnapPoints,
+        progressFill: mockProgressFill,
+        pageIndicator: mockPageIndicator
+      },
+      testState,
+      'multi-chapter-book',
+      {
+        preserveDOMScroll: false,
+        skipSaveProgress: true,
+        parsedChapters: chapters
+      }
+    );
+
+    // Chapter 0 has 1000 chars, Chapter 1 has 3000 chars and was measured at 2 spreads (1500 chars/spread)
+    // Chapter 0 estimated 1 spread (2 pages).
+    // Chapter 1 is at spread 0 -> globalSpread 1 -> Pages 3–4 of 6 (or 8)
+    expect(mockPageIndicator.textContent).toContain('Pages 3–4 of');
+  });
 });

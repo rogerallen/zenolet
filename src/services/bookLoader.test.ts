@@ -38,7 +38,16 @@ describe('bookLoader service', () => {
     vi.mocked(storage.getStoredBookOffline).mockResolvedValue({
       metadata: { ...testBook, byteSize: 5000 },
       content: '<p>Cached Chapter Content</p>',
-      chapters: [{ title: 'Chapter 1', href: 'ch1.xhtml', anchorId: 'ch1' }]
+      chapters: [
+        {
+          index: 0,
+          id: 'ch-0',
+          title: 'Chapter 1',
+          href: 'ch1.xhtml',
+          htmlContent: '<p>Cached Chapter Content</p>'
+        }
+      ],
+      tocChapters: [{ title: 'Chapter 1', href: 'ch1.xhtml', anchorId: 'ch1' }]
     });
 
     const result: BookLoadResult = await loadBookPipeline(testBook, 'https://proxy.example.com', 0);
@@ -46,6 +55,7 @@ describe('bookLoader service', () => {
     expect(result.fromCache).toBe(true);
     expect(result.content).toBe('<p>Cached Chapter Content</p>');
     expect(result.chapters).toHaveLength(1);
+    expect(result.tocChapters).toHaveLength(1);
     expect(corsProxy.fetchArrayBufferWithProxy).not.toHaveBeenCalled();
     expect(storage.saveBookOffline).not.toHaveBeenCalled();
   });
@@ -63,7 +73,16 @@ describe('bookLoader service', () => {
       title: 'Pride and Prejudice',
       author: 'Jane Austen',
       htmlContent: '<p>Fresh EPUB Content</p>',
-      chapters: [{ title: 'Chapter 1', href: 'ch1.xhtml', anchorId: 'ch1' }],
+      chapters: [
+        {
+          index: 0,
+          id: 'ch-0',
+          title: 'Chapter 1',
+          href: 'ch1.xhtml',
+          htmlContent: '<section class="epub-chapter">Fresh EPUB Content</section>'
+        }
+      ],
+      tocChapters: [{ title: 'Chapter 1', href: 'ch1.xhtml', anchorId: 'ch1' }],
       coverDataUrl: 'data:image/jpeg;base64,freshcover'
     });
 
@@ -72,6 +91,7 @@ describe('bookLoader service', () => {
     expect(result.fromCache).toBe(false);
     expect(result.content).toBe('<p>Fresh EPUB Content</p>');
     expect(result.coverUrl).toBe('data:image/jpeg;base64,freshcover');
+    expect(result.chapters).toHaveLength(1);
     expect(corsProxy.fetchArrayBufferWithProxy).toHaveBeenCalledTimes(1);
     expect(storage.saveBookOffline).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -80,7 +100,8 @@ describe('bookLoader service', () => {
         coverUrl: 'data:image/jpeg;base64,freshcover'
       }),
       expect.objectContaining({
-        content: '<p>Fresh EPUB Content</p>'
+        content: '<p>Fresh EPUB Content</p>',
+        chapters: expect.any(Array)
       }),
       2
     );
@@ -103,7 +124,8 @@ describe('bookLoader service', () => {
       title: 'Pride and Prejudice',
       author: 'Jane Austen',
       htmlContent: '<p>Third candidate succeeded</p>',
-      chapters: []
+      chapters: [],
+      tocChapters: []
     });
 
     const result = await loadBookPipeline(testBook, 'https://proxy.example.com', 0);

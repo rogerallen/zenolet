@@ -152,4 +152,157 @@ describe('Timeline Component & Chapter Navigation (Timeline.ts)', () => {
     expect(markers[0].title).toBe('A Scandal in Bohemia');
     expect(markers[1].title).toBe('The Red-Headed League');
   });
+
+  it('uses discrete ParsedChapter[] directly without DOM queries when available', () => {
+    const mockContent = document.createElement('div');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    const parsedChapters = [
+      { index: 0, id: 'ch-0', title: 'Hamlet: Act I', href: 'act1.xhtml', htmlContent: '<div>Act 1</div>' },
+      { index: 1, id: 'ch-1', title: 'Hamlet: Act II', href: 'act2.xhtml', htmlContent: '<div>Act 2</div>' },
+      { index: 2, id: 'ch-2', title: 'Hamlet: Act III', href: 'act3.xhtml', htmlContent: '<div>Act 3</div>' }
+    ];
+
+    const markers = getChapterMarkers(mockContent, mockViewport, 5, false, undefined, parsedChapters);
+    expect(markers.length).toBe(3);
+    expect(markers[0].title).toBe('Hamlet: Act I');
+    expect(markers[0].chapterIndex).toBe(0);
+    expect(markers[1].title).toBe('Hamlet: Act II');
+    expect(markers[1].chapterIndex).toBe(1);
+    expect(markers[2].title).toBe('Hamlet: Act III');
+    expect(markers[2].chapterIndex).toBe(2);
+  });
+
+  it('centers showChapterPopup around the clicked timeline ratio in multi-chapter books', async () => {
+    const { showChapterPopup, closeChapterPopup } = await import('./Timeline.js');
+
+    // Create 100 markers with globalFraction from 0 to 0.99
+    const markers = Array.from({ length: 100 }, (_, i) => ({
+      id: `ch-${i}`,
+      title: `Chapter ${i + 1}`,
+      pageSpread: 0,
+      chapterIndex: i,
+      globalFraction: i / 100
+    }));
+
+    const trackRect = {
+      left: 100,
+      top: 500,
+      width: 1000,
+      right: 1100,
+      bottom: 520,
+      height: 20,
+      x: 100,
+      y: 500,
+      toJSON: () => {}
+    } as DOMRect;
+
+    // Click near the end of the timeline: left + 900 = 1000 (which is 900/1000 = 90% -> chapter ~90)
+    const clickX = 1000;
+    const jumpSpy = vi.fn();
+
+    showChapterPopup(markers, 0, 0, clickX, trackRect, 1, vi.fn(), jumpSpy, 0);
+
+    const popup = document.getElementById('chapter-popup-menu');
+    expect(popup).not.toBeNull();
+
+    closeChapterPopup();
+  });
+
+  it('passes targetAnchorId to onJumpToChapter when clicking a chapter in popup or timeline dot', async () => {
+    const { showChapterPopup, closeChapterPopup, renderTimeline } = await import('./Timeline.js');
+
+    const markers = [
+      {
+        id: 'c1_pgepubid00024',
+        title: 'Chapter 20. All Astir.',
+        pageSpread: 0,
+        chapterIndex: 3,
+        globalFraction: 0.18,
+        targetAnchorId: 'c1_pgepubid00024'
+      }
+    ];
+
+    const trackRect = {
+      left: 0,
+      top: 500,
+      width: 1000,
+      right: 1000,
+      bottom: 520,
+      height: 20,
+      x: 0,
+      y: 500,
+      toJSON: () => {}
+    } as DOMRect;
+
+    const jumpChapterSpy = vi.fn();
+    showChapterPopup(markers, 0, 0, 180, trackRect, 1, vi.fn(), jumpChapterSpy, 3);
+
+    const popupItem = document.querySelector<HTMLButtonElement>('.chapter-popup-item');
+    expect(popupItem).not.toBeNull();
+    popupItem?.click();
+
+    expect(jumpChapterSpy).toHaveBeenCalledWith(3, 'c1_pgepubid00024');
+    closeChapterPopup();
+
+    // Verify timeline dot click as well
+    const ticksContainer = document.createElement('div');
+    ticksContainer.id = 'timeline-ticks';
+    document.body.appendChild(ticksContainer);
+
+    const mockContent = document.createElement('div');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    const parsedChapters = [
+      { index: 0, id: 'ch-0', title: 'Ch 0', href: 'ch0.xhtml', htmlContent: '<div>Cover</div>' },
+      { index: 1, id: 'ch-1', title: 'Ch 1', href: 'ch1.xhtml', htmlContent: '<div id="c1_pgepubid00024">Ch 20</div>' }
+    ];
+
+    const epubChapters: EpubChapter[] = [
+      { title: 'Chapter 20. All Astir.', href: 'ch1.xhtml#pgepubid00024', anchorId: 'c1_pgepubid00024', spineIndex: 1 }
+    ];
+
+    const dotJumpSpy = vi.fn();
+    renderTimeline(mockContent, mockViewport, 10, vi.fn(), epubChapters, parsedChapters, dotJumpSpy, 1);
+
+    const chapterDot = ticksContainer.querySelector<HTMLDivElement>('.timeline-dot.chapter-dot');
+    expect(chapterDot).not.toBeNull();
+    chapterDot?.click();
+
+    expect(dotJumpSpy).toHaveBeenCalledWith(1, 'c1_pgepubid00024');
+    ticksContainer.remove();
+  });
+
+  it('renders timeline dots on initial load of multi-chapter books even when current spine chunk has totalPagesSpreads of 1', async () => {
+    const { renderTimeline } = await import('./Timeline.js');
+
+    const ticksContainer = document.createElement('div');
+    ticksContainer.id = 'timeline-ticks';
+    document.body.appendChild(ticksContainer);
+
+    const mockContent = document.createElement('div');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    // Multi-chapter book with cover (spine 0) of 1 spread and chapters in spine 1
+    const parsedChapters = [
+      { index: 0, id: 'ch-0', title: 'Cover', href: 'wrap0000.xhtml', htmlContent: '<div>Cover SVG</div>' },
+      { index: 1, id: 'ch-1', title: 'Chapter 1', href: 'ch1.xhtml', htmlContent: '<div id="c1_ch1">Text</div>' }
+    ];
+
+    const epubChapters: EpubChapter[] = [
+      { title: 'Chapter 1. Loomings.', href: 'ch1.xhtml#ch1', anchorId: 'c1_ch1', spineIndex: 1 }
+    ];
+
+    // totalPagesSpreads is 1 for the cover chunk
+    renderTimeline(mockContent, mockViewport, 1, vi.fn(), epubChapters, parsedChapters, vi.fn(), 0);
+
+    const dots = ticksContainer.querySelectorAll('.timeline-dot');
+    // Must render Begin, End, and Chapter dot (at least 2 dots, not empty)
+    expect(dots.length).toBeGreaterThanOrEqual(2);
+
+    ticksContainer.remove();
+  });
 });

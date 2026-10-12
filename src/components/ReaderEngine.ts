@@ -1,8 +1,84 @@
 // --- Reader Engine Component for Zenolet ---
 import { restoreBookProgressByFraction, saveBookProgress, getStoredProgressFraction } from '../services/storage.js';
 import { updateActiveChapterLabel, renderTimeline } from './Timeline.js';
+import { calculateBookPagination } from '../services/virtualization.js';
 
-import type { EpubChapter } from '../services/epub.js';
+import type { EpubChapter, ParsedChapter } from '../services/epub.js';
+
+const measuredChapterSpreadsCache = new Map<number, number>();
+let activeParsedChaptersForReader: ParsedChapter[] | null = null;
+
+export function setReaderParsedChapters(chapters?: ParsedChapter[]): void {
+  activeParsedChaptersForReader = chapters && chapters.length > 0 ? chapters : null;
+}
+
+export function clearMeasuredSpreadsCache(): void {
+  measuredChapterSpreadsCache.clear();
+}
+
+export function premeasureAllChapterSpreads(
+  readerViewport: HTMLDivElement,
+  readerContent: HTMLElement,
+  chapters: ParsedChapter[]
+): void {
+  if (typeof window === 'undefined' || !readerViewport || !readerContent || !chapters) return;
+  const pageWidth = readerViewport.clientWidth;
+  if (pageWidth <= 0) return;
+
+  // Check if all chapters are already measured
+  if (chapters.every((_, idx) => measuredChapterSpreadsCache.has(idx))) return;
+
+  const clone = readerContent.cloneNode(false) as HTMLElement;
+  clone.style.visibility = 'hidden';
+  clone.style.position = 'absolute';
+  clone.style.top = '-99999px';
+  clone.style.left = '-99999px';
+  clone.style.height = `${readerViewport.clientHeight}px`;
+  clone.style.pointerEvents = 'none';
+
+  readerViewport.appendChild(clone);
+
+  try {
+    const maxChaptersToPremeasure = Math.min(chapters.length, 50);
+    for (let i = 0; i < maxChaptersToPremeasure; i++) {
+      if (!measuredChapterSpreadsCache.has(i)) {
+        clone.innerHTML = chapters[i].htmlContent;
+        const scrollWidth = clone.scrollWidth;
+        if (scrollWidth > 0) {
+          const spreads = Math.max(1, Math.ceil(scrollWidth / pageWidth));
+          measuredChapterSpreadsCache.set(i, spreads);
+        }
+      }
+    }
+  } finally {
+    clone.remove();
+  }
+}
+
+export function measureOffscreenChapterSpreads(
+  readerViewport: HTMLDivElement,
+  readerContent: HTMLElement,
+  htmlContent: string
+): number {
+  if (typeof window === 'undefined' || !readerViewport || !readerContent) return 1;
+  const pageWidth = readerViewport.clientWidth;
+  if (pageWidth <= 0) return 1;
+
+  const clone = readerContent.cloneNode(false) as HTMLElement;
+  clone.style.visibility = 'hidden';
+  clone.style.position = 'absolute';
+  clone.style.top = '-99999px';
+  clone.style.left = '-99999px';
+  clone.style.height = `${readerViewport.clientHeight}px`;
+  clone.style.pointerEvents = 'none';
+  clone.innerHTML = htmlContent;
+
+  readerViewport.appendChild(clone);
+  const scrollWidth = clone.scrollWidth;
+  clone.remove();
+
+  return Math.max(1, Math.ceil(scrollWidth / pageWidth));
+}
 
 export interface ReaderState {
   currentView: 'library' | 'reader';
@@ -11,6 +87,12 @@ export interface ReaderState {
   layoutColumns: 'auto' | '1' | '2' | '3';
   currentPageSpread: number;
   totalPagesSpreads: number;
+  currentChapterIndex?: number;
+  totalChapters?: number;
+  globalProgress?: number;
+  bookTotalPages?: number;
+  bookCurrentPage?: number;
+  bookEndPage?: number;
 }
 
 export function setTheme(theme: 'paper' | 'sepia' | 'slate' | 'charcoal' | 'night', state: ReaderState): void {
@@ -34,6 +116,7 @@ export function setTheme(theme: 'paper' | 'sepia' | 'slate' | 'charcoal' | 'nigh
 }
 
 export function setFontSize(size: number, state: ReaderState, recalculateFn: () => void): void {
+  clearMeasuredSpreadsCache();
   state.fontSize = size;
   const content = document.getElementById('reader-content');
   const sizeDisplay = document.getElementById('font-size-display');
@@ -49,6 +132,7 @@ export function setFontSize(size: number, state: ReaderState, recalculateFn: () 
 }
 
 export function setLayoutColumns(cols: 'auto' | '1' | '2' | '3', state: ReaderState, recalculateFn: () => void): void {
+  clearMeasuredSpreadsCache();
   state.layoutColumns = cols;
   try {
     localStorage.setItem('zenolet-layout-columns', cols);
@@ -78,6 +162,8 @@ export interface RecalculateOptions {
   preserveDOMScroll?: boolean;
   skipSaveProgress?: boolean;
   epubChapters?: EpubChapter[];
+  parsedChapters?: ParsedChapter[];
+  onJumpToChapter?: (chapterIndex: number, targetSpread?: number | 'last' | string) => void;
 }
 
 export function recalculatePages(
@@ -96,7 +182,9 @@ export function recalculatePages(
   activeBookId: string | null,
   preserveDOMScroll?: boolean,
   skipSaveProgress?: boolean,
-  epubChapters?: EpubChapter[]
+  epubChapters?: EpubChapter[],
+  parsedChapters?: ParsedChapter[],
+  onJumpToChapter?: (chapterIndex: number, targetSpread?: number | 'last' | string) => void
 ): void;
 export function recalculatePages(
   arg1: ReaderElements | HTMLDivElement,
@@ -108,7 +196,9 @@ export function recalculatePages(
   arg7?: string | null,
   arg8?: boolean,
   arg9?: boolean,
-  arg10?: EpubChapter[]
+  arg10?: EpubChapter[],
+  arg11?: ParsedChapter[],
+  arg12?: (chapterIndex: number, targetSpread?: number | 'last' | string) => void
 ): void {
   let elements: ReaderElements;
   let state: ReaderState;
@@ -116,6 +206,8 @@ export function recalculatePages(
   let preserveDOMScroll: boolean;
   let skipSaveProgress: boolean;
   let epubChapters: EpubChapter[] | undefined;
+  let parsedChapters: ParsedChapter[] | undefined;
+  let onJumpToChapter: ((chapterIndex: number, targetSpread?: number | 'last' | string) => void) | undefined;
 
   if (arg1 && 'readerViewport' in arg1) {
     elements = arg1;
@@ -125,6 +217,8 @@ export function recalculatePages(
     preserveDOMScroll = opts?.preserveDOMScroll ?? true;
     skipSaveProgress = opts?.skipSaveProgress ?? false;
     epubChapters = opts?.epubChapters;
+    parsedChapters = opts?.parsedChapters;
+    onJumpToChapter = opts?.onJumpToChapter;
   } else {
     elements = {
       readerViewport: arg1 as HTMLDivElement,
@@ -138,6 +232,8 @@ export function recalculatePages(
     preserveDOMScroll = arg8 ?? true;
     skipSaveProgress = arg9 ?? false;
     epubChapters = arg10;
+    parsedChapters = arg11;
+    onJumpToChapter = arg12;
   }
 
   if (!activeBookId) return;
@@ -197,6 +293,16 @@ export function recalculatePages(
     readerViewport.scrollLeft = 0;
   }
 
+  if (parsedChapters) {
+    setReaderParsedChapters(parsedChapters);
+  }
+
+  // Pre-measure all chapters to ensure total pages count is 100% stable across the whole book
+  if (activeParsedChaptersForReader && activeParsedChaptersForReader.length > 1 && pageWidth > 0) {
+    measuredChapterSpreadsCache.set(state.currentChapterIndex ?? 0, numSpreads);
+    premeasureAllChapterSpreads(readerViewport, readerContent, activeParsedChaptersForReader);
+  }
+
   updatePaginationIndicator(
     readerViewport,
     readerContent,
@@ -205,7 +311,8 @@ export function recalculatePages(
     state,
     activeBookId,
     actualCols,
-    skipSaveProgress
+    skipSaveProgress,
+    parsedChapters
   );
 
   renderTimeline(
@@ -218,7 +325,11 @@ export function recalculatePages(
         behavior: 'auto'
       });
     },
-    epubChapters
+    epubChapters,
+    parsedChapters,
+    onJumpToChapter,
+    state.currentChapterIndex,
+    state.globalProgress
   );
 }
 
@@ -227,7 +338,8 @@ export function updatePaginationIndicator(
   state: ReaderState,
   activeBookId: string | null,
   actualCols?: number,
-  skipSaveProgress?: boolean
+  skipSaveProgress?: boolean,
+  parsedChapters?: ParsedChapter[]
 ): void;
 export function updatePaginationIndicator(
   readerViewport: HTMLDivElement,
@@ -237,7 +349,8 @@ export function updatePaginationIndicator(
   state: ReaderState,
   activeBookId: string | null,
   actualCols?: number,
-  skipSaveProgress?: boolean
+  skipSaveProgress?: boolean,
+  parsedChapters?: ParsedChapter[]
 ): void;
 export function updatePaginationIndicator(
   arg1: Pick<ReaderElements, 'readerViewport' | 'readerContent' | 'progressFill' | 'pageIndicator'> | HTMLDivElement,
@@ -245,9 +358,10 @@ export function updatePaginationIndicator(
   arg3?: string | null | HTMLDivElement,
   arg4?: number | HTMLSpanElement,
   arg5?: boolean | ReaderState,
-  arg6?: string | null,
+  arg6?: string | null | ParsedChapter[],
   arg7?: number,
-  arg8: boolean = false
+  arg8: boolean = false,
+  arg9?: ParsedChapter[]
 ): void {
   let readerViewport: HTMLDivElement;
   let readerContent: HTMLElement;
@@ -257,6 +371,7 @@ export function updatePaginationIndicator(
   let activeBookId: string | null;
   let actualCols: number | undefined;
   let skipSaveProgress: boolean;
+  let parsedChapters: ParsedChapter[] | undefined;
 
   if (arg1 && 'readerViewport' in arg1) {
     readerViewport = arg1.readerViewport;
@@ -267,6 +382,7 @@ export function updatePaginationIndicator(
     activeBookId = (arg3 as string | null) ?? null;
     actualCols = arg4 as number | undefined;
     skipSaveProgress = (arg5 as boolean) ?? false;
+    parsedChapters = arg6 as ParsedChapter[] | undefined;
   } else {
     readerViewport = arg1 as HTMLDivElement;
     readerContent = arg2 as HTMLElement;
@@ -276,6 +392,7 @@ export function updatePaginationIndicator(
     activeBookId = (arg6 as string | null) ?? null;
     actualCols = arg7;
     skipSaveProgress = arg8 ?? false;
+    parsedChapters = arg9;
   }
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
@@ -288,27 +405,45 @@ export function updatePaginationIndicator(
 
   state.currentPageSpread = currentSpread;
 
-  const progressPercent = state.totalPagesSpreads > 1 ? (currentSpread / (state.totalPagesSpreads - 1)) * 100 : 100;
-  progressFill.style.width = `${progressPercent}%`;
+  const chapterPrefix =
+    state.totalChapters && state.totalChapters > 1
+      ? `Ch. ${(state.currentChapterIndex ?? 0) + 1} of ${state.totalChapters} · `
+      : '';
 
-  if (cols === 1) {
-    pageIndicator.textContent = `Page ${currentSpread + 1} of ${state.totalPagesSpreads}`;
+  const progressPercent =
+    typeof state.globalProgress === 'number'
+      ? state.globalProgress * 100
+      : state.totalPagesSpreads > 1
+        ? (currentSpread / (state.totalPagesSpreads - 1)) * 100
+        : 100;
+  progressFill.style.width = `${Math.min(100, Math.max(0, progressPercent))}%`;
+
+  const parsedChaptersToUse = parsedChapters || activeParsedChaptersForReader || undefined;
+
+  const pagination = calculateBookPagination(
+    state.currentChapterIndex ?? 0,
+    currentSpread,
+    state.totalPagesSpreads,
+    parsedChaptersToUse || [],
+    cols,
+    measuredChapterSpreadsCache
+  );
+
+  state.bookTotalPages = pagination.totalPages;
+  state.bookCurrentPage = pagination.startPage;
+  state.bookEndPage = pagination.endPage;
+
+  if (cols === 1 || pagination.startPage === pagination.endPage) {
+    pageIndicator.textContent = `${chapterPrefix}Page ${pagination.startPage} of ${pagination.totalPages}`;
   } else {
-    const totalPages = state.totalPagesSpreads * cols;
-    const startPage = currentSpread * cols + 1;
-    const endPage = Math.min(totalPages, currentSpread * cols + cols);
-
-    if (startPage === endPage) {
-      pageIndicator.textContent = `Page ${startPage} of ${totalPages}`;
-    } else {
-      pageIndicator.textContent = `Pages ${startPage}–${endPage} of ${totalPages}`;
-    }
+    pageIndicator.textContent = `${chapterPrefix}Pages ${pagination.startPage}–${pagination.endPage} of ${pagination.totalPages}`;
   }
 
   if (activeBookId && !skipSaveProgress) {
     const maxScroll = readerViewport.scrollWidth - pageWidth;
-    const progressFraction = maxScroll > 0 ? scrollLeft / maxScroll : 0;
-    saveBookProgress(activeBookId, progressFraction);
+    const chapterSpreadFraction = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+    const progressFraction = typeof state.globalProgress === 'number' ? state.globalProgress : chapterSpreadFraction;
+    saveBookProgress(activeBookId, progressFraction, state.currentChapterIndex, chapterSpreadFraction);
   }
 
   updateActiveChapterLabel(readerContent, readerViewport, state.currentPageSpread, state.totalPagesSpreads);

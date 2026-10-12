@@ -17,6 +17,41 @@ export interface NavigationOptions {
   readerViewport: HTMLDivElement;
   readerState: ReaderState;
   readerContent?: HTMLElement;
+  onNextChapter?: () => void;
+  onPrevChapter?: () => void;
+}
+
+export function navigateForward(
+  readerViewport: HTMLDivElement,
+  readerState: ReaderState,
+  onNextChapter?: () => void
+): void {
+  const pageWidth = readerViewport.clientWidth;
+  if (pageWidth <= 0) return;
+  const currentSpread = readerState.currentPageSpread;
+  const totalSpreads = readerState.totalPagesSpreads;
+
+  if (currentSpread < totalSpreads - 1) {
+    readerViewport.scrollBy({ left: pageWidth, behavior: 'auto' });
+  } else if (onNextChapter) {
+    onNextChapter();
+  }
+}
+
+export function navigateBackward(
+  readerViewport: HTMLDivElement,
+  readerState: ReaderState,
+  onPrevChapter?: () => void
+): void {
+  const pageWidth = readerViewport.clientWidth;
+  if (pageWidth <= 0) return;
+  const currentSpread = readerState.currentPageSpread;
+
+  if (currentSpread > 0) {
+    readerViewport.scrollBy({ left: -pageWidth, behavior: 'auto' });
+  } else if (onPrevChapter) {
+    onPrevChapter();
+  }
 }
 
 export function handleModalFocusTrap(e: KeyboardEvent, activeModal: HTMLElement): void {
@@ -90,10 +125,10 @@ export function handleKeyboardEvent(e: KeyboardEvent, options: NavigationOptions
 
   if (e.key === 'ArrowLeft' || (e.key === ' ' && e.shiftKey)) {
     e.preventDefault();
-    readerViewport.scrollBy({ left: -readerViewport.clientWidth, behavior: 'auto' });
+    navigateBackward(readerViewport, readerState, options.onPrevChapter);
   } else if (e.key === 'ArrowRight' || (e.key === ' ' && !e.shiftKey)) {
     e.preventDefault();
-    readerViewport.scrollBy({ left: readerViewport.clientWidth, behavior: 'auto' });
+    navigateForward(readerViewport, readerState, options.onNextChapter);
   }
 }
 
@@ -101,7 +136,9 @@ export function handleContentLinkClick(
   e: MouseEvent,
   readerContent: HTMLElement,
   readerViewport: HTMLDivElement,
-  readerState: ReaderState
+  readerState: ReaderState,
+  onNavigateToChapterAnchor?: (chapterIndex: number, anchorId: string) => void,
+  chapters?: Array<{ id: string; htmlContent?: string }>
 ): void {
   const targetLink = (e.target as HTMLElement).closest('a');
   if (!targetLink) return;
@@ -133,6 +170,34 @@ export function handleContentLinkClick(
         left: targetSpread * pageWidth,
         behavior: 'smooth'
       });
+    }
+    return;
+  }
+
+  // If not found in current DOM, check if it points to another chapter
+  if (onNavigateToChapterAnchor) {
+    // 1. Check for prefixed c<idx>_ or ch-<idx>
+    const matchPrefix = anchorId.match(/^(?:c|ch-)(\d+)(?:_.*)?$/);
+    if (matchPrefix) {
+      const targetChapterIndex = parseInt(matchPrefix[1], 10);
+      onNavigateToChapterAnchor(targetChapterIndex, anchorId);
+      return;
+    }
+
+    // 2. Search chapters list if available
+    if (chapters && chapters.length > 0) {
+      const targetIdx = chapters.findIndex(
+        (c) =>
+          c.id === anchorId ||
+          (c.htmlContent &&
+            (c.htmlContent.includes(`id="${anchorId}"`) ||
+              c.htmlContent.includes(`id='${anchorId}'`) ||
+              c.htmlContent.includes(`name="${anchorId}"`) ||
+              c.htmlContent.includes(`name='${anchorId}'`)))
+      );
+      if (targetIdx !== -1) {
+        onNavigateToChapterAnchor(targetIdx, anchorId);
+      }
     }
   }
 }

@@ -6,6 +6,7 @@ describe('State Encoding & URL Handoff (state.ts)', () => {
     const originalState: AppState = {
       bookId: '2701',
       progress: 0.425,
+      chapter: 3,
       theme: 'sepia',
       fontSize: 20
     };
@@ -17,6 +18,7 @@ describe('State Encoding & URL Handoff (state.ts)', () => {
     expect(decoded).not.toBeNull();
     expect(decoded?.bookId).toBe('2701');
     expect(decoded?.progress).toBe(0.425);
+    expect(decoded?.chapter).toBe(3);
     expect(decoded?.theme).toBe('sepia');
     expect(decoded?.fontSize).toBe(20);
   });
