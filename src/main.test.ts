@@ -1,12 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { handleKeyboardEvent, handleContentLinkClick, type NavigationOptions } from './components/Navigation.js';
+import type { ReaderState } from './components/ReaderEngine.js';
 
-describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
+describe('Zenolet Navigation Keyboard & Link Interception Integration', () => {
   let readerViewport: HTMLDivElement;
   let readerContent: HTMLElement;
   let aboutModal: HTMLDivElement;
   let settingsPanel: HTMLDivElement;
   let discoverPanel: HTMLElement;
   let discoverOverlay: HTMLDivElement;
+  let qrModal: HTMLDivElement;
+  let readerState: ReaderState;
+  let options: NavigationOptions;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -21,6 +26,7 @@ describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
         <div id="settings-panel" class="settings-panel"></div>
         <div id="discover-overlay" class="modal-overlay"></div>
         <aside id="discover-panel" class="discover-panel"></aside>
+        <div id="qr-modal" class="modal-overlay"></div>
       </div>
     `;
 
@@ -30,28 +36,46 @@ describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
     settingsPanel = document.getElementById('settings-panel') as HTMLDivElement;
     discoverPanel = document.getElementById('discover-panel') as HTMLElement;
     discoverOverlay = document.getElementById('discover-overlay') as HTMLDivElement;
+    qrModal = document.getElementById('qr-modal') as HTMLDivElement;
 
     Object.defineProperty(readerViewport, 'clientWidth', { value: 500, configurable: true });
     readerViewport.scrollBy = vi.fn() as unknown as typeof readerViewport.scrollBy;
+
+    readerState = {
+      currentView: 'reader',
+      theme: 'sepia',
+      fontSize: 16,
+      layoutColumns: 'auto',
+      currentPageSpread: 1,
+      totalPagesSpreads: 5
+    };
+
+    options = {
+      modals: {
+        aboutModal,
+        settingsPanel,
+        discoverPanel,
+        discoverOverlay,
+        qrModal,
+        onCloseDiscover: () => {
+          discoverPanel.classList.remove('visible');
+          discoverOverlay.classList.remove('visible');
+        },
+        onCloseQR: () => qrModal.classList.remove('visible')
+      },
+      readerViewport,
+      readerState,
+      readerContent
+    };
   });
 
-  it('handles Escape key to dismiss all open modals and panels', () => {
+  it('handles Escape key to dismiss all open modals and panels via production handler', () => {
     aboutModal.classList.add('visible');
     settingsPanel.classList.add('visible');
     discoverPanel.classList.add('visible');
     discoverOverlay.classList.add('visible');
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        aboutModal.classList.remove('visible');
-        settingsPanel.classList.remove('visible');
-        discoverPanel.classList.remove('visible');
-        discoverOverlay.classList.remove('visible');
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'Escape' }), options);
 
     expect(aboutModal.classList.contains('visible')).toBe(false);
     expect(settingsPanel.classList.contains('visible')).toBe(false);
@@ -59,62 +83,39 @@ describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
     expect(discoverOverlay.classList.contains('visible')).toBe(false);
   });
 
-  it('navigates forward with ArrowRight and Space, and backward with ArrowLeft and Shift+Space (LATER-002)', () => {
-    const currentView = 'reader';
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (currentView !== 'reader') return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
-      if (e.key === 'ArrowLeft' || (e.key === ' ' && e.shiftKey)) {
-        e.preventDefault();
-        readerViewport.scrollBy({ left: -readerViewport.clientWidth, behavior: 'auto' });
-      } else if (e.key === 'ArrowRight' || (e.key === ' ' && !e.shiftKey)) {
-        e.preventDefault();
-        readerViewport.scrollBy({ left: readerViewport.clientWidth, behavior: 'auto' });
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
+  it('navigates forward with ArrowRight and Space, and backward with ArrowLeft and Shift+Space via production handler (LATER-002)', () => {
     // 1. ArrowRight -> forward
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }), options);
     expect(readerViewport.scrollBy).toHaveBeenLastCalledWith({ left: 500, behavior: 'auto' });
 
     // 2. Space -> forward
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', shiftKey: false }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: ' ', shiftKey: false }), options);
     expect(readerViewport.scrollBy).toHaveBeenLastCalledWith({ left: 500, behavior: 'auto' });
 
     // 3. ArrowLeft -> backward
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), options);
     expect(readerViewport.scrollBy).toHaveBeenLastCalledWith({ left: -500, behavior: 'auto' });
 
     // 4. Shift + Space -> backward
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', shiftKey: true }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: ' ', shiftKey: true }), options);
     expect(readerViewport.scrollBy).toHaveBeenLastCalledWith({ left: -500, behavior: 'auto' });
   });
 
-  it('intercepts external HTTP links and opens in a new tab safely with noopener noreferrer', () => {
+  it('intercepts external HTTP links and opens in a new tab safely with noopener noreferrer via production handler', () => {
     const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
     readerContent.innerHTML = `<a id="ext-link" href="https://www.gutenberg.org">External Project Gutenberg</a>`;
     const link = document.getElementById('ext-link') as HTMLAnchorElement;
 
-    readerContent.addEventListener('click', (e: MouseEvent) => {
-      const targetLink = (e.target as HTMLElement).closest('a');
-      if (!targetLink) return;
-      const href = targetLink.getAttribute('href');
-      if (href && /^https?:\/\//i.test(href)) {
-        e.preventDefault();
-        window.open(href, '_blank', 'noopener,noreferrer');
-      }
-    });
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'target', { value: link });
 
-    link.click();
+    handleContentLinkClick(event, readerContent, readerViewport, readerState);
+
     expect(windowOpenSpy).toHaveBeenCalledWith('https://www.gutenberg.org', '_blank', 'noopener,noreferrer');
   });
 
-  it('traps Tab and Shift+Tab focus within active modal dialogs (ACC-001)', () => {
+  it('traps Tab and Shift+Tab focus within active modal dialogs via production handler (ACC-001)', () => {
     aboutModal.innerHTML = `
       <div class="modal-card">
         <button id="btn-1">First Button</button>
@@ -127,45 +128,16 @@ describe('Zenolet App Main Keyboard & Link Interception Integration', () => {
     const btn1 = aboutModal.querySelector('#btn-1') as HTMLButtonElement;
     const btn3 = aboutModal.querySelector('#btn-3') as HTMLButtonElement;
 
-    // Simulate focus trap keydown handler from main.ts
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeModal = [aboutModal].find((m) => m && m.classList.contains('visible'));
-      if (activeModal && e.key === 'Tab') {
-        const focusable = activeModal.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        const visibleFocusable = Array.from(focusable);
-        if (visibleFocusable.length > 0) {
-          const first = visibleFocusable[0];
-          const last = visibleFocusable[visibleFocusable.length - 1];
-          if (e.shiftKey) {
-            if (document.activeElement === first || !activeModal.contains(document.activeElement)) {
-              e.preventDefault();
-              last.focus();
-            }
-          } else {
-            if (document.activeElement === last || !activeModal.contains(document.activeElement)) {
-              e.preventDefault();
-              first.focus();
-            }
-          }
-        }
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
     // 1. Tabbing forward from last element wraps to first
     btn3.focus();
     expect(document.activeElement).toBe(btn3);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: false }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: false }), options);
     expect(document.activeElement).toBe(btn1);
 
     // 2. Tabbing backward (Shift+Tab) from first element wraps to last
     btn1.focus();
     expect(document.activeElement).toBe(btn1);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }));
+    handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }), options);
     expect(document.activeElement).toBe(btn3);
-
-    document.removeEventListener('keydown', handleKeyDown);
   });
 });

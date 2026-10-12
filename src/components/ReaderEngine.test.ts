@@ -401,4 +401,44 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
 
     document.body.removeChild(container);
   });
+
+  it('supports the ReaderElements parameter object signature cleanly', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 2500, configurable: true });
+    mockViewport.scrollLeft = 0;
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    Object.defineProperty(mockContent, 'scrollWidth', { value: 2500, configurable: true });
+
+    const mockSnapPoints = document.createElement('div') as HTMLDivElement;
+    const mockProgressFill = document.createElement('div') as HTMLDivElement;
+    const mockPageIndicator = document.createElement('span') as HTMLSpanElement;
+
+    const testState: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 16,
+      layoutColumns: '1',
+      currentPageSpread: 0,
+      totalPagesSpreads: 5
+    };
+
+    recalculatePages(
+      {
+        readerViewport: mockViewport,
+        readerContent: mockContent,
+        snapPoints: mockSnapPoints,
+        progressFill: mockProgressFill,
+        pageIndicator: mockPageIndicator
+      },
+      testState,
+      'test-book-elements',
+      { preserveDOMScroll: false, skipSaveProgress: true }
+    );
+
+    expect(testState.totalPagesSpreads).toBe(5);
+    expect(mockViewport.scrollLeft).toBe(0);
+    expect(mockProgressFill.style.width).toBe('0%');
+  });
 });

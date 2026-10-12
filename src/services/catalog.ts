@@ -1,12 +1,5 @@
-export interface CatalogBook {
-  id: string;
-  title: string;
-  author: string;
-  subjects: string[];
-  downloads: number;
-  epubUrl?: string;
-  coverUrl?: string;
-}
+import type { CatalogBook } from '../types.js';
+export type { CatalogBook };
 
 let catalogCache: CatalogBook[] | null = null;
 

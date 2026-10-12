@@ -1,22 +1,17 @@
 import './style.css';
 import { loadZenoletConfig, type ZenoletConfig } from './services/config.ts';
-import { fetchCatalog, type CatalogBook } from './services/catalog.ts';
-import { getGutenbergCandidateUrls, fetchArrayBufferWithProxy } from './services/corsProxy.ts';
-import { parseEpubArchive } from './services/epub.ts';
+import { fetchCatalog } from './services/catalog.ts';
+import { loadBookPipeline } from './services/bookLoader.ts';
 import { encodeState, decodeState, type AppState } from './services/state.ts';
 import {
-  saveBookOffline,
-  getStoredBookOffline,
   getStoredSlots,
-  saveSlots,
   removeBookFromSlot,
   getStoredProgress,
   getStoredProgressFraction,
   restoreBookProgressByFraction,
   flushBookProgress,
   getActualStorageUsage,
-  formatStorageSummary,
-  type BookMetadata
+  formatStorageSummary
 } from './services/storage.ts';
 import {
   renderCuratorHeader,
@@ -30,18 +25,15 @@ import {
   setLayoutColumns,
   recalculatePages,
   updatePaginationIndicator,
-  type ReaderState
+  type ReaderState,
+  type ReaderElements
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
-import {
-  closeChapterPopup,
-  invalidateChapterMarkers,
-  getElementSpreadIndex,
-  resolveChapterElement
-} from './components/Timeline.ts';
-
+import { closeChapterPopup, invalidateChapterMarkers } from './components/Timeline.ts';
+import { handleKeyboardEvent, handleContentLinkClick, type NavigationOptions } from './components/Navigation.ts';
+import type { CatalogBook } from './types.ts';
 import type { EpubChapter } from './services/epub.ts';
 
 // --- State ---
@@ -103,6 +95,16 @@ let DOM: {
 document.addEventListener('DOMContentLoaded', async () => {
   await initApp();
 });
+
+function getReaderElements(): ReaderElements {
+  return {
+    readerViewport: DOM.readerViewport,
+    readerContent: DOM.readerContent,
+    snapPoints: DOM.snapPoints,
+    progressFill: DOM.progressFill,
+    pageIndicator: DOM.pageIndicator
+  };
+}
 
 async function initApp() {
   // Cache DOM Elements
@@ -167,18 +169,11 @@ async function initApp() {
   // Initialize Settings
   setupSettingsModal(DOM.settingsPanel, [DOM.btnSettings, DOM.btnLibrarySettings], readerState, () => {
     if (activeBook) {
-      recalculatePages(
-        DOM.readerViewport,
-        DOM.readerContent,
-        DOM.snapPoints,
-        DOM.progressFill,
-        DOM.pageIndicator,
-        readerState,
-        activeBook.id,
-        true,
-        false,
-        activeBookChapters
-      );
+      recalculatePages(getReaderElements(), readerState, activeBook.id, {
+        preserveDOMScroll: true,
+        skipSaveProgress: false,
+        epubChapters: activeBookChapters
+      });
     }
   });
 
@@ -297,7 +292,6 @@ async function handleSelectBookForSlot(
 
 // --- Slot Download Operations (Stay on Shelf) ---
 async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Promise<void> {
-  // Set slot spinner loading state while downloading
   loadingSlotState = {
     slotIndex: targetSlotIndex,
     book: {
@@ -311,56 +305,7 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
   update8SlotShelfView();
 
   try {
-    // 1. Check if already stored offline in Cache API
-    const offlineData = await getStoredBookOffline(book.id);
-    let processedContent = '';
-    let chapters: EpubChapter[] = [];
-
-    if (offlineData) {
-      processedContent = offlineData.content;
-      chapters = offlineData.chapters || [];
-    } else {
-      // 2. Fetch binary EPUB via candidate URLs
-      const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
-      let lastErr: Error | null = null;
-      let epubBuffer: ArrayBuffer | null = null;
-
-      for (const candidate of candidateUrls) {
-        try {
-          const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
-          if (buffer && buffer.byteLength > 100) {
-            epubBuffer = buffer;
-            break;
-          }
-        } catch (err) {
-          lastErr = err as Error;
-        }
-      }
-
-      if (!epubBuffer) {
-        throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
-      }
-
-      // Parse & Stitch EPUB3 Archive
-      const parsed = parseEpubArchive(epubBuffer);
-      processedContent = parsed.htmlContent;
-      chapters = parsed.chapters || [];
-      if (parsed.coverDataUrl) {
-        book.coverUrl = parsed.coverDataUrl;
-      }
-    }
-
-    const byteSize = new Blob([processedContent]).size;
-    const meta: BookMetadata = {
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      epubUrl: book.epubUrl,
-      coverUrl: book.coverUrl,
-      byteSize
-    };
-
-    await saveBookOffline(meta, { metadata: meta, content: processedContent, chapters }, targetSlotIndex);
+    await loadBookPipeline(book, config.proxyUrl, targetSlotIndex);
   } catch (err) {
     console.error('[Zenolet] Failed to download book into slot:', err);
     alert(`Could not download "${book.title}". Please check your internet connection or proxy settings.`);
@@ -386,90 +331,30 @@ async function openBook(
   DOM.readerBookAuthor.textContent = `by ${book.author}`;
 
   try {
-    let processedContent = '';
-    activeBookChapters = [];
-
-    // 1. Try Offline Cache API first
-    const offlineData = await getStoredBookOffline(book.id);
-    if (offlineData) {
-      processedContent = offlineData.content;
-      activeBookChapters = offlineData.chapters || [];
-      DOM.readerContent.innerHTML = processedContent;
-
-      // Backfill byteSize if not already stored on shelf slot
-      const slotIndexToUpdate = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-      if (typeof slotIndexToUpdate === 'number') {
-        const slots = getStoredSlots();
-        if (slots[slotIndexToUpdate] && !slots[slotIndexToUpdate]?.byteSize) {
-          slots[slotIndexToUpdate]!.byteSize = new Blob([processedContent]).size;
-          saveSlots(slots);
-        }
-      }
-    } else {
-      // Set slot spinner loading state while downloading EPUB
-      const slotIndexToLoad = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-      if (typeof slotIndexToLoad === 'number') {
-        loadingSlotState = {
-          slotIndex: slotIndexToLoad,
-          book: {
-            id: book.id,
-            title: book.title,
-            author: book.author,
-            epubUrl: book.epubUrl,
-            coverUrl: book.coverUrl
-          }
-        };
-        update8SlotShelfView();
-      }
-
-      try {
-        // 2. Fetch via candidate EPUB URLs
-        const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
-        let lastErr: Error | null = null;
-        let epubBuffer: ArrayBuffer | null = null;
-
-        for (const candidate of candidateUrls) {
-          try {
-            const buffer = await fetchArrayBufferWithProxy(candidate, config.proxyUrl);
-            if (buffer && buffer.byteLength > 100) {
-              epubBuffer = buffer;
-              break;
-            }
-          } catch (err) {
-            lastErr = err as Error;
-          }
-        }
-
-        if (!epubBuffer) {
-          throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
-        }
-
-        // Parse & Stitch EPUB3 Archive
-        const parsed = parseEpubArchive(epubBuffer);
-        processedContent = parsed.htmlContent;
-        activeBookChapters = parsed.chapters || [];
-        DOM.readerContent.innerHTML = processedContent;
-
-        const byteSize = new Blob([processedContent]).size;
-
-        // Always auto-save book offline into slot storage upon selection
-        const meta: BookMetadata = {
+    const slotIndexToLoad = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
+    if (typeof slotIndexToLoad === 'number') {
+      loadingSlotState = {
+        slotIndex: slotIndexToLoad,
+        book: {
           id: book.id,
           title: book.title,
           author: book.author,
           epubUrl: book.epubUrl,
-          coverUrl: parsed.coverDataUrl || book.coverUrl,
-          byteSize
-        };
-        const slotToSave = typeof targetSlotIndex === 'number' ? targetSlotIndex : activeSlotIndex;
-        await saveBookOffline(
-          meta,
-          { metadata: meta, content: processedContent, chapters: activeBookChapters },
-          slotToSave
-        );
-      } finally {
-        loadingSlotState = null;
+          coverUrl: book.coverUrl
+        }
+      };
+      update8SlotShelfView();
+    }
+
+    try {
+      const result = await loadBookPipeline(book, config.proxyUrl, slotIndexToLoad);
+      activeBookChapters = result.chapters;
+      if (result.coverUrl) {
+        book.coverUrl = result.coverUrl;
       }
+      DOM.readerContent.innerHTML = result.content;
+    } finally {
+      loadingSlotState = null;
     }
 
     // Switch View
@@ -501,31 +386,17 @@ async function openBook(
     }
 
     // Recalculate Columns & Page Spreads without preserving stale DOM scroll or queueing progress=0
-    recalculatePages(
-      DOM.readerViewport,
-      DOM.readerContent,
-      DOM.snapPoints,
-      DOM.progressFill,
-      DOM.pageIndicator,
-      readerState,
-      book.id,
-      false,
-      true,
-      activeBookChapters
-    );
+    recalculatePages(getReaderElements(), readerState, book.id, {
+      preserveDOMScroll: false,
+      skipSaveProgress: true,
+      epubChapters: activeBookChapters
+    });
 
     // Restore Progress Fraction from storage if available
     const targetFraction = initialProgressFraction !== null ? initialProgressFraction : getStoredProgress(book.id);
     if (targetFraction !== null && targetFraction > 0) {
       restoreBookProgressByFraction(targetFraction, DOM.readerViewport);
-      updatePaginationIndicator(
-        DOM.readerViewport,
-        DOM.readerContent,
-        DOM.progressFill,
-        DOM.pageIndicator,
-        readerState,
-        book.id
-      );
+      updatePaginationIndicator(getReaderElements(), readerState, book.id);
     }
 
     // Update URL state hash (push new entry if opening book, replace if restored)
@@ -665,107 +536,34 @@ function setupEventListeners() {
     DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
   });
 
-  // Keyboard Shortcuts (Arrow Left/Right, Space, Modal Focus Traps)
-  document.addEventListener('keydown', (e) => {
-    const activeModal = [DOM.aboutModal, DOM.qrModal, DOM.discoverPanel, DOM.settingsPanel].find(
-      (m) => m && m.classList.contains('visible')
-    );
+  // Navigation, Keyboard Shortcuts & Modal Focus Traps
+  const navOptions: NavigationOptions = {
+    modals: {
+      aboutModal: DOM.aboutModal,
+      qrModal: DOM.qrModal,
+      discoverPanel: DOM.discoverPanel,
+      discoverOverlay: DOM.discoverOverlay,
+      settingsPanel: DOM.settingsPanel,
+      onCloseQR: () => closeQRModal(DOM.qrModal),
+      onCloseDiscover: () => closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel)
+    },
+    readerViewport: DOM.readerViewport,
+    readerState,
+    readerContent: DOM.readerContent
+  };
 
-    if (activeModal) {
-      if (e.key === 'Escape') {
-        DOM.aboutModal?.classList.remove('visible');
-        closeQRModal(DOM.qrModal);
-        closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel);
-        DOM.settingsPanel.classList.remove('visible');
-        return;
-      }
-      if (e.key === 'Tab') {
-        const focusable = activeModal.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        const visibleFocusable = Array.from(focusable).filter(
-          (el) => el.offsetParent !== null || el.offsetWidth > 0 || el.offsetHeight > 0
-        );
-        if (visibleFocusable.length > 0) {
-          const first = visibleFocusable[0];
-          const last = visibleFocusable[visibleFocusable.length - 1];
-          if (e.shiftKey) {
-            if (document.activeElement === first || !activeModal.contains(document.activeElement)) {
-              e.preventDefault();
-              last.focus();
-            }
-          } else {
-            if (document.activeElement === last || !activeModal.contains(document.activeElement)) {
-              e.preventDefault();
-              first.focus();
-            }
-          }
-        }
-      }
-      return;
-    }
-
-    if (readerState.currentView !== 'reader') return;
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
-    if (e.key === 'ArrowLeft' || (e.key === ' ' && e.shiftKey)) {
-      e.preventDefault();
-      DOM.readerViewport.scrollBy({ left: -DOM.readerViewport.clientWidth, behavior: 'auto' });
-    } else if (e.key === 'ArrowRight' || (e.key === ' ' && !e.shiftKey)) {
-      e.preventDefault();
-      DOM.readerViewport.scrollBy({ left: DOM.readerViewport.clientWidth, behavior: 'auto' });
-    }
-  });
+  document.addEventListener('keydown', (e) => handleKeyboardEvent(e, navOptions));
 
   // Intercept links inside book content (TOC chapter links, footnotes, external URLs)
   DOM.readerContent.addEventListener('click', (e: MouseEvent) => {
-    const targetLink = (e.target as HTMLElement).closest('a');
-    if (!targetLink) return;
-
-    const href = targetLink.getAttribute('href');
-    if (!href) return;
-
-    // External links (http:// or https://)
-    if (/^https?:\/\//i.test(href)) {
-      e.preventDefault();
-      e.stopPropagation();
-      window.open(href, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Internal book anchor / section links
-    e.preventDefault();
-    e.stopPropagation();
-
-    const anchorId = href.startsWith('#') ? href.slice(1) : href.includes('#') ? href.split('#')[1] : href;
-
-    if (!anchorId) return;
-
-    const targetEl = resolveChapterElement(DOM.readerContent, anchorId);
-    if (targetEl && readerState.totalPagesSpreads > 0) {
-      const targetSpread = getElementSpreadIndex(targetEl, DOM.readerViewport, readerState.totalPagesSpreads);
-      const pageWidth = DOM.readerViewport.clientWidth;
-      if (pageWidth > 0) {
-        DOM.readerViewport.scrollTo({
-          left: targetSpread * pageWidth,
-          behavior: 'smooth'
-        });
-      }
-    }
+    handleContentLinkClick(e, DOM.readerContent, DOM.readerViewport, readerState);
   });
 
   // Viewport Scroll Listener for Progress Indicator & URL State
   let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
   DOM.readerViewport.addEventListener('scroll', () => {
     if (!activeBook) return;
-    updatePaginationIndicator(
-      DOM.readerViewport,
-      DOM.readerContent,
-      DOM.progressFill,
-      DOM.pageIndicator,
-      readerState,
-      activeBook.id
-    );
+    updatePaginationIndicator(getReaderElements(), readerState, activeBook.id);
 
     if (scrollTimeout) clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => updateUrlHashState(), 400);
@@ -774,18 +572,11 @@ function setupEventListeners() {
   // Resize Listener
   window.addEventListener('resize', () => {
     if (activeBook && readerState.currentView === 'reader') {
-      recalculatePages(
-        DOM.readerViewport,
-        DOM.readerContent,
-        DOM.snapPoints,
-        DOM.progressFill,
-        DOM.pageIndicator,
-        readerState,
-        activeBook.id,
-        true,
-        false,
-        activeBookChapters
-      );
+      recalculatePages(getReaderElements(), readerState, activeBook.id, {
+        preserveDOMScroll: true,
+        skipSaveProgress: false,
+        epubChapters: activeBookChapters
+      });
     }
   });
 

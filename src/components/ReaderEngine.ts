@@ -66,6 +66,26 @@ export function setLayoutColumns(cols: 'auto' | '1' | '2' | '3', state: ReaderSt
   recalculateFn();
 }
 
+export interface ReaderElements {
+  readerViewport: HTMLDivElement;
+  readerContent: HTMLElement;
+  snapPoints: HTMLDivElement;
+  progressFill: HTMLDivElement;
+  pageIndicator: HTMLSpanElement;
+}
+
+export interface RecalculateOptions {
+  preserveDOMScroll?: boolean;
+  skipSaveProgress?: boolean;
+  epubChapters?: EpubChapter[];
+}
+
+export function recalculatePages(
+  elements: ReaderElements,
+  state: ReaderState,
+  activeBookId: string | null,
+  options?: RecalculateOptions
+): void;
 export function recalculatePages(
   readerViewport: HTMLDivElement,
   readerContent: HTMLElement,
@@ -74,12 +94,55 @@ export function recalculatePages(
   pageIndicator: HTMLSpanElement,
   state: ReaderState,
   activeBookId: string | null,
-  preserveDOMScroll: boolean = true,
-  skipSaveProgress: boolean = false,
+  preserveDOMScroll?: boolean,
+  skipSaveProgress?: boolean,
   epubChapters?: EpubChapter[]
+): void;
+export function recalculatePages(
+  arg1: ReaderElements | HTMLDivElement,
+  arg2: ReaderState | HTMLElement,
+  arg3?: string | null | HTMLDivElement,
+  arg4?: RecalculateOptions | HTMLDivElement,
+  arg5?: HTMLSpanElement,
+  arg6?: ReaderState,
+  arg7?: string | null,
+  arg8?: boolean,
+  arg9?: boolean,
+  arg10?: EpubChapter[]
 ): void {
+  let elements: ReaderElements;
+  let state: ReaderState;
+  let activeBookId: string | null;
+  let preserveDOMScroll: boolean;
+  let skipSaveProgress: boolean;
+  let epubChapters: EpubChapter[] | undefined;
+
+  if (arg1 && 'readerViewport' in arg1) {
+    elements = arg1;
+    state = arg2 as ReaderState;
+    activeBookId = (arg3 as string | null) ?? null;
+    const opts = arg4 as RecalculateOptions | undefined;
+    preserveDOMScroll = opts?.preserveDOMScroll ?? true;
+    skipSaveProgress = opts?.skipSaveProgress ?? false;
+    epubChapters = opts?.epubChapters;
+  } else {
+    elements = {
+      readerViewport: arg1 as HTMLDivElement,
+      readerContent: arg2 as HTMLElement,
+      snapPoints: arg3 as HTMLDivElement,
+      progressFill: arg4 as HTMLDivElement,
+      pageIndicator: arg5 as HTMLSpanElement
+    };
+    state = arg6 as ReaderState;
+    activeBookId = (arg7 as string | null) ?? null;
+    preserveDOMScroll = arg8 ?? true;
+    skipSaveProgress = arg9 ?? false;
+    epubChapters = arg10;
+  }
+
   if (!activeBookId) return;
 
+  const { readerViewport, readerContent, snapPoints, progressFill, pageIndicator } = elements;
   const prevProgress = preserveDOMScroll ? getStoredProgressFraction(readerViewport) : 0;
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
@@ -160,6 +223,13 @@ export function recalculatePages(
 }
 
 export function updatePaginationIndicator(
+  elements: Pick<ReaderElements, 'readerViewport' | 'readerContent' | 'progressFill' | 'pageIndicator'>,
+  state: ReaderState,
+  activeBookId: string | null,
+  actualCols?: number,
+  skipSaveProgress?: boolean
+): void;
+export function updatePaginationIndicator(
   readerViewport: HTMLDivElement,
   readerContent: HTMLElement,
   progressFill: HTMLDivElement,
@@ -167,8 +237,46 @@ export function updatePaginationIndicator(
   state: ReaderState,
   activeBookId: string | null,
   actualCols?: number,
-  skipSaveProgress: boolean = false
+  skipSaveProgress?: boolean
+): void;
+export function updatePaginationIndicator(
+  arg1: Pick<ReaderElements, 'readerViewport' | 'readerContent' | 'progressFill' | 'pageIndicator'> | HTMLDivElement,
+  arg2: ReaderState | HTMLElement,
+  arg3?: string | null | HTMLDivElement,
+  arg4?: number | HTMLSpanElement,
+  arg5?: boolean | ReaderState,
+  arg6?: string | null,
+  arg7?: number,
+  arg8: boolean = false
 ): void {
+  let readerViewport: HTMLDivElement;
+  let readerContent: HTMLElement;
+  let progressFill: HTMLDivElement;
+  let pageIndicator: HTMLSpanElement;
+  let state: ReaderState;
+  let activeBookId: string | null;
+  let actualCols: number | undefined;
+  let skipSaveProgress: boolean;
+
+  if (arg1 && 'readerViewport' in arg1) {
+    readerViewport = arg1.readerViewport;
+    readerContent = arg1.readerContent;
+    progressFill = arg1.progressFill;
+    pageIndicator = arg1.pageIndicator;
+    state = arg2 as ReaderState;
+    activeBookId = (arg3 as string | null) ?? null;
+    actualCols = arg4 as number | undefined;
+    skipSaveProgress = (arg5 as boolean) ?? false;
+  } else {
+    readerViewport = arg1 as HTMLDivElement;
+    readerContent = arg2 as HTMLElement;
+    progressFill = arg3 as HTMLDivElement;
+    pageIndicator = arg4 as HTMLSpanElement;
+    state = arg5 as ReaderState;
+    activeBookId = (arg6 as string | null) ?? null;
+    actualCols = arg7;
+    skipSaveProgress = arg8 ?? false;
+  }
   const pageWidth = readerViewport.clientWidth;
   if (pageWidth <= 0) return;
 
