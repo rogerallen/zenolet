@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { recalculatePages, alignChapterPageBreaks, type ReaderState } from './ReaderEngine.js';
 import { clearBookProgress } from '../services/storage.js';
+import { createMockViewport, createMockContent } from '../test/fixtures.js';
 
 describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
   beforeEach(() => {
@@ -9,13 +10,8 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
   });
 
   it('does not restore stale DOM scroll and stays on page 1 when preserveDOMScroll is false', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
-    Object.defineProperty(mockViewport, 'scrollWidth', { value: 5000, configurable: true });
-    mockViewport.scrollLeft = 0;
-
-    const mockContent = document.createElement('div') as HTMLElement;
-    Object.defineProperty(mockContent, 'scrollWidth', { value: 5000, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500, scrollWidth: 5000, scrollLeft: 0 });
+    const mockContent = createMockContent({ scrollWidth: 5000 });
 
     const mockSnapPoints = document.createElement('div') as HTMLDivElement;
     const mockProgressFill = document.createElement('div') as HTMLDivElement;
@@ -49,13 +45,8 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
   });
 
   it('preserves and restores DOM scroll position when preserveDOMScroll is true on resize/settings change', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
-    Object.defineProperty(mockViewport, 'scrollWidth', { value: 5000, configurable: true });
-    mockViewport.scrollLeft = 2250; // 50% of (5000 - 500 = 4500) maxScroll
-
-    const mockContent = document.createElement('div') as HTMLElement;
-    Object.defineProperty(mockContent, 'scrollWidth', { value: 5000, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500, scrollWidth: 5000, scrollLeft: 2250 });
+    const mockContent = createMockContent({ scrollWidth: 5000 });
 
     const mockSnapPoints = document.createElement('div') as HTMLDivElement;
     const mockProgressFill = document.createElement('div') as HTMLDivElement;
@@ -89,13 +80,8 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
   });
 
   it('correctly calculates two-column spreads and indicators', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 1000, configurable: true });
-    Object.defineProperty(mockViewport, 'scrollWidth', { value: 10000, configurable: true });
-    mockViewport.scrollLeft = 0;
-
-    const mockContent = document.createElement('div') as HTMLElement;
-    Object.defineProperty(mockContent, 'scrollWidth', { value: 10000, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 1000, scrollWidth: 10000, scrollLeft: 0 });
+    const mockContent = createMockContent({ scrollWidth: 10000 });
 
     const mockSnapPoints = document.createElement('div') as HTMLDivElement;
     const mockProgressFill = document.createElement('div') as HTMLDivElement;

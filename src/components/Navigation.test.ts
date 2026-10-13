@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { navigateForward, navigateBackward, type NavigationOptions, handleKeyboardEvent } from './Navigation.js';
 import type { ReaderState } from './ReaderEngine.js';
+import { createMockViewport } from '../test/fixtures.js';
 
 describe('Navigation & Chapter Boundary Transitions', () => {
   it('scrolls forward when not on the final chapter spread', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
 
     const state: ReaderState = {
@@ -25,8 +25,7 @@ describe('Navigation & Chapter Boundary Transitions', () => {
   });
 
   it('triggers onNextChapter callback when at the final chapter spread', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
 
     const state: ReaderState = {
@@ -46,8 +45,7 @@ describe('Navigation & Chapter Boundary Transitions', () => {
   });
 
   it('scrolls backward when not on the first spread', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
 
     const state: ReaderState = {
@@ -67,8 +65,7 @@ describe('Navigation & Chapter Boundary Transitions', () => {
   });
 
   it('triggers onPrevChapter callback when at spread 0', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
 
     const state: ReaderState = {
@@ -88,8 +85,7 @@ describe('Navigation & Chapter Boundary Transitions', () => {
   });
 
   it('handles keyboard navigation with boundary callbacks via handleKeyboardEvent', () => {
-    const mockViewport = document.createElement('div') as HTMLDivElement;
-    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
 
     const state: ReaderState = {
