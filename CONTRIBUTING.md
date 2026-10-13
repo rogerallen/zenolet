@@ -122,12 +122,16 @@ npm test              # or: npx vitest run
 
 ### 5. Automated Pre-Commit Verification
 
-Before submitting a Pull Request, ensure all automated verification checks pass cleanly:
+Before submitting a Pull Request, ensure all automated verification checks pass cleanly using the single composite command:
 
 ```bash
-npm run audit         # Zero production vulnerabilities
-npm test              # Zero failing unit tests
-npm run lint          # Zero ESLint warnings or errors
-npm run format:check  # 100% Prettier formatting compliance (run `npm run format` to auto-fix)
-npm run build         # Clean TypeScript compilation and Vite production build
+npm run verify
 ```
+
+This runs the complete verification suite:
+
+- `npm run audit` — Zero production vulnerabilities
+- `npm test` — Zero failing unit tests
+- `npm run lint` — Zero ESLint warnings or errors
+- `npm run format:check` — 100% Prettier formatting compliance (run `npm run format` to auto-fix)
+- `npm run build` — Clean TypeScript compilation and Vite production build

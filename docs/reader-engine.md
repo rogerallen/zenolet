@@ -92,16 +92,16 @@ The core layout calculation is handled by `recalculatePages()` in [`src/componen
 
 ```mermaid
 flowchart TD
-    A["1. Async Image Pre-Decoding<br/><code>Promise.all(img.decode())</code>"] --> B["2. Measure Viewport Width<br/><code>pageWidth = readerViewport.clientWidth</code>"]
-    B --> C["3. Determine Column Count<br/>1 Col (Mobile), 2 Cols (Desktop), 3 Cols (Wide)"]
-    C --> D["4. Apply CSS columnWidth<br/><code>pageWidth / actualCols</code>"]
-    D --> E["5. Dynamic Break Alignment<br/><code>alignChapterPageBreaks(readerContent)</code>"]
-    E --> F["6. Measure Total Scroll Width<br/><code>totalScrollWidth = readerContent.scrollWidth</code>"]
-    F --> G["7. Calculate Total Spreads<br/><code>numSpreads = Math.ceil(totalScrollWidth / pageWidth)</code>"]
-    G --> H["8. Lock Container Width<br/><code>readerContent.style.width = numSpreads * pageWidth</code>"]
-    H --> I["9. Populate .snap-points<br/>Create <code>numSpreads</code> snap target elements"]
+    A["1. Book Load / Layout Change"] --> B["2. Upfront Offscreen Calibration<br/><code>premeasureAllChapterSpreads()</code>"]
+    B --> C["3. Cache Spine Spread Counts<br/>Lock whole-book page counts across all chapters"]
+    C --> D["4. Mount Active Spine Chapter<br/><code>mountChapter(chapterIndex)</code>"]
+    D --> E["5. Async Image Pre-Decoding<br/><code>Promise.all(img.decode())</code>"]
+    E --> F["6. Measure Viewport Width<br/><code>pageWidth = readerViewport.clientWidth</code>"]
+    F --> G["7. Determine Column Count<br/>1 Col (Mobile), 2 Cols (Desktop), 3 Cols (Wide)"]
+    G --> H["8. Apply CSS columnWidth<br/><code>pageWidth / actualCols</code>"]
+    H --> I["9. Measure Scroll Width & Set Snap Points<br/><code>readerContent.scrollWidth</code>"]
     I --> J["10. Restore Reading Progress<br/>Restore scroll position via normalized fraction"]
-    J --> K["11. Update Indicators & Timeline<br/>Update 'Page X of Y' & chapter markers"]
+    J --> K["11. Contiguous Book Pagination<br/><code>calculateBookPagination()</code> ➔ Pages X–Y of Z"]
 ```
 
 ### Step 1: Asynchronous Image Pre-Decoding
