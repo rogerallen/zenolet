@@ -15,7 +15,7 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 - **Top 1,000 Gutenberg Catalog**: Pre-indexed `curator/catalog.json` featuring the 1,000 most popular Project Gutenberg titles with search and genre filtering.
 - **Dedicated Cloudflare Worker CORS Proxy**: Custom serverless proxy (`worker/index.js`) with origin security, OPTIONS preflight handling, streaming byte logging, and strict hard-fail enforcement.
 - **Single-Command Local Environment (`npm run dev:local`)**: Concurrently runs local Wrangler Worker proxy and Vite UI with zero need to modify production configuration files.
-- **Tactile Horizontal Flow Layout**: Book text flows horizontally in single-column (mobile) or double-column (desktop) spreads like a physical book, using CSS Multi-column layout and scroll snapping. Read the [Reader Engine Architecture (READER_ENGINE.md)](./READER_ENGINE.md) for full technical and algorithmic details.
+- **Tactile Horizontal Flow Layout**: Book text flows horizontally in single-column (mobile) or double-column (desktop) spreads like a physical book, using CSS Multi-column layout and scroll snapping. Read the [Reader Engine Architecture (docs/reader-engine.md)](./docs/reader-engine.md) for full technical and algorithmic details.
 - **Compressed State & QR Handoff**: Encodes reading progress, theme, and book ID into a compressed URL hash (`#s=...`) using `CompressionStream('deflate-raw')` + Base64URL. Render an instant QR code for mobile camera handoff (<300 characters).
 - **Off-Grid PWA & Cache Storage**: Service Worker caches app shell and offline books for offline reading.
 
@@ -23,8 +23,9 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 ## Documentation
 
-- **[Curator's Guide (CURATING.md)](./CURATING.md)**: Step-by-step instructions for customizing and publishing your own sovereign library.
-- **[Reader Engine Architecture (READER_ENGINE.md)](./READER_ENGINE.md)**: Deep dive into the CSS multi-column layout, scroll snapping, scale-invariant progress math, and navigation algorithms.
+- **[Curator's Guide (docs/curating.md)](./docs/curating.md)**: Step-by-step instructions for customizing and publishing your own sovereign library.
+- **[Reader Engine Architecture (docs/reader-engine.md)](./docs/reader-engine.md)**: Deep dive into the CSS multi-column layout, scroll snapping, scale-invariant progress math, and navigation algorithms.
+- **[Glossary (docs/glossary.md)](./docs/glossary.md)**: Ubiquitous domain language and terminology definitions.
 - **[Contributor's Guide (CONTRIBUTING.md)](./CONTRIBUTING.md)**: Guidelines for contributing code, testing, and developing features for the reader engine.
 
 ---
@@ -33,7 +34,7 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 Want to publish your own sovereign micro-library (e.g. philosophy classics, sci-fi anthologies, poetry, or curated educational reading lists)?
 
-Read the full step-by-step [Curator's Guide (CURATING.md)](./CURATING.md).
+Read the full step-by-step [Curator's Guide (docs/curating.md)](./docs/curating.md).
 
 All customizations live exclusively in the **`curator/`** directory. The core reader engine in `src/` remains untouched, allowing you to pull upstream updates easily.
 

@@ -27,4 +27,4 @@ Welcome to the **Curator Configuration** directory. This is the **only directory
 2. **Set Your Catalog**: Add or generate your books in `catalog.json`.
 3. **Deploy**: Push to GitHub or your static web host. Your custom library is live immediately!
 
-For a full step-by-step walkthrough, see [CURATING.md](../CURATING.md) in the repository root.
+For a full step-by-step walkthrough, see [docs/curating.md](../docs/curating.md).

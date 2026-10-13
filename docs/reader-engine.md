@@ -40,7 +40,7 @@ The reader's DOM structure cleanly separates the scroll container from the conte
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Key CSS Rules ([`src/style.css`](./src/style.css))
+### Key CSS Rules ([`src/style.css`](../src/style.css))
 
 1. **Fixed Container Height**:
    ```css
@@ -88,7 +88,7 @@ When content exceeds the vertical height of the viewport, the browser automatica
 
 ## 🧮 3. The Layout & Pagination Algorithm
 
-The core layout calculation is handled by `recalculatePages()` in [`src/components/ReaderEngine.ts`](./src/components/ReaderEngine.ts):
+The core layout calculation is handled by `recalculatePages()` in [`src/components/ReaderEngine.ts`](../src/components/ReaderEngine.ts):
 
 ```mermaid
 flowchart TD
@@ -188,7 +188,7 @@ const currentSpread = Math.min(state.totalPagesSpreads - 1, Math.max(0, Math.rou
 - In **2-column mode**: `"Pages {currentSpread * 2 + 1}–{currentSpread * 2 + 2} of {totalPagesSpreads * 2}"`
 - In **3-column mode**: `"Pages {currentSpread * 3 + 1}–{currentSpread * 3 + 3} of {totalPagesSpreads * 3}"`
 
-### Anchor & Chapter Resolution ([`src/components/Timeline.ts`](./src/components/Timeline.ts))
+### Anchor & Chapter Resolution ([`src/components/Timeline.ts`](../src/components/Timeline.ts))
 
 When a user clicks a Table of Contents entry, footnote anchor, or timeline chapter dot, `getElementSpreadIndex()` determines which horizontal page spread contains that element:
 
@@ -234,8 +234,8 @@ The reader engine supports multiple simultaneous input modalities:
 
 ## 🔗 Key Source Files
 
-- [`src/components/ReaderEngine.ts`](./src/components/ReaderEngine.ts): Multi-column layout recalculation, pagination indicators, themes, and font sizing.
-- [`src/style.css`](./src/style.css): Multi-column CSS rules, viewport scroll snapping, and reader typography.
-- [`src/components/Timeline.ts`](./src/components/Timeline.ts): Structured TOC / heading discovery, chapter markers, and element spread index calculation.
-- [`src/services/storage.ts`](./src/services/storage.ts): Scale-invariant reading progress fraction persistence and restoration.
-- [`src/main.ts`](./src/main.ts): Application lifecycle, image decoding orchestration, and event listeners.
+- [`src/components/ReaderEngine.ts`](../src/components/ReaderEngine.ts): Multi-column layout recalculation, pagination indicators, themes, and font sizing.
+- [`src/style.css`](../src/style.css): Multi-column CSS rules, viewport scroll snapping, and reader typography.
+- [`src/components/Timeline.ts`](../src/components/Timeline.ts): Structured TOC / heading discovery, chapter markers, and element spread index calculation.
+- [`src/services/storage.ts`](../src/services/storage.ts): Scale-invariant reading progress fraction persistence and restoration.
+- [`src/main.ts`](../src/main.ts): Application lifecycle, image decoding orchestration, and event listeners.

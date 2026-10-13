@@ -45,6 +45,13 @@ zenolet/
 │   │   └── storage.test.ts      # Unit tests for 8-slot storage & offline cache
 │   ├── main.ts                  # App entry point, DOM cache, event orchestration
 │   └── style.css                # Global design system, multi-column rules & themes
+├── docs/                        # 📚 Architecture, ADRs & documentation
+│   ├── adr/                     # Architectural Decision Records
+│   │   ├── 0001-modular-reader-and-service-boundaries.md
+│   │   └── 0002-chapter-virtualized-rendering.md
+│   ├── curating.md              # Comprehensive step-by-step curation handbook
+│   ├── glossary.md              # Ubiquitous domain language & terminology definitions
+│   └── reader-engine.md         # Reader engine architecture & pagination algorithm guide
 ├── worker/
 │   └── index.js                 # Cloudflare Worker CORS proxy script (origin restriction & byte logging)
 ├── .gitignore
@@ -52,8 +59,6 @@ zenolet/
 ├── .prettierrc
 ├── AGENTS.md                    # Invariants, versioning rules, & development guidelines
 ├── CONTRIBUTING.md              # Contributor guide for engine developers
-├── CURATING.md                  # Comprehensive step-by-step curation handbook
-├── READER_ENGINE.md             # Reader engine architecture & pagination algorithm guide
 ├── eslint.config.js             # Modern ESLint 9+ flat configuration
 ├── index.html                   # Main HTML5 SPA shell
 ├── package.json                 # Dependencies & scripts
@@ -67,7 +72,7 @@ zenolet/
 
 ## Curator Customization vs. Engine Development
 
-- **Curators**: If your goal is to publish your own curated book collection, see the [Curator's Guide (CURATING.md)](./CURATING.md). You only need to edit files in `curator/`.
+- **Curators**: If your goal is to publish your own curated book collection, see the [Curator's Guide (docs/curating.md)](./docs/curating.md). You only need to edit files in `curator/`.
 - **Engine Contributors**: If you are contributing bug fixes, performance optimizations, accessibility enhancements, or new features to the core reader engine, your code changes will primarily be in `src/`, `worker/`, and `public/`.
 
 ---
