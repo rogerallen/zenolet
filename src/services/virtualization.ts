@@ -16,8 +16,8 @@ export function getNormalizedHtmlContent(html: string): string {
 }
 
 /**
- * Computes character-weighted base fractions and span fractions for discrete chapters.
- * Ensures smooth, continuous progress across omnibus books regardless of chapter lengths.
+ * Computes character-weighted base fractions and span fractions across discrete Spine Items.
+ * Ensures smooth, continuous progress across multi-chapter books regardless of individual chapter lengths.
  */
 export function computeChapterWeights(chapters: ParsedChapter[]): ChapterWeights {
   if (!chapters || chapters.length === 0) {

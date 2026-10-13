@@ -1,6 +1,11 @@
 // --- Gutenberg EPUB3 Unpacker & Document Stitcher for Zenolet ---
 import { unzipSync, strFromU8 } from 'fflate';
 
+/**
+ * Table of Contents Chapter:
+ * A logical navigation entry defined in the EPUB navigation document (`nav.xhtml` or `toc.ncx`),
+ * mapped to an anchor or relative target within a Spine Item.
+ */
 export interface EpubChapter {
   title: string;
   href: string;
@@ -8,6 +13,11 @@ export interface EpubChapter {
   spineIndex?: number;
 }
 
+/**
+ * Spine Item / Spine Chapter:
+ * A discrete XHTML document defined in the EPUB spine (`<spine>`),
+ * mounted individually into the reader viewport during chapter virtualization.
+ */
 export interface ParsedChapter {
   index: number;
   id: string;
