@@ -112,9 +112,15 @@ let DOM: {
 };
 
 // --- App Initialization ---
-document.addEventListener('DOMContentLoaded', async () => {
-  await initApp();
-});
+if (typeof document !== 'undefined' && !import.meta.env.VITEST) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      void initApp();
+    });
+  } else {
+    void initApp();
+  }
+}
 
 function getReaderElements(): ReaderElements {
   return {
@@ -126,7 +132,7 @@ function getReaderElements(): ReaderElements {
   };
 }
 
-async function initApp() {
+export async function initApp(): Promise<void> {
   // Cache DOM Elements
   DOM = {
     curatorHeaderContainer: document.getElementById('curator-header-container') as HTMLElement,
@@ -855,3 +861,5 @@ function setupEventListeners() {
     }
   });
 }
+
+export { readerState, closeReaderAndReturnToLibrary, handleUrlHashState, openBook };
