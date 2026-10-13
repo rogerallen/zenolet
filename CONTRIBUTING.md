@@ -15,9 +15,12 @@ zenolet/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml           # GitHub Pages automated deployment pipeline (Node 24)
+├── .githooks/
+│   └── pre-commit               # Git pre-commit verification hook (npm run verify)
 ├── .vscode/
 │   ├── extensions.json          # Recommended VS Code extensions (ESLint, Prettier)
-│   └── settings.json            # VS Code workspace format-on-save settings
+│   ├── settings.json            # VS Code workspace format-on-save settings
+│   └── tasks.json               # VS Code build, test, and verification tasks
 ├── public/
 │   ├── icon.svg                 # Default app icon
 │   ├── manifest.json            # PWA Web Manifest

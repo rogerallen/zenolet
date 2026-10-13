@@ -1,0 +1,15 @@
+#!/bin/sh
+# Zenolet Pre-Commit Hook
+# Automatically runs full verification (audit, test, lint, format check, build) before committing.
+
+echo "🔍 Running pre-commit verification (npm run verify)..."
+npm run verify
+
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo "❌ Verification failed. Fix the issues above before committing."
+  exit 1
+fi
+
+echo "✅ All verification checks passed."
+exit 0

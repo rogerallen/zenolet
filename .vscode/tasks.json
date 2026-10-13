@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "verify",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"],
+      "label": "npm: verify",
+      "detail": "Runs audit, unit tests, linting, prettier formatting check, and production build"
+    },
+    {
+      "type": "npm",
+      "script": "dev:local",
+      "isBackground": true,
+      "problemMatcher": [],
+      "label": "npm: dev:local",
+      "detail": "Runs local Wrangler Worker proxy and Vite UI concurrently"
+    },
+    {
+      "type": "npm",
+      "script": "test",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "npm: test",
+      "detail": "Runs Vitest unit test suite"
+    },
+    {
+      "type": "npm",
+      "script": "format",
+      "problemMatcher": [],
+      "label": "npm: format",
+      "detail": "Runs Prettier write to auto-format all files"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"],
+      "label": "npm: build",
+      "detail": "Compiles TypeScript and bundles production site with Vite"
+    }
+  ]
+}
