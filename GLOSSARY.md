@@ -36,12 +36,16 @@ _Avoid_: Chapter dot, milestone, tick
 The rendering architecture that mounts only the active chapter into the reader DOM, bounded memory usage and eliminating multi-column layout thrashing on large books.
 _Avoid_: Lazy loading, DOM pagination, infinite scroll
 
-**Spine Chapter**:
-A discrete XHTML document element defined in the EPUB spine (`<spine>`), packaged in `ParsedChapter` and mounted individually into the reader viewport during virtualization.
-_Avoid_: Chunk, HTML section, page file
+**Spine**:
+The linear document reading order defined in an EPUB package (`<spine>`), specifying the sequential array of content documents that compose the book.
+_Avoid_: Chapter order, book manifest, playlist
+
+**Spine Item**:
+A discrete XHTML document referenced by the Spine (packaged as `ParsedChapter` in Zenolet) that is mounted individually into the reader viewport during chapter virtualization.
+_Avoid_: Chunk, HTML section, page file, chapter file
 
 **Table of Contents Chapter**:
-A navigation entry defined in the EPUB navigation document (`nav.xhtml` or `toc.ncx`), mapped to an anchor or relative target within a Spine Chapter.
+A navigation entry defined in the EPUB navigation document (`nav.xhtml` or `toc.ncx`), mapped to an anchor or relative target within a Spine Item.
 _Avoid_: Subchapter, TOC link, heading target
 
 **Chapter Boundary**:
