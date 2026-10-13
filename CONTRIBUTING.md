@@ -58,6 +58,8 @@ zenolet/
 │   ├── main.ts                  # App entry point, DOM cache, event orchestration
 │   ├── main.test.ts             # Unit tests for main application orchestration
 │   ├── style.css                # Global design system, multi-column rules & themes
+│   ├── test/
+│   │   └── fixtures.ts          # Shared mock DOM & chapter data test fixtures
 │   └── types.ts                 # Canonical domain interfaces and types
 ├── docs/                        # 📚 Architecture, ADRs & documentation
 │   ├── adr/                     # Architectural Decision Records
@@ -117,10 +119,11 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 4. Run Unit Tests
+### 4. Run Unit Tests & Coverage
 
 ```bash
-npm test              # or: npx vitest run
+npm test              # Run test suite
+npm run test:coverage # Run test suite and output v8 test coverage report
 ```
 
 ### 5. Automated Pre-Commit Verification
