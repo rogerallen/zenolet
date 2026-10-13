@@ -8,7 +8,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   prettier,
   {
-    ignores: ['dist/**', 'node_modules/**', 'public/**', '.wrangler/**', '.vite/**']
+    ignores: ['dist/**', 'node_modules/**', 'public/**', '.wrangler/**', '.vite/**', 'coverage/**']
   },
   {
     files: ['**/*.ts', '**/*.js'],
