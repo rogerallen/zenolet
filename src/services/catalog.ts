@@ -3,6 +3,10 @@ export type { CatalogBook };
 
 let catalogCache: CatalogBook[] | null = null;
 
+export function clearCatalogCache(): void {
+  catalogCache = null;
+}
+
 export async function fetchCatalog(): Promise<CatalogBook[]> {
   if (catalogCache) return catalogCache;
   try {
