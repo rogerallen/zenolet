@@ -28,14 +28,15 @@ The reader's DOM structure cleanly separates the scroll container from the conte
 │  │ .reader-viewport (overflow-x: scroll, scroll-snap-type: x)       │  │
 │  │                                                                  │  │
 │  │  ├─ .snap-points (Layer 1 - Invisible Snap Anchor Targets)       │  │
-│  │  │  [Target Spread 0] [Target Spread 1] [Target Spread 2] ...     │  │
+│  │  │  [Spread 0 Target] [Spread 1 Target] [Spread 2 Target] ...    │  │
 │  │  │                                                               │  │
-│  │  └─ .reader-content (Layer 2 - Multi-Column Text Flow)           │  │
+│  │  └─ .reader-content (Layer 2 - Active Spine Chapter Flow)        │  │
 │  │     ┌──────────────┬──────────────┬──────────────┬─────────────┐ │  │
-│  │     │ Chapter 1    │ ...continued │ ...continued │ Chapter 2   │ │  │
-│  │     │ Paragraph 1  │ Paragraph 3  │ Paragraph 5  │ Paragraph 1 │ │  │
-│  │     │ Paragraph 2  │ Paragraph 4  │ Paragraph 6  │ Paragraph 2 │ │  │
+│  │     │ Active Spine │ ...continued │ ...continued │ Active Spine│ │  │
+│  │     │ Chapter N    │ Paragraph 3  │ Paragraph 5  │ Chapter N   │ │  │
+│  │     │ Paragraph 1  │ Paragraph 4  │ Paragraph 6  │ Final Para  │ │  │
 │  │     └──────────────┴──────────────┴──────────────┴─────────────┘ │  │
+│  │     (Mounts next spine chapter N+1 at boundary on page advance)   │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
