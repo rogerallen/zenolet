@@ -27,12 +27,18 @@ zenolet/
 │   │   ├── Bookshelf.ts         # 8-slot bookshelf, curator header, slot persistence
 │   │   ├── DiscoverModal.ts     # Instant local catalog search & add-to-shelf drawer
 │   │   ├── DiscoverModal.test.ts # Unit tests for local catalog search
+│   │   ├── Navigation.ts        # Table of contents & chapter navigation drawer
+│   │   ├── Navigation.test.ts   # Unit tests for chapter navigation
 │   │   ├── QRModal.ts           # QR code overlay for desktop-to-phone handoff
 │   │   ├── ReaderEngine.ts      # CSS multi-column engine, page math, swiping, typography
 │   │   ├── ReaderEngine.test.ts # Unit tests for page layout and scroll restoration
 │   │   ├── SettingsModal.ts     # Reading themes (Paper, Sepia, Slate, Night) & font sizing
-│   │   └── Timeline.ts          # TOC scanner, chapter dots, reading timeline footer
+│   │   ├── SettingsModal.test.ts # Unit tests for reader settings modal
+│   │   ├── Timeline.ts          # TOC scanner, chapter dots, reading timeline footer
+│   │   └── Timeline.test.ts     # Unit tests for timeline and chapter markers
 │   ├── services/
+│   │   ├── bookLoader.ts        # EPUB loading orchestrator & metadata extractor
+│   │   ├── bookLoader.test.ts   # Unit tests for book loader
 │   │   ├── catalog.ts           # Catalog search & genre classification service
 │   │   ├── config.ts            # Loader & validator for curator/config.json
 │   │   ├── config.test.ts       # Unit tests for config loading & schema
@@ -41,10 +47,15 @@ zenolet/
 │   │   ├── epub.ts              # In-memory EPUB3 unpacker, OPF parser, image inliner & stitcher
 │   │   ├── epub.test.ts         # Unit tests for EPUB unpacking, TOC, & XHTML bookmark anchors
 │   │   ├── state.ts             # CompressionStream URL hash encoder & decoder (#s=...)
+│   │   ├── state.test.ts        # Unit tests for URL hash state encoding & decoding
 │   │   ├── storage.ts           # 8-slot persistence, progress math, CacheStorage purging
-│   │   └── storage.test.ts      # Unit tests for 8-slot storage & offline cache
+│   │   ├── storage.test.ts      # Unit tests for 8-slot storage & offline cache
+│   │   ├── virtualization.ts    # Chapter virtualization, progress normalization & whole-book pagination
+│   │   └── virtualization.test.ts # Unit tests for virtualization and pagination math
 │   ├── main.ts                  # App entry point, DOM cache, event orchestration
-│   └── style.css                # Global design system, multi-column rules & themes
+│   ├── main.test.ts             # Unit tests for main application orchestration
+│   ├── style.css                # Global design system, multi-column rules & themes
+│   └── types.ts                 # Canonical domain interfaces and types
 ├── docs/                        # 📚 Architecture, ADRs & documentation
 │   ├── adr/                     # Architectural Decision Records
 │   │   ├── 0001-modular-reader-and-service-boundaries.md
@@ -114,6 +125,7 @@ npm test              # or: npx vitest run
 Before submitting a Pull Request, ensure all automated verification checks pass cleanly:
 
 ```bash
+npm run audit         # Zero production vulnerabilities
 npm test              # Zero failing unit tests
 npm run lint          # Zero ESLint warnings or errors
 npm run format:check  # 100% Prettier formatting compliance (run `npm run format` to auto-fix)

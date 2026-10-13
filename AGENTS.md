@@ -93,12 +93,17 @@ Whenever a feature, deploy, or version bump occurs:
    - Keyboard navigation must support `ArrowRight` / `Space` for forward page turns, and `ArrowLeft` / `Shift + Space` for backward page turns.
    - Touch devices (iPad, iPhone, Android) utilize native hardware-accelerated CSS scroll snapping for touch swipe page turns, while desktop environments provide standard text cursor selection without grab/drag viewport panning.
 
+8. **Universal Chapter Virtualization & Upfront Spread Calibration (ADR-0002)**:
+   - For multi-chapter books, the reader mounts only the active spine item into `DOM.readerContent` to bound peak DOM memory on mobile devices.
+   - All spine chapter spread counts must be pre-measured once offscreen (`premeasureAllChapterSpreads`) upon book load and layout changes, ensuring whole-book page counts (`Pages X–Y of Z`) remain rock-solid and never shift when reading trailing chapters.
+   - TOC navigation entries must map to their parent spine items and anchors (`anchorId`), preserving granular jumping even when multiple chapters share a single spine file.
+
 ---
 
 ## ⚡ Service Worker & Caching Invariants
 
 1. **Production & Dev Cache Preservation**:
-   - The Service Worker (`public/sw.js`) activate listener and the development script in `index.html` MUST explicitly preserve `zenolet-books-v1` in `PROTECTED_CACHES` when deleting stale application caches. Never unconditionally wipe all non-app caches upon activation, as this destroys offline user books.
+   - The Service Worker (`public/sw.js`) activate listener and the development script in `index.html` MUST explicitly preserve `zenolet-books-v2` in `PROTECTED_CACHES` when deleting stale application caches. Never unconditionally wipe all non-app caches upon activation, as this destroys offline user books.
 
 2. **Subresource Offline Fallback**:
    - The Service Worker (`public/sw.js`) must ONLY return the SPA navigation fallback (`index.html`) for navigation requests (`request.mode === 'navigate'`).

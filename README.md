@@ -25,6 +25,7 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 - **[Curator's Guide (docs/curating.md)](./docs/curating.md)**: Step-by-step instructions for customizing and publishing your own sovereign library.
 - **[Reader Engine Architecture (docs/reader-engine.md)](./docs/reader-engine.md)**: Deep dive into the CSS multi-column layout, scroll snapping, scale-invariant progress math, and navigation algorithms.
+- **[Architectural Decision Records (docs/adr/)](./docs/adr/)**: Key architectural design decisions, constraints, and rationales.
 - **[Glossary (docs/glossary.md)](./docs/glossary.md)**: Ubiquitous domain language and terminology definitions.
 - **[Contributor's Guide (CONTRIBUTING.md)](./CONTRIBUTING.md)**: Guidelines for contributing code, testing, and developing features for the reader engine.
 
