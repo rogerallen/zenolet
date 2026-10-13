@@ -273,4 +273,165 @@ describe('Storage and Progress Math for Zenolet', () => {
     restoreBookProgressByFraction(1.5, mockViewport);
     expect(mockViewport.scrollLeft).toBe(4500); // Max scroll = 5000 - 500 = 4500
   });
+
+  it('estimates storage quota when navigator.storage.estimate is supported', async () => {
+    const { getStorageQuotaEstimate } = await import('./storage.js');
+    const originalNavigatorStorage = navigator.storage;
+
+    try {
+      // 1. Success case
+      Object.defineProperty(navigator, 'storage', {
+        value: {
+          estimate: vi.fn().mockResolvedValue({ usage: 1048576, quota: 10485760 })
+        },
+        configurable: true
+      });
+
+      const estimate = await getStorageQuotaEstimate();
+      expect(estimate).toEqual({ usage: 1048576, quota: 10485760 });
+
+      // 2. Error case
+      Object.defineProperty(navigator, 'storage', {
+        value: {
+          estimate: vi.fn().mockRejectedValue(new Error('Permission denied'))
+        },
+        configurable: true
+      });
+
+      const failedEstimate = await getStorageQuotaEstimate();
+      expect(failedEstimate).toBeNull();
+    } finally {
+      Object.defineProperty(navigator, 'storage', {
+        value: originalNavigatorStorage,
+        configurable: true
+      });
+    }
+  });
+
+  it('calculates actual storage usage with fallback to quota estimate when byteSize is 0', async () => {
+    const { getActualStorageUsage, saveSlots } = await import('./storage.js');
+    const originalNavigatorStorage = navigator.storage;
+
+    try {
+      // Save a book with byteSize = 0
+      const slots = new Array(8).fill(null);
+      slots[0] = {
+        id: 'zero-size-book',
+        title: 'Zero Size',
+        author: 'Author',
+        byteSize: 0
+      };
+      saveSlots(slots);
+
+      Object.defineProperty(navigator, 'storage', {
+        value: {
+          estimate: vi.fn().mockResolvedValue({ usage: 2097152, quota: 10485760 })
+        },
+        configurable: true
+      });
+
+      const usage = await getActualStorageUsage();
+      expect(usage.bookCount).toBe(1);
+      expect(usage.totalBytes).toBe(2097152);
+    } finally {
+      Object.defineProperty(navigator, 'storage', {
+        value: originalNavigatorStorage,
+        configurable: true
+      });
+    }
+  });
+
+  it('migrates legacy zenolet-offline-metadata into zenolet-slots', async () => {
+    const { getStoredSlots } = await import('./storage.js');
+    const legacyBooks = [
+      { id: 'b1', title: 'Book 1', author: 'Author 1', byteSize: 100 },
+      { id: 'b2', title: 'Book 2', author: 'Author 2', byteSize: 200 }
+    ];
+
+    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(legacyBooks));
+
+    const slots = getStoredSlots();
+    expect(slots[0]?.id).toBe('b1');
+    expect(slots[1]?.id).toBe('b2');
+    expect(slots.slice(2).every((s) => s === null)).toBe(true);
+  });
+
+  it('safely handles corrupt JSON in localStorage slots and progress', async () => {
+    const { getStoredSlots, getStoredProgressDetails } = await import('./storage.js');
+
+    localStorage.setItem('zenolet-slots', '{corrupt json');
+    const slots = getStoredSlots();
+    expect(slots.length).toBe(8);
+    expect(slots.every((s) => s === null)).toBe(true);
+
+    localStorage.setItem('zenolet-reading-progress', 'not-valid-json');
+    const progress = getStoredProgressDetails('any-book');
+    expect(progress).toBeNull();
+  });
+
+  it('saves and retrieves offline book details via Cache API and moves existing slots', async () => {
+    const { saveBookOffline, getStoredBookOffline, getStoredSlots, purgeBookCache } = await import('./storage.js');
+
+    const fakeCacheStore = new Map<string, Response>();
+    const fakeCache = {
+      put: vi.fn(async (url: string, res: Response) => {
+        fakeCacheStore.set(url, res.clone());
+      }),
+      match: vi.fn(async (url: string) => fakeCacheStore.get(url)?.clone() || null),
+      delete: vi.fn(async (url: string) => fakeCacheStore.delete(url)),
+      keys: vi.fn(async () => Array.from(fakeCacheStore.keys()).map((u) => new Request(u)))
+    };
+
+    // @ts-ignore
+    globalThis.caches = {
+      open: vi.fn(async () => fakeCache as unknown as Cache),
+      delete: vi.fn(async () => true)
+    } as unknown as CacheStorage;
+
+    try {
+      const bookMeta = { id: 'moby-offline', title: 'Moby Dick', author: 'Melville' };
+      const bookData = { metadata: bookMeta, content: '<h1>Call me Ishmael</h1>' };
+
+      // 1. Save book offline without target slot -> places in slot 0
+      await saveBookOffline(bookMeta, bookData);
+      expect(fakeCache.put).toHaveBeenCalled();
+
+      const slotsAfterFirst = getStoredSlots();
+      expect(slotsAfterFirst[0]?.id).toBe('moby-offline');
+
+      // 2. Retrieve offline book
+      const retrieved = await getStoredBookOffline('moby-offline');
+      expect(retrieved?.metadata.title).toBe('Moby Dick');
+      expect(retrieved?.content).toBe('<h1>Call me Ishmael</h1>');
+
+      // 3. Move existing book to slot 3
+      await saveBookOffline(bookMeta, bookData, 3);
+      const slotsAfterMove = getStoredSlots();
+      expect(slotsAfterMove[0]).toBeNull();
+      expect(slotsAfterMove[3]?.id).toBe('moby-offline');
+
+      // 4. Clean up
+      await purgeBookCache('moby-offline');
+      expect(fakeCache.delete).toHaveBeenCalled();
+    } finally {
+      // @ts-ignore
+      delete globalThis.caches;
+    }
+  });
+
+  it('calculates getStoredProgressFraction accurately based on viewport geometry', async () => {
+    const { getStoredProgressFraction } = await import('./storage.js');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 2500, configurable: true });
+    mockViewport.scrollLeft = 1000;
+
+    // maxScroll = 2500 - 500 = 2000; 1000 / 2000 = 0.5
+    expect(getStoredProgressFraction(mockViewport)).toBe(0.5);
+
+    // When scrollWidth equals clientWidth, maxScroll is 0
+    Object.defineProperty(mockViewport, 'scrollWidth', { value: 500, configurable: true });
+    expect(getStoredProgressFraction(mockViewport)).toBe(0);
+  });
 });
