@@ -4,15 +4,16 @@ import {
   updateActiveChapterLabel,
   resolveChapterElement,
   getElementSpreadIndex,
-  invalidateChapterMarkers
+  invalidateChapterMarkers,
+  closeChapterPopup
 } from './Timeline.js';
 import type { EpubChapter } from '../services/epub.js';
 
 describe('Timeline Component & Chapter Navigation (Timeline.ts)', () => {
   beforeEach(() => {
+    document.body.innerHTML = '';
     invalidateChapterMarkers();
-    const existing = document.getElementById('active-chapter-indicator');
-    if (existing) existing.remove();
+    closeChapterPopup();
   });
 
   it('prioritizes structured EpubChapter[] table of contents over DOM scraping (ARC-001)', () => {
@@ -304,5 +305,179 @@ describe('Timeline Component & Chapter Navigation (Timeline.ts)', () => {
     expect(dots.length).toBeGreaterThanOrEqual(2);
 
     ticksContainer.remove();
+  });
+
+  it('renders and interacts with chapter popup via showChapterPopup', async () => {
+    const { showChapterPopup, closeChapterPopup } = await import('./Timeline.js');
+
+    const markers = [
+      { id: 'c0', title: 'Chapter 1: Loomings', pageSpread: 0, chapterIndex: 0 },
+      { id: 'c1', title: 'Chapter 2: The Carpet-Bag', pageSpread: 4, chapterIndex: 1 },
+      { id: 'c2', title: 'Chapter 3: The Spouter-Inn', pageSpread: 8, chapterIndex: 2 }
+    ];
+
+    const trackRect = {
+      left: 100,
+      top: 500,
+      width: 800,
+      height: 20,
+      right: 900,
+      bottom: 520,
+      x: 100,
+      y: 500,
+      toJSON: () => {}
+    } as DOMRect;
+
+    const onJumpSpread = vi.fn();
+    const onJumpChapter = vi.fn();
+
+    // 1. Show popup
+    showChapterPopup(markers, 4, 0, 500, trackRect, 10, onJumpSpread, onJumpChapter, 0);
+
+    const popup = document.querySelector('.chapter-popup-menu') as HTMLElement;
+    expect(popup).not.toBeNull();
+
+    // Verify items rendered
+    const items = popup.querySelectorAll('.chapter-popup-item');
+    expect(items.length).toBe(3);
+
+    // 2. Click a chapter item
+    const secondItem = items[1] as HTMLElement;
+    secondItem.click();
+    expect(onJumpChapter).toHaveBeenCalledWith(1, 0);
+
+    // After click, popup is closed
+    expect(document.querySelector('.chapter-popup-menu')).toBeNull();
+
+    // 3. Re-open and close with Escape key
+    vi.useFakeTimers();
+    showChapterPopup(markers, 4, 0, 500, trackRect, 10, onJumpSpread, onJumpChapter, 0);
+    expect(document.querySelector('.chapter-popup-menu')).not.toBeNull();
+
+    // Advance past the 20ms listener attachment timeout
+    vi.advanceTimersByTime(50);
+    const escEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+    window.dispatchEvent(escEvent);
+    expect(document.querySelector('.chapter-popup-menu')).toBeNull();
+    vi.useRealTimers();
+
+    // 4. closeChapterPopup directly
+    showChapterPopup(markers, 4, 0, 500, trackRect, 10, onJumpSpread, onJumpChapter, 0);
+    closeChapterPopup();
+    expect(document.querySelector('.chapter-popup-menu')).toBeNull();
+  });
+
+  it('triggers showChapterPopup on progress-track long press and jump on short press', async () => {
+    const { renderTimeline } = await import('./Timeline.js');
+
+    const track = document.createElement('div');
+    track.id = 'progress-track';
+    document.body.appendChild(track);
+
+    const ticks = document.createElement('div');
+    ticks.id = 'timeline-ticks';
+    document.body.appendChild(ticks);
+
+    const mockContent = document.createElement('div');
+    mockContent.innerHTML = '<h2 id="ch1">Chapter 1</h2><h2 id="ch2">Chapter 2</h2>';
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    track.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width: 1000,
+        height: 20,
+        right: 1000,
+        bottom: 20
+      }) as DOMRect;
+
+    const jumpSpreadSpy = vi.fn();
+    renderTimeline(mockContent, mockViewport, 10, jumpSpreadSpy);
+
+    // Short press -> onJumpToSpread
+    const mouseDown = new MouseEvent('mousedown', { clientX: 500, clientY: 10, button: 0 });
+    track.onmousedown?.(mouseDown);
+    const mouseUp = new MouseEvent('mouseup', { clientX: 500, clientY: 10, button: 0 });
+    track.onmouseup?.(mouseUp);
+    expect(jumpSpreadSpy).toHaveBeenCalled();
+
+    // Contextmenu event triggers showChapterPopup
+    const contextMenuEvent = new MouseEvent('contextmenu', { clientX: 500, clientY: 10 });
+    track.oncontextmenu?.(contextMenuEvent as unknown as PointerEvent);
+    expect(document.querySelector('.chapter-popup-menu')).not.toBeNull();
+    closeChapterPopup();
+
+    // Long press -> opens chapter popup
+    vi.useFakeTimers();
+    track.onmousedown?.(new MouseEvent('mousedown', { clientX: 500, clientY: 10, button: 0 }));
+    vi.advanceTimersByTime(400);
+
+    const popup = document.querySelector('.chapter-popup-menu');
+    expect(popup).not.toBeNull();
+    closeChapterPopup();
+    track.onmouseup?.(new MouseEvent('mouseup', { clientX: 500, clientY: 10, button: 0 }));
+    vi.advanceTimersByTime(450);
+
+    // Mouseleave cancels press
+    track.onmousedown?.(new MouseEvent('mousedown', { clientX: 500, clientY: 10, button: 0 }));
+    track.onmouseleave?.(new MouseEvent('mouseleave'));
+    vi.advanceTimersByTime(400);
+    expect(document.querySelector('.chapter-popup-menu')).toBeNull();
+
+    // Verify accessible begin and end dots
+    const beginDot = ticks.querySelector('.begin-dot') as HTMLElement;
+    const endDot = ticks.querySelector('.end-dot') as HTMLElement;
+    expect(beginDot).not.toBeNull();
+    expect(endDot).not.toBeNull();
+
+    // Enter key on beginDot
+    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    beginDot.dispatchEvent(enterEvent);
+    expect(jumpSpreadSpy).toHaveBeenCalledWith(0);
+
+    // Space key on endDot
+    const spaceEvent = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    endDot.dispatchEvent(spaceEvent);
+    expect(jumpSpreadSpy).toHaveBeenCalledWith(9);
+
+    vi.useRealTimers();
+    track.remove();
+    ticks.remove();
+    const existingPopup = document.querySelector('.chapter-popup-menu');
+    if (existingPopup) existingPopup.remove();
+  });
+
+  it('navigates multi-chapter beginDot and endDot to chapter indices', async () => {
+    invalidateChapterMarkers();
+    const { renderTimeline } = await import('./Timeline.js');
+
+    const ticks = document.createElement('div');
+    ticks.id = 'timeline-ticks';
+    document.body.appendChild(ticks);
+
+    const mockContent = document.createElement('div');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    const parsedChapters = [
+      { index: 0, id: 'ch-0', title: 'Chapter 1', href: 'ch1.xhtml', htmlContent: '<div>Text</div>' },
+      { index: 1, id: 'ch-1', title: 'Chapter 2', href: 'ch2.xhtml', htmlContent: '<div>Text</div>' }
+    ];
+
+    const jumpChapterSpy = vi.fn();
+    renderTimeline(mockContent, mockViewport, 5, vi.fn(), undefined, parsedChapters, jumpChapterSpy, 0);
+
+    const beginDot = ticks.querySelector('.begin-dot') as HTMLElement;
+    const endDot = ticks.querySelector('.end-dot') as HTMLElement;
+
+    beginDot.click();
+    expect(jumpChapterSpy).toHaveBeenCalledWith(0, 0);
+
+    endDot.click();
+    expect(jumpChapterSpy).toHaveBeenCalledWith(1, 'last');
+
+    ticks.remove();
   });
 });
