@@ -32,7 +32,12 @@ export function navigateForward(
   const totalSpreads = readerState.totalPagesSpreads;
 
   if (currentSpread < totalSpreads - 1) {
-    readerViewport.scrollBy({ left: pageWidth, behavior: 'auto' });
+    const targetSpread = currentSpread + 1;
+    if (typeof readerViewport.scrollTo === 'function') {
+      readerViewport.scrollTo({ left: targetSpread * pageWidth, behavior: 'auto' });
+    } else {
+      readerViewport.scrollBy({ left: pageWidth, behavior: 'auto' });
+    }
   } else if (onNextChapter) {
     onNextChapter();
   }
@@ -48,7 +53,12 @@ export function navigateBackward(
   const currentSpread = readerState.currentPageSpread;
 
   if (currentSpread > 0) {
-    readerViewport.scrollBy({ left: -pageWidth, behavior: 'auto' });
+    const targetSpread = currentSpread - 1;
+    if (typeof readerViewport.scrollTo === 'function') {
+      readerViewport.scrollTo({ left: targetSpread * pageWidth, behavior: 'auto' });
+    } else {
+      readerViewport.scrollBy({ left: -pageWidth, behavior: 'auto' });
+    }
   } else if (onPrevChapter) {
     onPrevChapter();
   }

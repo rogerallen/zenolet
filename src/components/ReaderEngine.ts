@@ -31,8 +31,10 @@ export function premeasureAllChapterSpreads(
   const clone = readerContent.cloneNode(false) as HTMLElement;
   clone.style.visibility = 'hidden';
   clone.style.position = 'absolute';
-  clone.style.top = '-99999px';
-  clone.style.left = '-99999px';
+  clone.style.top = '0';
+  clone.style.left = '0';
+  clone.style.zIndex = '-999';
+  clone.style.width = 'auto';
   clone.style.height = `${readerViewport.clientHeight}px`;
   clone.style.pointerEvents = 'none';
 
@@ -42,10 +44,12 @@ export function premeasureAllChapterSpreads(
     const maxChaptersToPremeasure = Math.min(chapters.length, 50);
     for (let i = 0; i < maxChaptersToPremeasure; i++) {
       if (!measuredChapterSpreadsCache.has(i)) {
+        clone.style.width = 'auto';
         clone.innerHTML = chapters[i].htmlContent;
+        void clone.offsetHeight;
         const scrollWidth = clone.scrollWidth;
         if (scrollWidth > 0) {
-          const spreads = Math.max(1, Math.ceil(scrollWidth / pageWidth));
+          const spreads = Math.max(1, Math.ceil((scrollWidth - 2) / pageWidth));
           measuredChapterSpreadsCache.set(i, spreads);
         }
       }
@@ -67,17 +71,20 @@ export function measureOffscreenChapterSpreads(
   const clone = readerContent.cloneNode(false) as HTMLElement;
   clone.style.visibility = 'hidden';
   clone.style.position = 'absolute';
-  clone.style.top = '-99999px';
-  clone.style.left = '-99999px';
+  clone.style.top = '0';
+  clone.style.left = '0';
+  clone.style.zIndex = '-999';
+  clone.style.width = 'auto';
   clone.style.height = `${readerViewport.clientHeight}px`;
   clone.style.pointerEvents = 'none';
   clone.innerHTML = htmlContent;
 
   readerViewport.appendChild(clone);
+  void clone.offsetHeight;
   const scrollWidth = clone.scrollWidth;
   clone.remove();
 
-  return Math.max(1, Math.ceil(scrollWidth / pageWidth));
+  return Math.max(1, Math.ceil((scrollWidth - 2) / pageWidth));
 }
 
 export interface ReaderState {
@@ -260,19 +267,20 @@ export function recalculatePages(
 
   if (actualCols === 3) {
     readerContent.classList.add('three-columns');
-    readerContent.style.columnWidth = `${pageWidth / 3}px`;
+    readerContent.style.columnWidth = `${Math.floor(pageWidth / 3)}px`;
   } else if (actualCols === 2) {
     readerContent.classList.add('two-columns');
-    readerContent.style.columnWidth = `${pageWidth / 2}px`;
+    readerContent.style.columnWidth = `${Math.floor(pageWidth / 2)}px`;
   } else {
     readerContent.classList.add('one-column');
     readerContent.style.columnWidth = `${pageWidth}px`;
   }
 
   alignChapterPageBreaks(readerContent);
+  void readerContent.offsetHeight;
 
   const totalScrollWidth = readerContent.scrollWidth;
-  const numSpreads = Math.max(1, Math.ceil(totalScrollWidth / pageWidth));
+  const numSpreads = Math.max(1, Math.ceil((totalScrollWidth - 2) / pageWidth));
 
   state.totalPagesSpreads = numSpreads;
   readerContent.style.width = `${numSpreads * pageWidth}px`;

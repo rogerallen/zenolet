@@ -31,6 +31,28 @@ describe('Navigation & Chapter Boundary Transitions', () => {
     expect(nextChapterSpy).not.toHaveBeenCalled();
   });
 
+  it('uses scrollTo with exact target spread when scrollTo is supported to prevent Safari page skipping', () => {
+    const mockViewport = createMockViewport({ clientWidth: 500 });
+    mockViewport.scrollTo = vi.fn() as unknown as typeof mockViewport.scrollTo;
+    mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;
+
+    const state: ReaderState = {
+      currentView: 'reader',
+      theme: 'paper',
+      fontSize: 18,
+      layoutColumns: '1',
+      currentPageSpread: 2,
+      totalPagesSpreads: 5
+    };
+
+    navigateForward(mockViewport, state);
+    expect(mockViewport.scrollTo).toHaveBeenCalledWith({ left: 1500, behavior: 'auto' });
+    expect(mockViewport.scrollBy).not.toHaveBeenCalled();
+
+    navigateBackward(mockViewport, state);
+    expect(mockViewport.scrollTo).toHaveBeenCalledWith({ left: 500, behavior: 'auto' });
+  });
+
   it('triggers onNextChapter callback when at the final chapter spread', () => {
     const mockViewport = createMockViewport({ clientWidth: 500 });
     mockViewport.scrollBy = vi.fn() as unknown as typeof mockViewport.scrollBy;

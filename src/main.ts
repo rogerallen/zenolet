@@ -758,9 +758,14 @@ function setupEventListeners() {
         const deltaX = e.changedTouches[0].clientX - touchStartX;
         const deltaY = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > 2 * Math.abs(deltaY)) {
-          if (deltaX < 0 && readerState.currentPageSpread >= readerState.totalPagesSpreads - 1) {
+          const maxScroll = DOM.readerViewport.scrollWidth - DOM.readerViewport.clientWidth;
+          if (
+            deltaX < 0 &&
+            readerState.currentPageSpread >= readerState.totalPagesSpreads - 1 &&
+            DOM.readerViewport.scrollLeft >= maxScroll - 5
+          ) {
             handleNextPage();
-          } else if (deltaX > 0 && readerState.currentPageSpread === 0) {
+          } else if (deltaX > 0 && readerState.currentPageSpread === 0 && DOM.readerViewport.scrollLeft <= 5) {
             handlePrevPage();
           }
         }

@@ -226,7 +226,8 @@ export function calculateBookPagination(
 
   // Fallback chars-per-spread if no text chapter measured yet (default ~1500 chars per spread)
   const defaultCharsPerSpread = Math.max(500, Math.round(1500 * (cols > 1 ? cols * 0.8 : 1)));
-  const charsPerSpread = measuredSpreads > 0 ? measuredChars / measuredSpreads : defaultCharsPerSpread;
+  const rawCharsPerSpread = measuredSpreads > 0 ? measuredChars / measuredSpreads : defaultCharsPerSpread;
+  const charsPerSpread = Math.max(300, rawCharsPerSpread);
 
   // Compute spreads for each chapter
   const chapterSpreads: number[] = [];

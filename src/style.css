@@ -106,7 +106,10 @@
   background-color: var(--text-muted);
 }
 
+html,
 body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -226,6 +229,7 @@ a:not([href]) {
   height: var(--header-height);
   background-color: var(--bg-panel);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -345,6 +349,7 @@ a:not([href]) {
   box-shadow: var(--shadow-md);
   transform: translateY(-50%) scale(1.06);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .nav-arrow-left {
@@ -375,9 +380,12 @@ a:not([href]) {
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  -webkit-scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
   position: relative;
   user-select: text;
+  -webkit-user-select: text;
   cursor: default;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -400,6 +408,8 @@ a:not([href]) {
 .snap-target {
   height: 100%;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
+  -webkit-scroll-snap-stop: always;
   flex-shrink: 0;
 }
 
@@ -413,7 +423,9 @@ a:not([href]) {
   pointer-events: auto;
   z-index: 2;
 
+  -webkit-column-fill: auto;
   column-fill: auto;
+  -webkit-column-gap: 0;
   column-gap: 0;
 
   font-family: var(--font-serif);
@@ -456,6 +468,8 @@ a:not([href]) {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   break-after: avoid;
+  page-break-after: avoid;
+  -webkit-column-break-after: avoid;
 }
 
 .reader-content p {
@@ -478,6 +492,7 @@ a:not([href]) {
   margin: 1em auto !important;
   break-inside: avoid;
   page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
 }
 
 .reader-content figure,
@@ -491,6 +506,7 @@ a:not([href]) {
   text-align: center;
   break-inside: avoid;
   page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
   margin: 1em auto;
 }
 
@@ -500,11 +516,13 @@ a:not([href]) {
   margin: 1em 0;
   break-inside: auto;
   page-break-inside: auto;
+  -webkit-column-break-inside: auto;
 }
 
 .reader-content tr {
   break-inside: avoid;
   page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
 }
 
 /* Chapter & Section Breaks (Column / Page Breaks) */
@@ -582,6 +600,7 @@ a:not([href]) {
   height: var(--footer-height);
   background-color: var(--bg-panel);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;

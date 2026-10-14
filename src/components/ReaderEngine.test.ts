@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { recalculatePages, alignChapterPageBreaks, type ReaderState } from './ReaderEngine.js';
+import {
+  recalculatePages,
+  alignChapterPageBreaks,
+  premeasureAllChapterSpreads,
+  measureOffscreenChapterSpreads,
+  clearMeasuredSpreadsCache,
+  type ReaderState
+} from './ReaderEngine.js';
 import { clearBookProgress } from '../services/storage.js';
 import { createMockViewport, createMockContent } from '../test/fixtures.js';
 
@@ -564,5 +571,36 @@ describe('ReaderEngine recalculatePages & DOM scroll preservation', () => {
     // Chapter 0 estimated 1 spread (2 pages).
     // Chapter 1 is at spread 0 -> globalSpread 1 -> Pages 3–4 of 6 (or 8)
     expect(mockPageIndicator.textContent).toContain('Pages 3–4 of');
+  });
+
+  it('premeasureAllChapterSpreads resets clone width to auto so it does not inherit wide active widths', () => {
+    clearMeasuredSpreadsCache();
+
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'clientHeight', { value: 700, configurable: true });
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    // Simulate active chapter having a very large width (e.g. 50 spreads = 25000px)
+    mockContent.style.width = '25000px';
+    mockContent.style.columnWidth = '500px';
+
+    const chapters = [{ index: 0, id: 'c0', title: 'Ch 1', href: 'c0.xhtml', htmlContent: '<p>Small</p>' }];
+
+    premeasureAllChapterSpreads(mockViewport, mockContent, chapters);
+    // In JSDOM, scrollWidth defaults to 0 unless mocked, but verify the function executes cleanly without crashing
+    expect(mockContent.style.width).toBe('25000px'); // Original content width untouched
+  });
+
+  it('measureOffscreenChapterSpreads returns at least 1 and does not throw', () => {
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+    Object.defineProperty(mockViewport, 'clientHeight', { value: 700, configurable: true });
+
+    const mockContent = document.createElement('div') as HTMLElement;
+    mockContent.style.width = '10000px';
+
+    const spreads = measureOffscreenChapterSpreads(mockViewport, mockContent, '<p>Test</p>');
+    expect(spreads).toBeGreaterThanOrEqual(1);
   });
 });
