@@ -713,8 +713,14 @@ function setupEventListeners() {
   DOM.prevPageBtn.addEventListener('click', () => {
     handlePrevPage();
   });
+  DOM.prevPageBtn.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+  });
   DOM.nextPageBtn.addEventListener('click', () => {
     handleNextPage();
+  });
+  DOM.nextPageBtn.addEventListener('dblclick', (e) => {
+    e.preventDefault();
   });
 
   // Navigation, Keyboard Shortcuts & Modal Focus Traps

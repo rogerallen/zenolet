@@ -360,4 +360,19 @@ describe('App Lifecycle and Integration (main.ts initApp)', () => {
     expect(appReaderState.currentView).toBe('reader');
     expect(readerView.classList.contains('hidden')).toBe(false);
   });
+
+  it('prevents default on dblclick for next and prev navigation buttons to prevent Safari smart-zoom', async () => {
+    await initApp();
+
+    const prevBtn = document.getElementById('prev-page-btn') as HTMLButtonElement;
+    const nextBtn = document.getElementById('next-page-btn') as HTMLButtonElement;
+
+    const prevDblClick = new MouseEvent('dblclick', { bubbles: true, cancelable: true });
+    prevBtn.dispatchEvent(prevDblClick);
+    expect(prevDblClick.defaultPrevented).toBe(true);
+
+    const nextDblClick = new MouseEvent('dblclick', { bubbles: true, cancelable: true });
+    nextBtn.dispatchEvent(nextDblClick);
+    expect(nextDblClick.defaultPrevented).toBe(true);
+  });
 });

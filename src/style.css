@@ -110,6 +110,7 @@ html,
 body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  touch-action: manipulation;
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -117,6 +118,13 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+button,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 a[href] {
@@ -336,6 +344,9 @@ a:not([href]) {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0.18;
   border-radius: 12px;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .reader-main:hover .nav-arrow {
@@ -363,7 +374,9 @@ a:not([href]) {
 .nav-arrow span {
   font-size: 2.2rem;
   line-height: 1;
+  -webkit-user-select: none;
   user-select: none;
+  pointer-events: none;
 }
 
 .reader-container {
@@ -645,6 +658,7 @@ a:not([href]) {
   border-radius: 4px;
   position: relative;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .progress-fill {
@@ -672,6 +686,7 @@ a:not([href]) {
   pointer-events: auto;
   cursor: pointer;
   transition: transform 0.2s ease;
+  touch-action: manipulation;
 }
 
 .timeline-dot.chapter-dot {
