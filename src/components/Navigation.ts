@@ -8,8 +8,10 @@ export interface ModalElements {
   discoverPanel?: HTMLElement | null;
   discoverOverlay?: HTMLElement | null;
   settingsPanel?: HTMLElement | null;
+  deleteModal?: HTMLElement | null;
   onCloseQR?: () => void;
   onCloseDiscover?: () => void;
+  onCloseDelete?: () => void;
 }
 
 export interface NavigationOptions {
@@ -102,14 +104,24 @@ export function handleModalFocusTrap(e: KeyboardEvent, activeModal: HTMLElement)
 export function handleKeyboardEvent(e: KeyboardEvent, options: NavigationOptions): void {
   const { modals, readerViewport, readerState } = options;
 
-  const modalList = [modals.aboutModal, modals.qrModal, modals.discoverPanel, modals.settingsPanel].filter(
-    (m): m is HTMLElement => Boolean(m && m.classList.contains('visible'))
-  );
+  const modalList = [
+    modals.deleteModal,
+    modals.aboutModal,
+    modals.qrModal,
+    modals.discoverPanel,
+    modals.settingsPanel
+  ].filter((m): m is HTMLElement => Boolean(m && m.classList.contains('visible')));
 
   const activeModal = modalList[0];
 
   if (activeModal) {
     if (e.key === 'Escape') {
+      if (modals.deleteModal?.classList.contains('visible')) {
+        if (modals.onCloseDelete) modals.onCloseDelete();
+        else modals.deleteModal?.classList.remove('visible');
+        return;
+      }
+
       modals.aboutModal?.classList.remove('visible');
       if (modals.onCloseQR) modals.onCloseQR();
       else modals.qrModal?.classList.remove('visible');

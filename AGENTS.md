@@ -133,32 +133,33 @@ Whenever a feature, deploy, or version bump occurs:
 
 ---
 
-## 📚 8-Slot Bookshelf Invariants
+## 📚 Dynamic Bookshelf Invariants (ADR-0003)
 
-1. **Fixed 8 Slots**:
-   - The bookshelf consists of exactly 8 discrete slots (`0..7`), stored as `(BookMetadata | null)[]`.
-   - Never convert the shelf into an unindexed dynamic list or shift elements on deletion.
+1. **Dynamic Capacity & Single Append Trigger**:
+   - The Bookshelf is a dynamic collection of offline books (`BookMetadata[]`), unbounded by arbitrary numeric limits and constrained only by browser storage capacity.
+   - When empty, the Bookshelf displays exactly one card: the "+ Add Book" trigger.
+   - When books are present, the Bookshelf renders all active book cards followed by exactly one trailing "+ Add Book" trigger.
 
-2. **Slot Position Stability & State Handoff Isolation**:
-   - **Persistence**: A book assigned to Slot `i` must always remain in Slot `i`.
-   - **Reading**: Opening, reading, or returning from a book must NEVER reorder or shift slot positions.
-   - **Deletion**: Deleting a book in Slot `i` only sets Slot `i` to `null` (empty slot) and NEVER collapses or shifts remaining slots.
-   - **Addition**: Clicking empty Slot `i` and picking a book must place that book directly into Slot `i`.
-   - **External URL Handoff**: Opening a book via URL hash state (`#s=...`) or QR code handoff must reset `activeSlotIndex = null` prior to loading, ensuring the imported book is placed into the first empty slot rather than overwriting previously clicked shelf slots.
+2. **Compaction on Deletion & Order Stability**:
+   - Deleting a book purges its cached offline data and reading progress, removes it from the bookshelf collection, and compacts remaining books forward so no empty gaps exist.
+   - Reading, opening, or returning from a book must NEVER reorder or shift book positions.
+   - External URL Handoff (`#s=...`) or QR code handoff appends imported books cleanly to the end of the shelf if not already present, without overwriting existing books.
 
 3. **Zero Starter Books**:
-   - An empty shelf must remain completely empty (all 8 slots `null`) with "+ Add Book" on each slot.
+   - A fresh library starts with an empty bookshelf displaying only the single "+ Add Book" trigger.
    - Never auto-seed starter or default books when the shelf is empty or cleared.
 
-4. **Reading Progress & Removal Invariants**:
-   - **Active Shelf Books**: While a book remains on the bookshelf, opening or revisiting it must always restore its saved reading position so the reader picks up right where they left off. Layout adjustments while reading (window resize, font changes, column toggles) must also preserve the active reading position.
-   - **Book Removal & Overwriting**: Removing a book from a slot (or overwriting an occupied slot / replacing slot 0 on a full shelf) completely clears that book's saved progress, in-memory viewport state, and purges all cached content (both HTML and cached images) from local storage and Cache API. If that book is added to the shelf again in the future, reading MUST start back at the very first page (progress = 0).
+4. **Explicit Deletion Confirmation**:
+   - Clicking the "X" button on a book card must prompt the user with an accessible in-app confirmation modal before purging cached book assets and reading progress.
 
-5. **Proxy & Offline Asset Invariants**:
+5. **No "Slot N" Vocabulary**:
+   - All user-facing references to discrete numbered slots ("Slot 1", "Slot 2", etc.) are eliminated from UI cards, tooltips, and accessibility attributes.
+
+6. **Proxy & Offline Asset Invariants**:
    - **Strict Proxying**: All external EPUB book archives MUST always be requested through the configured Cloudflare CORS proxy. Never attempt unproxied direct fetches to external book hosts.
-   - **Complete Offline Caching**: When an EPUB book is downloaded into one of the 8 shelf slots, the parsed document tree (with all chapter XHTML and inlined base64 illustration data) is stored locally in Cache API so the entire book is 100% readable and visual without network connectivity.
+   - **Complete Offline Caching**: When an EPUB book is downloaded into the bookshelf, the parsed document tree (with all chapter XHTML and inlined base64 illustration data) is stored locally in Cache API so the entire book is 100% readable and visual without network connectivity.
 
-6. **Curated Offline-Only Catalog Search**:
+7. **Curated Offline-Only Catalog Search**:
    - **No Online Repository Lookups**: Book search operates strictly across the curated local catalog (`catalog.json`, containing the top ~1,000 classics). Never query external catalog APIs (such as Gutendex or external search endpoints).
    - **Instant & Private**: Search must execute 100% locally in-memory with zero network latency, zero debounce delay, and zero external tracking.
 

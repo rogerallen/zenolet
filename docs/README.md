@@ -30,3 +30,4 @@ Formal records documenting significant architectural and design choices:
 
 - **[ADR-0001: Modular Reader and Service Boundaries](./adr/0001-modular-reader-and-service-boundaries.md)**: Architectural boundaries between UI components, services, and the Cloudflare proxy.
 - **[ADR-0002: Chapter-Virtualized Rendering Architecture](./adr/0002-chapter-virtualized-rendering.md)**: Two-tier spine vs. TOC architecture, upfront spread calibration, and bounded memory rendering.
+- **[ADR-0003: Dynamic Bookshelf with Single Append Trigger](./adr/0003-dynamic-bookshelf.md)**: Dynamic offline library sizing, single append trigger, confirmation deletion modal, and compaction.

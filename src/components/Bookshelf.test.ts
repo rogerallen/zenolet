@@ -101,8 +101,8 @@ describe('Bookshelf Component', () => {
       byteSize: 524288
     };
 
-    it('renders 8 slots including empty and filled cards', () => {
-      const slots: (BookMetadata | null)[] = [mockBook, mockBookNoCover, null, null, null, null, null, null];
+    it('renders dynamic bookshelf cards with a single trailing Add Book trigger', () => {
+      const slots: (BookMetadata | null)[] = [mockBook, mockBookNoCover];
       const onOpenBook = vi.fn();
       const onRemoveBook = vi.fn();
       const onEmptySlotClick = vi.fn();
@@ -110,13 +110,18 @@ describe('Bookshelf Component', () => {
       render8SlotGrid(container, slots, 8, onOpenBook, onRemoveBook, onEmptySlotClick);
 
       const allCards = container.querySelectorAll('.slot-card');
-      expect(allCards.length).toBe(8);
+      expect(allCards.length).toBe(3);
 
       const filledCards = container.querySelectorAll('.slot-filled');
       expect(filledCards.length).toBe(2);
 
       const emptyCards = container.querySelectorAll('.slot-empty');
-      expect(emptyCards.length).toBe(6);
+      expect(emptyCards.length).toBe(1);
+
+      // Verify no "Slot N" text is rendered
+      expect(container.textContent).not.toContain('Slot 1');
+      expect(container.textContent).not.toContain('Slot 2');
+      expect(container.textContent).not.toContain('Slot 3');
 
       // Check first filled card details
       const firstCard = filledCards[0] as HTMLElement;
@@ -171,7 +176,7 @@ describe('Bookshelf Component', () => {
     });
 
     it('handles empty slot click and keyboard interaction', () => {
-      const slots: (BookMetadata | null)[] = [null, null, null, null, null, null, null, null];
+      const slots: (BookMetadata | null)[] = [];
       const onOpenBook = vi.fn();
       const onRemoveBook = vi.fn();
       const onEmptySlotClick = vi.fn();
@@ -179,16 +184,17 @@ describe('Bookshelf Component', () => {
       render8SlotGrid(container, slots, 8, onOpenBook, onRemoveBook, onEmptySlotClick);
 
       const emptyCards = container.querySelectorAll('.slot-empty');
-      const slot2 = emptyCards[1] as HTMLElement;
+      expect(emptyCards.length).toBe(1);
+      const emptyTrigger = emptyCards[0] as HTMLElement;
 
       // Click
-      slot2.click();
-      expect(onEmptySlotClick).toHaveBeenCalledWith(1);
+      emptyTrigger.click();
+      expect(onEmptySlotClick).toHaveBeenCalledWith(0);
 
       // Enter key
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
-      slot2.dispatchEvent(enterEvent);
-      expect(onEmptySlotClick).toHaveBeenCalledWith(1);
+      emptyTrigger.dispatchEvent(enterEvent);
+      expect(onEmptySlotClick).toHaveBeenCalledWith(0);
     });
 
     it('renders loading states for occupied and empty slots', () => {

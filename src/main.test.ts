@@ -204,10 +204,11 @@ describe('App Lifecycle and Integration (main.ts initApp)', () => {
     const footerRepoLink = document.getElementById('footer-repo-link') as HTMLAnchorElement;
     expect(footerRepoLink.href).toBe('https://github.com/example/repo');
 
-    // 4. Bookshelf slots grid rendered with 8 slots
+    // 4. Bookshelf rendered with single empty Add Book trigger
     const slotsGrid = document.getElementById('slots-grid');
     const slotCards = slotsGrid?.querySelectorAll('.slot-card');
-    expect(slotCards?.length).toBe(8);
+    expect(slotCards?.length).toBe(1);
+    expect(slotCards?.[0].classList.contains('slot-empty')).toBe(true);
 
     // 5. Settings applied
     expect(appReaderState.theme).toBe('sepia');
@@ -241,6 +242,53 @@ describe('App Lifecycle and Integration (main.ts initApp)', () => {
     expect(aboutModal.classList.contains('visible')).toBe(true);
     aboutModal.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(aboutModal.classList.contains('visible')).toBe(false);
+  });
+
+  it('prompts delete confirmation modal when book remove button is clicked and cancels/confirms properly', async () => {
+    // Seed localStorage with a book
+    localStorage.setItem(
+      'zenolet-slots',
+      JSON.stringify([{ id: '1342', title: 'Pride and Prejudice', author: 'Jane Austen' }])
+    );
+
+    await initApp();
+
+    const slotsGrid = document.getElementById('slots-grid') as HTMLElement;
+    const cards = slotsGrid.querySelectorAll('.slot-card');
+    expect(cards.length).toBe(2); // 1 filled card + 1 Add Book card
+
+    const removeBtn = slotsGrid.querySelector('.btn-remove-slot') as HTMLButtonElement;
+    expect(removeBtn).not.toBeNull();
+
+    const deleteModal = document.getElementById('delete-modal') as HTMLDivElement;
+    const deleteTitle = document.getElementById('delete-modal-book-title') as HTMLElement;
+    const deleteCancel = document.getElementById('delete-modal-cancel') as HTMLButtonElement;
+    const deleteConfirm = document.getElementById('delete-modal-confirm') as HTMLButtonElement;
+
+    expect(deleteModal.classList.contains('visible')).toBe(false);
+
+    // Click remove button -> opens confirmation modal
+    removeBtn.click();
+    expect(deleteModal.classList.contains('visible')).toBe(true);
+    expect(deleteTitle.textContent).toBe('Pride and Prejudice');
+
+    // Clicking cancel closes modal and keeps book
+    deleteCancel.click();
+    expect(deleteModal.classList.contains('visible')).toBe(false);
+    expect(slotsGrid.querySelectorAll('.slot-card').length).toBe(2);
+
+    // Click remove again and confirm deletion
+    removeBtn.click();
+    expect(deleteModal.classList.contains('visible')).toBe(true);
+
+    deleteConfirm.click();
+    expect(deleteModal.classList.contains('visible')).toBe(false);
+
+    // Book is removed, only 1 trailing Add Book card remains
+    await vi.waitFor(() => {
+      expect(slotsGrid.querySelectorAll('.slot-card').length).toBe(1);
+      expect(slotsGrid.querySelector('.slot-empty')).not.toBeNull();
+    });
   });
 
   it('returns cleanly to library view from reader view on closeReaderAndReturnToLibrary', async () => {

@@ -1,6 +1,6 @@
 {
   "title": "Read the Most Popular E-Books",
-  "blurb": "Select from the a collection of the most popular 1,000 e-books from Project Gutenberg.  Read in a familiar, horizontal interface.  Eight slots are available to store books for offline reading.",
+  "blurb": "Select from a collection of the most popular 1,000 e-books from Project Gutenberg. Read in a familiar, horizontal interface and store books for offline reading.",
   "repoUrl": "https://github.com/rogerallen/zenolet",
   "curator": {
     "name": "Roger Allen",

@@ -966,6 +966,67 @@ a:not([href]) {
   font-size: 0.85rem;
 }
 
+/* Delete Confirmation Modal Styling */
+.delete-modal-card {
+  max-width: 440px;
+}
+
+.delete-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.delete-modal-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.delete-modal-warning {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.delete-modal-actions button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.delete-btn-cancel {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color) !important;
+}
+
+.delete-btn-cancel:hover {
+  filter: brightness(0.95);
+}
+
+.delete-btn-confirm {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.delete-btn-confirm:hover {
+  background-color: #b91c1c;
+}
+
 /* Settings Dropdown Panel */
 .settings-panel {
   position: fixed;
@@ -1163,8 +1224,13 @@ a:not([href]) {
   white-space: nowrap;
 }
 
+.btn-discover-import:disabled,
 .btn-discover-import.imported {
-  background-color: #22c55e;
+  background-color: var(--bg-primary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.75;
 }
 
 .discover-cover-wrap {
@@ -1239,8 +1305,8 @@ a:not([href]) {
 /* --- 8-Slot Grid (2 rows x 4 cols) --- */
 .slots-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, minmax(210px, auto));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: minmax(210px, auto);
   gap: 20px;
   max-width: 1160px;
   margin: 20px auto 40px;
@@ -1249,8 +1315,7 @@ a:not([href]) {
 
 @media (max-width: 900px) {
   .slots-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 

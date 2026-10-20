@@ -87,6 +87,23 @@ describe('DiscoverModal Local-Only Catalog Search', () => {
     );
   });
 
+  it('disables Add to Shelf button when book is already on the bookshelf', () => {
+    const container = document.createElement('div');
+    const onImport = vi.fn();
+    const isBookOnShelf = (id: string) => id === '84';
+
+    renderLocalCatalogResults('Frankenstein', sampleCatalog, container, onImport, isBookOnShelf);
+
+    const btn = container.querySelector('.btn-discover-import') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    expect(btn.disabled).toBe(true);
+    expect(btn.textContent?.trim()).toBe('Added to Shelf');
+    expect(btn.classList.contains('imported')).toBe(true);
+
+    btn.click();
+    expect(onImport).not.toHaveBeenCalled();
+  });
+
   it('opens discover panel and focuses the search input (ACC-001)', async () => {
     const { openDiscoverPanel, closeDiscoverPanel } = await import('./DiscoverModal.js');
     const overlay = document.createElement('div');

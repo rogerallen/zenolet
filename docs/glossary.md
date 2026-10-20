@@ -5,12 +5,16 @@ A serverless, privacy-first, horizontal page-flowing Progressive Web Application
 ## Language
 
 **Bookshelf**:
-A fixed 8-slot discrete grid holding the user's currently downloaded or active reading books.
-_Avoid_: Library grid, book list, shelf list
+A dynamic responsive grid holding the user's currently downloaded offline reading books, terminating in a single Add Book Trigger.
+_Avoid_: Fixed shelf, library grid, slot grid
 
-**Slot**:
-One of exactly eight indexed positions (0 through 7) on the Bookshelf, containing either book metadata or an empty state.
-_Avoid_: Shelf item, shelf index, book entry
+**Add Book Trigger**:
+The single trailing action card on the Bookshelf used to open the catalog search and download an additional book.
+_Avoid_: Empty slot, blank card, placeholder slot
+
+**Bookshelf Card**:
+A visual card on the Bookshelf representing a single downloaded book, displaying title, author, cover art, reading progress, and a deletion trigger.
+_Avoid_: Slot, shelf item, book slot
 
 **Curator**:
 The maintainer who forks and configures a Zenolet instance with custom library metadata, branding, and a curated book catalog.

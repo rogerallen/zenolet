@@ -304,7 +304,7 @@
             <div class="about-section">
               <h4>Curated Offline-first Bookshelf</h4>
               <p>
-                Focus on just eight books. Each book stays pinned to its slot with saved reading progress, cover art,
+                Build your personal offline reading library. Each book is saved with its reading progress, cover art,
                 and local storage size. Adding a book caches its full EPUB archive and illustrations locally in your
                 browser. Read anywhere off-grid with zero network requests.
               </p>
@@ -351,6 +351,28 @@
             <canvas id="qr-canvas"></canvas>
           </div>
           <input type="text" id="qr-url-input" class="qr-url-input" aria-label="Mobile reading URL" readonly />
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal Overlay -->
+      <div id="delete-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <div class="modal-card delete-modal-card">
+          <div class="modal-header">
+            <h3 id="delete-modal-title" class="modal-title">Remove Book</h3>
+            <button id="delete-modal-close" class="btn-close" aria-label="Close Remove Book Dialog">&times;</button>
+          </div>
+          <div class="delete-modal-body">
+            <p class="delete-modal-message">
+              Remove <strong id="delete-modal-book-title"></strong> from your bookshelf?
+            </p>
+            <p class="delete-modal-warning">
+              Its cached offline content and saved reading progress will be permanently deleted.
+            </p>
+          </div>
+          <div class="delete-modal-actions">
+            <button id="delete-modal-cancel" class="delete-btn-cancel">Cancel</button>
+            <button id="delete-modal-confirm" class="delete-btn-confirm">Remove</button>
+          </div>
         </div>
       </div>
 

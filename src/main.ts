@@ -30,6 +30,7 @@ import {
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal } from './components/QRModal.ts';
+import { openDeleteModal, closeDeleteModal } from './components/DeleteModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
 import {
   closeChapterPopup,
@@ -109,6 +110,11 @@ let DOM: {
   discoverSearchInput: HTMLInputElement;
   discoverResults: HTMLDivElement;
   libraryStorageStatus: HTMLSpanElement;
+  deleteModal: HTMLDivElement;
+  deleteModalClose: HTMLButtonElement;
+  deleteModalTitleSpan: HTMLElement;
+  deleteModalCancel: HTMLButtonElement;
+  deleteModalConfirm: HTMLButtonElement;
 };
 
 // --- App Initialization ---
@@ -168,7 +174,12 @@ export async function initApp(): Promise<void> {
     discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
     discoverSearchInput: document.getElementById('discover-search-input') as HTMLInputElement,
     discoverResults: document.getElementById('discover-results') as HTMLDivElement,
-    libraryStorageStatus: document.getElementById('library-storage-status') as HTMLSpanElement
+    libraryStorageStatus: document.getElementById('library-storage-status') as HTMLSpanElement,
+    deleteModal: document.getElementById('delete-modal') as HTMLDivElement,
+    deleteModalClose: document.getElementById('delete-modal-close') as HTMLButtonElement,
+    deleteModalTitleSpan: document.getElementById('delete-modal-book-title') as HTMLElement,
+    deleteModalCancel: document.getElementById('delete-modal-cancel') as HTMLButtonElement,
+    deleteModalConfirm: document.getElementById('delete-modal-confirm') as HTMLButtonElement
   };
 
   // Load Curator Configuration (curator/config.json)
@@ -267,9 +278,24 @@ function update8SlotShelfView() {
       };
       openBook(book, null, true, slotIndex);
     },
-    async (_bookId, slotIndex) => {
-      await removeBookFromSlot(slotIndex);
-      update8SlotShelfView();
+    (_bookId, slotIndex) => {
+      const currentSlots = getStoredSlots();
+      const book = currentSlots[slotIndex];
+      const title = book?.title || 'this book';
+      openDeleteModal(
+        {
+          overlay: DOM.deleteModal,
+          titleSpan: DOM.deleteModalTitleSpan,
+          confirmBtn: DOM.deleteModalConfirm,
+          cancelBtn: DOM.deleteModalCancel,
+          closeBtn: DOM.deleteModalClose
+        },
+        title,
+        async () => {
+          await removeBookFromSlot(slotIndex);
+          update8SlotShelfView();
+        }
+      );
     },
     (slotIndex) => {
       activeSlotIndex = slotIndex;
@@ -726,11 +752,18 @@ function setupEventListeners() {
   // Navigation, Keyboard Shortcuts & Modal Focus Traps
   const navOptions: NavigationOptions = {
     modals: {
+      deleteModal: DOM.deleteModal,
       aboutModal: DOM.aboutModal,
       qrModal: DOM.qrModal,
       discoverPanel: DOM.discoverPanel,
       discoverOverlay: DOM.discoverOverlay,
       settingsPanel: DOM.settingsPanel,
+      onCloseDelete: () =>
+        closeDeleteModal({
+          overlay: DOM.deleteModal,
+          confirmBtn: DOM.deleteModalConfirm,
+          cancelBtn: DOM.deleteModalCancel
+        }),
       onCloseQR: () => closeQRModal(DOM.qrModal),
       onCloseDiscover: () => closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel)
     },

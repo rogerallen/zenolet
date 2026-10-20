@@ -29,8 +29,7 @@ export async function getStorageQuotaEstimate(): Promise<{ usage?: number; quota
 }
 
 export async function getActualStorageUsage(): Promise<{ bookCount: number; totalBytes: number }> {
-  const slots = getStoredSlots();
-  const activeBooks = slots.filter((s): s is BookMetadata => s !== null);
+  const activeBooks = getStoredBooks();
   const bookCount = activeBooks.length;
   let totalBytes = activeBooks.reduce((acc, s) => acc + (s.byteSize || 0), 0);
 
@@ -63,17 +62,16 @@ export const BOOK_CACHE_NAME = 'zenolet-books-v2';
 export const NUM_SLOTS = 8;
 export const STORAGE_KEY_SLOTS = 'zenolet-slots';
 
-export function getStoredSlots(): (BookMetadata | null)[] {
+export function getStoredBooks(): BookMetadata[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_SLOTS);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        const slots: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
-        for (let i = 0; i < NUM_SLOTS; i++) {
-          slots[i] = parsed[i] || null;
-        }
-        return slots;
+        return parsed.filter(
+          (item): item is BookMetadata =>
+            item !== null && typeof item === 'object' && typeof item.id === 'string' && item.id.length > 0
+        );
       }
     }
 
@@ -82,36 +80,42 @@ export function getStoredSlots(): (BookMetadata | null)[] {
     if (legacy) {
       const parsed = JSON.parse(legacy) as BookMetadata[];
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const migrated: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
-        for (let i = 0; i < Math.min(NUM_SLOTS, parsed.length); i++) {
-          migrated[i] = parsed[i];
-        }
-        localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(migrated));
-        return migrated;
+        const nonNull = parsed.filter(
+          (item): item is BookMetadata =>
+            item !== null && typeof item === 'object' && typeof item.id === 'string' && item.id.length > 0
+        );
+        localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(nonNull));
+        return nonNull;
       }
     }
   } catch (e) {
-    console.error('[Zenolet Storage] Failed to read stored slots:', e);
+    console.error('[Zenolet Storage] Failed to read stored books:', e);
   }
 
-  // Default to 8 completely empty slots (no starter books)
-  const emptySlots: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
-  return emptySlots;
+  return [];
+}
+
+export function getStoredSlots(): (BookMetadata | null)[] {
+  return getStoredBooks();
+}
+
+export function saveBooks(books: BookMetadata[]): void {
+  const nonNull = books.filter(
+    (b): b is BookMetadata => b !== null && typeof b === 'object' && typeof b.id === 'string' && b.id.length > 0
+  );
+  try {
+    localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(nonNull));
+    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(nonNull));
+  } catch (e) {
+    console.error('[Zenolet Storage] Failed to save books to localStorage:', e);
+  }
 }
 
 export function saveSlots(slots: (BookMetadata | null)[]): void {
-  const normalized: (BookMetadata | null)[] = new Array(NUM_SLOTS).fill(null);
-  for (let i = 0; i < NUM_SLOTS; i++) {
-    normalized[i] = slots[i] || null;
-  }
-  try {
-    localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(normalized));
-    // Keep zenolet-offline-metadata in sync for legacy compatibility
-    const nonNull = normalized.filter((b): b is BookMetadata => b !== null);
-    localStorage.setItem('zenolet-offline-metadata', JSON.stringify(nonNull));
-  } catch (e) {
-    console.error('[Zenolet Storage] Failed to save slots to localStorage:', e);
-  }
+  const nonNull = slots.filter(
+    (b): b is BookMetadata => b !== null && typeof b === 'object' && typeof b.id === 'string' && b.id.length > 0
+  );
+  saveBooks(nonNull);
 }
 
 export async function purgeBookCache(bookId: string): Promise<void> {
@@ -128,15 +132,22 @@ export async function purgeBookCache(bookId: string): Promise<void> {
 }
 
 export async function removeBookFromSlot(slotIndex: number): Promise<void> {
-  const slots = getStoredSlots();
-  if (slotIndex >= 0 && slotIndex < NUM_SLOTS) {
-    const book = slots[slotIndex];
+  const books = getStoredBooks();
+  if (slotIndex >= 0 && slotIndex < books.length) {
+    const book = books[slotIndex];
     if (book) {
       await purgeBookCache(book.id);
     }
-    slots[slotIndex] = null;
-    saveSlots(slots);
+    books.splice(slotIndex, 1);
+    saveBooks(books);
   }
+}
+
+export async function removeBookFromBookshelf(bookId: string): Promise<void> {
+  await purgeBookCache(bookId);
+  const books = getStoredBooks();
+  const updated = books.filter((b) => b.id !== bookId);
+  saveBooks(updated);
 }
 
 // --- Offline Book Storage (Cache API) ---
@@ -167,48 +178,23 @@ export async function saveBookOffline(
     }
   }
 
-  const slots = getStoredSlots();
-  const existingIdx = slots.findIndex((s) => s?.id === book.id);
+  const books = getStoredBooks();
+  const existingIdx = books.findIndex((s) => s.id === book.id);
 
   if (existingIdx !== -1) {
-    // If targetSlotIndex specified and different from existing slot, move to target
-    if (
-      typeof targetSlotIndex === 'number' &&
-      targetSlotIndex >= 0 &&
-      targetSlotIndex < NUM_SLOTS &&
-      targetSlotIndex !== existingIdx
-    ) {
-      const overwrittenBook = slots[targetSlotIndex];
-      if (overwrittenBook && overwrittenBook.id !== book.id) {
-        await purgeBookCache(overwrittenBook.id);
-      }
-      slots[existingIdx] = null;
-      slots[targetSlotIndex] = book;
-    } else {
-      // Keep in existing slot without moving
-      slots[existingIdx] = book;
-    }
-  } else if (typeof targetSlotIndex === 'number' && targetSlotIndex >= 0 && targetSlotIndex < NUM_SLOTS) {
-    const overwrittenBook = slots[targetSlotIndex];
+    // Keep in existing position, updating metadata
+    books[existingIdx] = book;
+  } else if (typeof targetSlotIndex === 'number' && targetSlotIndex >= 0 && targetSlotIndex < books.length) {
+    const overwrittenBook = books[targetSlotIndex];
     if (overwrittenBook && overwrittenBook.id !== book.id) {
       await purgeBookCache(overwrittenBook.id);
     }
-    slots[targetSlotIndex] = book;
+    books[targetSlotIndex] = book;
   } else {
-    // Assign to first empty slot
-    const emptyIdx = slots.findIndex((s) => s === null);
-    if (emptyIdx !== -1) {
-      slots[emptyIdx] = book;
-    } else {
-      // Full shelf: overwrite Slot 0 and purge old Slot 0 book
-      const overwrittenBook = slots[0];
-      if (overwrittenBook && overwrittenBook.id !== book.id) {
-        await purgeBookCache(overwrittenBook.id);
-      }
-      slots[0] = book;
-    }
+    // Append to end of dynamic bookshelf
+    books.push(book);
   }
-  saveSlots(slots);
+  saveBooks(books);
 }
 
 export async function getStoredBookOffline(bookId: string): Promise<BookDetails | null> {

@@ -1,5 +1,6 @@
 // --- Discover & Search GUI Component (Curated Offline Catalog Only) ---
 import type { CatalogBook } from '../services/catalog.js';
+import { getStoredBooks } from '../services/storage.js';
 import { escapeHtml } from './Bookshelf.js';
 
 export interface DiscoverState {
@@ -35,12 +36,14 @@ export function renderLocalCatalogResults(
   query: string,
   catalog: CatalogBook[],
   container: HTMLDivElement,
-  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void,
+  isBookOnShelf?: (bookId: string) => boolean
 ): void {
+  const checkOnShelf = isBookOnShelf || ((bookId: string) => getStoredBooks().some((b) => b.id === bookId));
   if (!query.trim()) {
     // Render top 15 popular books if query is empty
     const popular = catalog.slice(0, 15);
-    renderCatalogCards(popular, catalog, container, 'Popular Classics', onImportBook);
+    renderCatalogCards(popular, catalog, container, 'Popular Classics', onImportBook, checkOnShelf);
     return;
   }
 
@@ -55,7 +58,14 @@ export function renderLocalCatalogResults(
     .slice(0, 30);
 
   if (matches.length > 0) {
-    renderCatalogCards(matches, catalog, container, `Matching Classics (${matches.length})`, onImportBook);
+    renderCatalogCards(
+      matches,
+      catalog,
+      container,
+      `Matching Classics (${matches.length})`,
+      onImportBook,
+      checkOnShelf
+    );
   } else {
     showDiscoverEmpty(container, 'No matching books found in the curated classics catalog.');
   }
@@ -66,7 +76,8 @@ function renderCatalogCards(
   allCatalog: CatalogBook[],
   container: HTMLDivElement,
   sectionTitle: string,
-  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void
+  onImportBook: (bookId: string, title: string, author: string, epubUrl?: string, coverUrl?: string) => void,
+  isBookOnShelf?: (bookId: string) => boolean
 ): void {
   let html = `<div style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">${escapeHtml(sectionTitle)}</div>`;
 
@@ -80,13 +91,17 @@ function renderCatalogCards(
         ? `<div class="discover-cover-wrap"><img class="discover-cover-img" src="${escapeHtml(b.coverUrl)}" alt="Cover" loading="lazy" /></div>`
         : '';
 
-      return `
-      <div class="discover-card">
-        ${coverHtml}
-        <div class="discover-card-info">
-          <h4 class="discover-title">${rankPrefix}${escapeHtml(b.title)}</h4>
-          <p class="discover-author">by ${escapeHtml(b.author)} #${escapeHtml(b.id)}</p>
-        </div>
+      const onShelf = isBookOnShelf ? isBookOnShelf(b.id) : false;
+      const buttonHtml = onShelf
+        ? `
+        <button class="btn-discover-import imported" 
+                disabled 
+                aria-disabled="true" 
+                title="This book is already on your bookshelf">
+          Added to Shelf
+        </button>
+      `
+        : `
         <button class="btn-discover-import" 
                 data-id="${escapeHtml(b.id)}" 
                 data-title="${escapeHtml(b.title)}" 
@@ -95,6 +110,16 @@ function renderCatalogCards(
                 data-cover="${escapeHtml(b.coverUrl || '')}">
           + Add to Shelf
         </button>
+      `;
+
+      return `
+      <div class="discover-card">
+        ${coverHtml}
+        <div class="discover-card-info">
+          <h4 class="discover-title">${rankPrefix}${escapeHtml(b.title)}</h4>
+          <p class="discover-author">by ${escapeHtml(b.author)} #${escapeHtml(b.id)}</p>
+        </div>
+        ${buttonHtml}
       </div>
     `;
     })
@@ -102,7 +127,7 @@ function renderCatalogCards(
 
   container.innerHTML = html;
 
-  container.querySelectorAll('.btn-discover-import').forEach((btn) => {
+  container.querySelectorAll('.btn-discover-import:not([disabled])').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-id');
       const title = btn.getAttribute('data-title');

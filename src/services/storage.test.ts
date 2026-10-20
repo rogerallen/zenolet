@@ -84,41 +84,36 @@ describe('Storage and Progress Math for Zenolet', () => {
     expect(getElementSpreadIndex(mockEl1, mockViewport, totalSpreads)).toBe(37);
   });
 
-  it('returns 8 empty null slots by default without starter books', async () => {
-    const { getStoredSlots } = await import('./storage.js');
+  it('returns empty array by default without starter books', async () => {
+    const { getStoredSlots, getStoredBooks } = await import('./storage.js');
     const slots = getStoredSlots();
-    expect(slots).toHaveLength(8);
-    expect(slots.every((s) => s === null)).toBe(true);
+    expect(slots).toEqual([]);
+    expect(getStoredBooks()).toEqual([]);
   });
 
-  it('preserves exact slot positions when updating or removing books', async () => {
+  it('compacts remaining books forward when removing a book from bookshelf (ADR-0003)', async () => {
     const { getStoredSlots, saveSlots, removeBookFromSlot } = await import('./storage.js');
     const mockBookA = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
     const mockBookB = { id: '2701', title: 'Moby Dick', author: 'Herman Melville' };
 
-    const initialSlots = new Array(8).fill(null);
-    initialSlots[1] = mockBookA;
-    initialSlots[5] = mockBookB;
-    saveSlots(initialSlots);
+    saveSlots([mockBookA, mockBookB]);
 
     const loaded = getStoredSlots();
-    expect(loaded[0]).toBeNull();
-    expect(loaded[1]?.id).toBe('84');
-    expect(loaded[5]?.id).toBe('2701');
+    expect(loaded).toHaveLength(2);
+    expect(loaded[0]?.id).toBe('84');
+    expect(loaded[1]?.id).toBe('2701');
 
-    // Remove book in Slot 1
-    await removeBookFromSlot(1);
+    // Remove first book (index 0)
+    await removeBookFromSlot(0);
     const afterRemoval = getStoredSlots();
-    expect(afterRemoval[1]).toBeNull();
-    expect(afterRemoval[5]?.id).toBe('2701'); // Slot 5 still in Slot 5, not shifted!
+    expect(afterRemoval).toHaveLength(1);
+    expect(afterRemoval[0]?.id).toBe('2701'); // Book B shifted forward into position 0
   });
 
-  it('resets reading progress when a book is removed from a slot', async () => {
+  it('resets reading progress when a book is removed from bookshelf', async () => {
     const { saveSlots, removeBookFromSlot, getStoredProgress } = await import('./storage.js');
     const mockBook = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
-    const slots = new Array(8).fill(null);
-    slots[2] = mockBook;
-    saveSlots(slots);
+    saveSlots([mockBook]);
 
     // Simulate stored progress for Frankenstein
     localStorage.setItem(
@@ -127,8 +122,8 @@ describe('Storage and Progress Math for Zenolet', () => {
     );
     expect(getStoredProgress('84')).toBe(0.65);
 
-    // Remove book from slot 2
-    await removeBookFromSlot(2);
+    // Remove book from index 0
+    await removeBookFromSlot(0);
 
     // Progress must be reset / null so next time it starts on page 1
     expect(getStoredProgress('84')).toBeNull();
@@ -137,9 +132,7 @@ describe('Storage and Progress Math for Zenolet', () => {
   it('purges cached offline book content and images from Cache API on removal', async () => {
     const { saveSlots, removeBookFromSlot } = await import('./storage.js');
     const mockBook = { id: '1342', title: 'Pride and Prejudice', author: 'Jane Austen' };
-    const slots = new Array(8).fill(null);
-    slots[3] = mockBook;
-    saveSlots(slots);
+    saveSlots([mockBook]);
 
     const mockDelete = vi.fn().mockResolvedValue(true);
     const mockCache = { delete: mockDelete, put: vi.fn(), match: vi.fn() };
@@ -149,7 +142,7 @@ describe('Storage and Progress Math for Zenolet', () => {
     globalThis.caches = { open: mockOpen, delete: vi.fn(), has: vi.fn(), keys: vi.fn(), match: vi.fn() };
 
     try {
-      await removeBookFromSlot(3);
+      await removeBookFromSlot(0);
       expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v2');
       expect(mockDelete).toHaveBeenCalledWith('/cached-books/1342');
     } finally {
@@ -163,9 +156,7 @@ describe('Storage and Progress Math for Zenolet', () => {
     const oldBook = { id: '84', title: 'Frankenstein', author: 'Mary Shelley' };
     const newBook = { id: '2701', title: 'Moby Dick', author: 'Herman Melville' };
 
-    const slots = new Array(8).fill(null);
-    slots[2] = oldBook;
-    saveSlots(slots);
+    saveSlots([oldBook]);
 
     localStorage.setItem(
       'zenolet-reading-progress',
@@ -181,7 +172,7 @@ describe('Storage and Progress Math for Zenolet', () => {
     globalThis.caches = { open: mockOpen, delete: vi.fn(), has: vi.fn(), keys: vi.fn(), match: vi.fn() };
 
     try {
-      await saveBookOffline(newBook, { metadata: newBook, content: '<p>Whale</p>' }, 2);
+      await saveBookOffline(newBook, { metadata: newBook, content: '<p>Whale</p>' }, 0);
       expect(mockOpen).toHaveBeenCalledWith('zenolet-books-v2');
       expect(mockDelete).toHaveBeenCalledWith('/cached-books/84');
       expect(mockPut).toHaveBeenCalledWith('/cached-books/2701', expect.anything());
@@ -192,20 +183,19 @@ describe('Storage and Progress Math for Zenolet', () => {
     }
   });
 
-  it('purges Slot 0 cache when saving to a full shelf without a target slot (COR-001)', async () => {
+  it('appends new book to bookshelf without overwriting existing books (ADR-0003)', async () => {
     const { saveSlots, saveBookOffline, getStoredSlots } = await import('./storage.js');
-    const fullSlots = Array.from({ length: 8 }, (_, i) => ({
+    const existingBooks = Array.from({ length: 8 }, (_, i) => ({
       id: `book-${i}`,
       title: `Title ${i}`,
       author: `Author ${i}`
     }));
-    saveSlots(fullSlots);
+    saveSlots(existingBooks);
 
     const incomingBook = { id: 'book-new', title: 'New Title', author: 'New Author' };
 
-    const mockDelete = vi.fn().mockResolvedValue(true);
     const mockPut = vi.fn().mockResolvedValue(undefined);
-    const mockCache = { delete: mockDelete, put: mockPut, match: vi.fn() };
+    const mockCache = { delete: vi.fn(), put: mockPut, match: vi.fn() };
     const mockOpen = vi.fn().mockResolvedValue(mockCache);
 
     // @ts-ignore
@@ -213,11 +203,11 @@ describe('Storage and Progress Math for Zenolet', () => {
 
     try {
       await saveBookOffline(incomingBook, { metadata: incomingBook, content: '<p>New</p>' }, null);
-      expect(mockDelete).toHaveBeenCalledWith('/cached-books/book-0');
       expect(mockPut).toHaveBeenCalledWith('/cached-books/book-new', expect.anything());
       const updated = getStoredSlots();
-      expect(updated[0]?.id).toBe('book-new');
-      expect(updated[1]?.id).toBe('book-1');
+      expect(updated.length).toBe(9);
+      expect(updated[0]?.id).toBe('book-0');
+      expect(updated[8]?.id).toBe('book-new');
     } finally {
       // @ts-ignore
       delete globalThis.caches;
@@ -351,9 +341,9 @@ describe('Storage and Progress Math for Zenolet', () => {
     localStorage.setItem('zenolet-offline-metadata', JSON.stringify(legacyBooks));
 
     const slots = getStoredSlots();
+    expect(slots).toHaveLength(2);
     expect(slots[0]?.id).toBe('b1');
     expect(slots[1]?.id).toBe('b2');
-    expect(slots.slice(2).every((s) => s === null)).toBe(true);
   });
 
   it('safely handles corrupt JSON in localStorage slots and progress', async () => {
@@ -361,15 +351,14 @@ describe('Storage and Progress Math for Zenolet', () => {
 
     localStorage.setItem('zenolet-slots', '{corrupt json');
     const slots = getStoredSlots();
-    expect(slots.length).toBe(8);
-    expect(slots.every((s) => s === null)).toBe(true);
+    expect(slots).toEqual([]);
 
     localStorage.setItem('zenolet-reading-progress', 'not-valid-json');
     const progress = getStoredProgressDetails('any-book');
     expect(progress).toBeNull();
   });
 
-  it('saves and retrieves offline book details via Cache API and moves existing slots', async () => {
+  it('saves and retrieves offline book details via Cache API and updates existing books', async () => {
     const { saveBookOffline, getStoredBookOffline, getStoredSlots, purgeBookCache } = await import('./storage.js');
 
     const fakeCacheStore = new Map<string, Response>();
@@ -392,11 +381,12 @@ describe('Storage and Progress Math for Zenolet', () => {
       const bookMeta = { id: 'moby-offline', title: 'Moby Dick', author: 'Melville' };
       const bookData = { metadata: bookMeta, content: '<h1>Call me Ishmael</h1>' };
 
-      // 1. Save book offline without target slot -> places in slot 0
+      // 1. Save book offline -> appends to bookshelf
       await saveBookOffline(bookMeta, bookData);
       expect(fakeCache.put).toHaveBeenCalled();
 
       const slotsAfterFirst = getStoredSlots();
+      expect(slotsAfterFirst).toHaveLength(1);
       expect(slotsAfterFirst[0]?.id).toBe('moby-offline');
 
       // 2. Retrieve offline book
@@ -404,11 +394,12 @@ describe('Storage and Progress Math for Zenolet', () => {
       expect(retrieved?.metadata.title).toBe('Moby Dick');
       expect(retrieved?.content).toBe('<h1>Call me Ishmael</h1>');
 
-      // 3. Move existing book to slot 3
-      await saveBookOffline(bookMeta, bookData, 3);
-      const slotsAfterMove = getStoredSlots();
-      expect(slotsAfterMove[0]).toBeNull();
-      expect(slotsAfterMove[3]?.id).toBe('moby-offline');
+      // 3. Update existing book without duplicating
+      const updatedMeta = { ...bookMeta, title: 'Moby Dick Illustrated' };
+      await saveBookOffline(updatedMeta, bookData);
+      const slotsAfterUpdate = getStoredSlots();
+      expect(slotsAfterUpdate).toHaveLength(1);
+      expect(slotsAfterUpdate[0]?.title).toBe('Moby Dick Illustrated');
 
       // 4. Clean up
       await purgeBookCache('moby-offline');
