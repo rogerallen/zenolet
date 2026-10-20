@@ -57,5 +57,5 @@ The transition point between adjacent chapters where reading advances to page sp
 _Avoid_: Chapter break, page gap
 
 **State Handoff**:
-A compressed, URL-safe hash payload (`#s=...`) encoding book ID, progress fraction, and reader preferences for QR code or cross-device transfer.
-_Avoid_: Share link, sync token, deep link
+A compressed, URL-safe hash payload (`#s=...`) encoding point-in-time book coordinates (book ID, chapter, progress fraction, reader preferences) for one-shot cross-device transfer via QR code or link.
+_Avoid_: Sync, cloud sync, file transfer, share link, sync token, deep link

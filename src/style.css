@@ -948,6 +948,13 @@ a:not([href]) {
   margin: 0;
 }
 
+.handoff-intro {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .qr-canvas-wrapper {
   display: flex;
   justify-content: center;
@@ -956,7 +963,16 @@ a:not([href]) {
   border-radius: 12px;
 }
 
+.handoff-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
 .qr-url-input {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   padding: 10px;
   border: 1px solid var(--border-color);
@@ -964,6 +980,60 @@ a:not([href]) {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 0.85rem;
+}
+
+.btn-copy-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  min-width: 90px;
+}
+
+.btn-copy-link:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-copy-link.copied {
+  background-color: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
+}
+
+.handoff-notice {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.handoff-notice-icon {
+  font-size: 1rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.handoff-notice p {
+  margin: 0;
+}
+
+.handoff-notice strong {
+  color: var(--text-primary);
 }
 
 /* Delete Confirmation Modal Styling */
@@ -1761,5 +1831,13 @@ a:not([href]) {
     gap: 8px 10px;
     flex-wrap: wrap;
     font-size: 0.8rem;
+  }
+
+  .handoff-input-row {
+    flex-direction: column;
+  }
+
+  .btn-copy-link {
+    width: 100%;
   }
 }

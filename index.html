@@ -177,7 +177,12 @@
           </div>
 
           <div class="reader-header-right">
-            <button id="share-btn" class="btn-icon" title="Read on Phone (QR Code & Link)" aria-label="Mobile Link">
+            <button
+              id="share-btn"
+              class="btn-icon"
+              title="Continue reading on another device (QR code &amp; link)"
+              aria-label="Continue reading on another device"
+            >
               <svg
                 width="15"
                 height="15"
@@ -188,10 +193,13 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
               </svg>
-              <span class="btn-label">Mobile</span>
+              <span class="btn-label">Share</span>
             </button>
             <button id="settings-toggle" class="btn-icon" title="Reading Settings" aria-label="Settings">
               <svg
@@ -319,10 +327,11 @@
             </div>
 
             <div class="about-section">
-              <h4>Seamless Mobile Handoff</h4>
+              <h4>One-Shot Device Handoff</h4>
               <p>
-                Scan the on-screen QR code with your phone camera to transfer your book and exact reading position
-                instantly without accounts or logins.
+                Scan the on-screen QR code or copy the link to continue reading on another device without accounts or
+                logins. Reading progress tracks independently on each device after handoff, and the receiving device
+                fetches the book on first open.
               </p>
             </div>
 
@@ -341,16 +350,35 @@
       <div id="qr-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
         <div class="modal-card">
           <div class="modal-header">
-            <h3 id="qr-modal-title" class="modal-title">Read on Mobile</h3>
+            <h3 id="qr-modal-title" class="modal-title">Continue Reading on Another Device</h3>
             <button id="qr-close" class="btn-close" aria-label="Close QR Modal">&times;</button>
           </div>
-          <p style="font-size: 0.9rem; color: var(--text-secondary)">
-            Scan this QR code with your phone camera to transfer your book and reading position:
+          <p class="handoff-intro">
+            Scan this QR code with your camera or copy the link to open this book on another device:
           </p>
           <div class="qr-canvas-wrapper">
             <canvas id="qr-canvas"></canvas>
           </div>
-          <input type="text" id="qr-url-input" class="qr-url-input" aria-label="Mobile reading URL" readonly />
+          <div class="handoff-input-row">
+            <input
+              type="text"
+              id="qr-url-input"
+              class="qr-url-input"
+              aria-label="Reading URL for another device"
+              readonly
+            />
+            <button id="qr-copy-btn" class="btn-copy-link" type="button" aria-label="Copy reading link to clipboard">
+              Copy Link
+            </button>
+          </div>
+          <div class="handoff-notice">
+            <span class="handoff-notice-icon" aria-hidden="true">💡</span>
+            <p>
+              <strong>One-time handoff:</strong> This transfers your book position at this moment. Reading progress will
+              track independently on each device afterward. The receiving device must be online to download the book if
+              it isn't already cached.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -328,6 +328,37 @@ describe('App Lifecycle and Integration (main.ts initApp)', () => {
     expect(appReaderState.currentView).toBe('library');
   });
 
+  it('opens QR handoff modal on share button click and copies URL via copy button', async () => {
+    await initApp();
+
+    const shareBtn = document.getElementById('share-btn') as HTMLButtonElement;
+    const qrModal = document.getElementById('qr-modal') as HTMLDivElement;
+    const qrUrlInput = document.getElementById('qr-url-input') as HTMLInputElement;
+    const qrCopyBtn = document.getElementById('qr-copy-btn') as HTMLButtonElement;
+
+    expect(qrModal.classList.contains('visible')).toBe(false);
+
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: writeTextMock
+      }
+    });
+
+    shareBtn.click();
+    await vi.waitFor(() => {
+      expect(qrModal.classList.contains('visible')).toBe(true);
+    });
+
+    expect(qrUrlInput.value).toContain(window.location.host);
+
+    qrCopyBtn.click();
+    await vi.waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith(qrUrlInput.value);
+      expect(qrCopyBtn.textContent).toBe('Copied!');
+    });
+  });
+
   it('closes QR modal when close button or outside backdrop is clicked', async () => {
     await initApp();
 

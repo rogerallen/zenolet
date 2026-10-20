@@ -29,7 +29,7 @@ import {
   type ReaderElements
 } from './components/ReaderEngine.ts';
 import { setupSettingsModal } from './components/SettingsModal.ts';
-import { openQRModal, closeQRModal } from './components/QRModal.ts';
+import { openQRModal, closeQRModal, copyReadingUrl } from './components/QRModal.ts';
 import { openDeleteModal, closeDeleteModal } from './components/DeleteModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
 import {
@@ -104,6 +104,7 @@ let DOM: {
   qrClose: HTMLButtonElement;
   qrCanvas: HTMLCanvasElement;
   qrUrlInput: HTMLInputElement;
+  qrCopyBtn: HTMLButtonElement;
   discoverOverlay: HTMLDivElement;
   discoverPanel: HTMLElement;
   discoverClose: HTMLButtonElement;
@@ -169,6 +170,7 @@ export async function initApp(): Promise<void> {
     qrClose: document.getElementById('qr-close') as HTMLButtonElement,
     qrCanvas: document.getElementById('qr-canvas') as HTMLCanvasElement,
     qrUrlInput: document.getElementById('qr-url-input') as HTMLInputElement,
+    qrCopyBtn: document.getElementById('qr-copy-btn') as HTMLButtonElement,
     discoverOverlay: document.getElementById('discover-overlay') as HTMLDivElement,
     discoverPanel: document.getElementById('discover-panel') as HTMLElement,
     discoverClose: document.getElementById('discover-close') as HTMLButtonElement,
@@ -702,12 +704,15 @@ function setupEventListeners() {
   DOM.btnQR.addEventListener('click', async () => {
     await updateUrlHashState();
     const fullUrl = window.location.href;
-    await openQRModal(DOM.qrModal, DOM.qrCanvas, DOM.qrUrlInput, fullUrl);
+    await openQRModal(DOM.qrModal, DOM.qrCanvas, DOM.qrUrlInput, fullUrl, DOM.qrCopyBtn);
   });
 
   DOM.qrClose.addEventListener('click', () => closeQRModal(DOM.qrModal));
   DOM.qrModal.addEventListener('click', (e) => {
     if (e.target === DOM.qrModal) closeQRModal(DOM.qrModal);
+  });
+  DOM.qrCopyBtn?.addEventListener('click', async () => {
+    await copyReadingUrl(DOM.qrUrlInput, DOM.qrCopyBtn);
   });
 
   // About Modal Listeners

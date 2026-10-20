@@ -86,8 +86,9 @@ Whenever a feature, deploy, or version bump occurs:
    - **Nested Relative Path Resolution**: When navigation documents (`nav.xhtml` or `toc.ncx`) reside in a subfolder (e.g. `EPUB/navigation/nav.xhtml`), all relative chapter paths must be resolved against the navigation document directory (`resolveZipPath(navDir, ...)`).
    - Timeline markers and active chapter indicators must prioritize structured TOC chapters before falling back to DOM heading discovery.
 
-6. **Cross-Platform State Handoff (`state.ts`)**:
-   - Reading state URLs (`#s=...`) use compressed base64url payloads with deflate-raw compression via synchronous `fflate` (`deflateSync`/`inflateSync`), with fallback for uncompressed base64 payloads (`#s=u_...`).
+6. **Cross-Platform One-Shot State Handoff (`state.ts`, ADR-0004)**:
+   - Reading state URLs (`#s=...`) encode point-in-time coordinates using compressed base64url payloads with deflate-raw compression via synchronous `fflate` (`deflateSync`/`inflateSync`), with fallback for uncompressed base64 payloads (`#s=u_...`).
+   - State handoff is a one-time coordinate snapshot (not continuous synchronization); positions on the sending and receiving devices diverge as reading continues, and the receiving device fetches the book upon import if not already cached.
 
 7. **Keyboard & Desktop Interaction**:
    - Keyboard navigation must support `ArrowRight` / `Space` for forward page turns, and `ArrowLeft` / `Shift + Space` for backward page turns.

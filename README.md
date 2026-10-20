@@ -16,7 +16,7 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 - **Dedicated Cloudflare Worker CORS Proxy**: Custom serverless proxy (`worker/index.js`) with origin security, OPTIONS preflight handling, streaming byte logging, and strict hard-fail enforcement.
 - **Single-Command Local Environment (`npm run dev:local`)**: Concurrently runs local Wrangler Worker proxy and Vite UI with zero need to modify production configuration files.
 - **Tactile Horizontal Flow Layout**: Book text flows horizontally in single-column (mobile) or double-column (desktop) spreads like a physical book, using CSS Multi-column layout and scroll snapping. Read the [Reader Engine Architecture (docs/reader-engine.md)](./docs/reader-engine.md) for full technical and algorithmic details.
-- **Compressed State & QR Handoff**: Encodes reading progress, theme, and book ID into a compressed URL hash (`#s=...`) using `CompressionStream('deflate-raw')` + Base64URL. Render an instant QR code for mobile camera handoff (<300 characters).
+- **Compressed One-Shot State Handoff**: Encodes point-in-time reading coordinates, theme, and book ID into a compressed URL hash (`#s=...`) using `CompressionStream('deflate-raw')` + Base64URL. Generates a QR code and copyable link for continuing reading on another device (<300 characters).
 - **Off-Grid PWA & Cache Storage**: Service Worker caches app shell and offline books for offline reading.
 
 ---
