@@ -186,6 +186,10 @@ describe('getGutenbergCandidateUrls & fetchArrayBufferWithProxy', () => {
     expect(candidates[1]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images.epub');
     expect(candidates[2]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701-images-3.epub');
     expect(candidates[3]).toBe('https://www.gutenberg.org/cache/epub/2701/pg2701.epub');
+    expect(candidates[4]).toBe('https://www.gutenberg.org/ebooks/2701.epub3.images');
+    expect(candidates[5]).toBe('https://www.gutenberg.org/ebooks/2701.epub.images');
+    expect(candidates[6]).toBe('https://www.gutenberg.org/ebooks/2701.epub3.noimages');
+    expect(candidates[7]).toBe('https://www.gutenberg.org/ebooks/2701.epub.noimages');
     // Ensure no legacy raw HTML URLs are returned
     expect(candidates.some((c) => c.endsWith('.html') || c.endsWith('.htm'))).toBe(false);
   });

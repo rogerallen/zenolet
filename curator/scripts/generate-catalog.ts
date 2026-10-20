@@ -26,6 +26,7 @@ interface GutendexBook {
   subjects: string[];
   download_count: number;
   formats: Record<string, string>;
+  media_type?: string;
 }
 
 interface GutendexResponse {
@@ -64,6 +65,10 @@ async function generateCatalog() {
         // Extract best EPUB format
         const epubUrl = item.formats['application/epub+zip'];
         const coverUrl = item.formats['image/jpeg'];
+
+        // Only include textual books with a verified EPUB archive available
+        if (item.media_type && item.media_type !== 'Text') continue;
+        if (!epubUrl) continue;
 
         catalog.push({
           id: String(item.id),

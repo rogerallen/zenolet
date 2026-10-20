@@ -3518,17 +3518,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/58820/pg58820.cover.medium.jpg"
   },
   {
-    "id": "26296",
-    "title": "Les mille et une nuits, tome premier",
-    "author": "Unknown Author",
-    "subjects": [
-      "Fairy tales",
-      "Tales -- Arab countries"
-    ],
-    "downloads": 45237,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26296/pg26296.cover.medium.jpg"
-  },
-  {
     "id": "52190",
     "title": "Ecce Homo: Complete Works, Volume Seventeen",
     "author": "Nietzsche, Friedrich Wilhelm",
@@ -4093,16 +4082,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/51649/pg51649.cover.medium.jpg"
   },
   {
-    "id": "26471",
-    "title": "Spoon River Anthology",
-    "author": "Masters, Edgar Lee",
-    "subjects": [
-      "American poetry"
-    ],
-    "downloads": 39445,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26471/pg26471.cover.medium.jpg"
-  },
-  {
     "id": "19707",
     "title": "One Wonderful Night: A Romance of New York",
     "author": "Tracy, Louis",
@@ -4516,16 +4495,6 @@
     "downloads": 37803,
     "epubUrl": "https://www.gutenberg.org/ebooks/521.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/521/pg521.cover.medium.jpg"
-  },
-  {
-    "id": "26225",
-    "title": "Fifteen Thousand Useful Phrases",
-    "author": "Kleiser, Grenville",
-    "subjects": [
-      "English language -- Terms and phrases"
-    ],
-    "downloads": 37789,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26225/pg26225.cover.medium.jpg"
   },
   {
     "id": "2199",
@@ -7911,19 +7880,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78103/pg78103.cover.medium.jpg"
   },
   {
-    "id": "22789",
-    "title": "On the Duties of the Clergy",
-    "author": "Ambrose, Saint, Bishop of Milan",
-    "subjects": [
-      "Ambrose, Saint, Bishop of Milan, -397",
-      "Asceticism -- History -- Early church, ca. 30-600",
-      "Christian ethics -- History -- Early church, ca. 30-600",
-      "Clergy -- Office -- Early works to 1800"
-    ],
-    "downloads": 22944,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/22789/pg22789.cover.medium.jpg"
-  },
-  {
     "id": "78126",
     "title": "The weird of the wanderer : $b Being the papyrus records of some incidents in one of the previous lives of  Mr. Nicholas Crabbe",
     "author": "Rolfe, Frederick, Pirie-Gordon, C. H. C. (Charles Harry Clinton)",
@@ -10371,16 +10327,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76187/pg76187.cover.medium.jpg"
   },
   {
-    "id": "20968",
-    "title": "Three Hundred Tang Poems, Volume 1",
-    "author": "Various",
-    "subjects": [
-      "Chinese poetry -- Tang dynasty, 618-907"
-    ],
-    "downloads": 22034,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20968/pg20968.cover.medium.jpg"
-  },
-  {
     "id": "76476",
     "title": "Missing men",
     "author": "Starrett, Vincent",
@@ -10505,17 +10451,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/45/pg45.cover.medium.jpg"
   },
   {
-    "id": "22788",
-    "title": "The Federalist Papers",
-    "author": "Hamilton, Alexander, Jay, John, Madison, James",
-    "subjects": [
-      "Constitutional history -- United States -- Sources",
-      "Constitutional law -- United States"
-    ],
-    "downloads": 20654,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/22788/pg22788.cover.medium.jpg"
-  },
-  {
     "id": "45631",
     "title": "Twelve Years a Slave: Narrative of Solomon Northup, a Citizen of New-York, Kidnapped in Washington City in 1841, and Rescued in 1853, from a Cotton Plantation near the Red River in Louisiana",
     "author": "Northup, Solomon",
@@ -10541,16 +10476,6 @@
     "downloads": 20251,
     "epubUrl": "https://www.gutenberg.org/ebooks/55987.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/55987/pg55987.cover.medium.jpg"
-  },
-  {
-    "id": "28942",
-    "title": "The Junior Classics, Volume 1: Fairy and wonder tales",
-    "author": "Neilson, William Allan",
-    "subjects": [
-      "Children's literature"
-    ],
-    "downloads": 20232,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28942/pg28942.cover.medium.jpg"
   },
   {
     "id": "53635",
@@ -10899,17 +10824,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/47434/pg47434.cover.medium.jpg"
   },
   {
-    "id": "21436",
-    "title": "Poems Every Child Should Know",
-    "author": "Unknown Author",
-    "subjects": [
-      "American poetry",
-      "English poetry"
-    ],
-    "downloads": 18050,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/21436/pg21436.cover.medium.jpg"
-  },
-  {
     "id": "49402",
     "title": "The Black Hawk War Including a Review of Black Hawk's Life",
     "author": "Stevens, Frank Everett",
@@ -11123,7 +11037,8 @@
       "Calculus"
     ],
     "downloads": 17118,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/33283/pg33283.cover.medium.jpg"
+    "coverUrl": "https://www.gutenberg.org/cache/epub/33283/pg33283.cover.medium.jpg",
+    "epubUrl": "https://www.gutenberg.org/ebooks/33283.epub3.images"
   },
   {
     "id": "30254",
@@ -11334,40 +11249,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/47629/pg47629.cover.medium.jpg"
   },
   {
-    "id": "20051",
-    "title": "Märchen der Gebrüder Grimm 2",
-    "author": "Grimm, Jacob, Grimm, Wilhelm",
-    "subjects": [
-      "Fairy tales -- Germany"
-    ],
-    "downloads": 14578,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20051/pg20051.cover.medium.jpg"
-  },
-  {
-    "id": "20000",
-    "title": "Twenty Thousand Leagues Under the Sea",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Adventure stories",
-      "Science fiction",
-      "Sea stories",
-      "Submarines (Ships) -- Fiction",
-      "Underwater exploration -- Fiction"
-    ],
-    "downloads": 14436,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20000/pg20000.cover.medium.jpg"
-  },
-  {
-    "id": "20027",
-    "title": "Grimms' Fairy Tales",
-    "author": "Grimm, Jacob, Grimm, Wilhelm",
-    "subjects": [
-      "Fairy tales -- Germany"
-    ],
-    "downloads": 14112,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20027/pg20027.cover.medium.jpg"
-  },
-  {
     "id": "24855",
     "title": "Concrete Construction: Methods and Costs",
     "author": "Gillette, Halbert Powers, Hill, Charles Shattuck",
@@ -11456,29 +11337,6 @@
     "downloads": 13570,
     "epubUrl": "https://www.gutenberg.org/ebooks/132.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/132/pg132.cover.medium.jpg"
-  },
-  {
-    "id": "22981",
-    "title": "Letters of Two Brides",
-    "author": "Balzac, Honoré de",
-    "subjects": [
-      "Epistolary fiction",
-      "French fiction -- Translations into English",
-      "Man-woman relationships -- Fiction",
-      "Married women -- Fiction"
-    ],
-    "downloads": 13515,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/22981/pg22981.cover.medium.jpg"
-  },
-  {
-    "id": "20676",
-    "title": "Genesis",
-    "author": "Unknown Author",
-    "subjects": [
-      "Bible. Genesis"
-    ],
-    "downloads": 13368,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20676/pg20676.cover.medium.jpg"
   },
   {
     "id": "48040",
@@ -11576,20 +11434,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/40739/pg40739.cover.medium.jpg"
   },
   {
-    "id": "26301",
-    "title": "Pride and Prejudice",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Courtship -- Fiction",
-      "Domestic fiction",
-      "England -- Fiction",
-      "Love stories",
-      "Sisters -- Fiction"
-    ],
-    "downloads": 12820,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26301/pg26301.cover.medium.jpg"
-  },
-  {
     "id": "63460",
     "title": "Die seltsamen Geschichten des Doktor Ulebuhle",
     "author": "Bürgel, Bruno Hans",
@@ -11625,20 +11469,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/44798/pg44798.cover.medium.jpg"
   },
   {
-    "id": "28794",
-    "title": "Moby Dick; Or, The Whale",
-    "author": "Melville, Herman",
-    "subjects": [
-      "Adventure stories",
-      "Ahab, Captain (Fictitious character) -- Fiction",
-      "Mentally ill -- Fiction",
-      "Psychological fiction",
-      "Sea stories"
-    ],
-    "downloads": 12661,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28794/pg28794.cover.medium.jpg"
-  },
-  {
     "id": "996",
     "title": "Don Quixote",
     "author": "Cervantes Saavedra, Miguel de",
@@ -11667,16 +11497,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/22091/pg22091.cover.medium.jpg"
   },
   {
-    "id": "23709",
-    "title": "The Burgess Bird Book for Children",
-    "author": "Burgess, Thornton W. (Thornton Waldo)",
-    "subjects": [
-      "Birds -- Juvenile literature"
-    ],
-    "downloads": 12483,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/23709/pg23709.cover.medium.jpg"
-  },
-  {
     "id": "76662",
     "title": "Sämtliche Werke 20 : $b Aus dem Dunkel der Großstadt : Acht Novellen",
     "author": "Dostoyevsky, Fyodor",
@@ -11687,32 +11507,6 @@
     "downloads": 12454,
     "epubUrl": "https://www.gutenberg.org/ebooks/76662.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76662/pg76662.cover.medium.jpg"
-  },
-  {
-    "id": "22962",
-    "title": "Mansfield Park",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Adoptees -- Fiction",
-      "Children of the rich -- Fiction",
-      "Country homes -- Fiction",
-      "Cousins -- Fiction",
-      "Domestic fiction"
-    ],
-    "downloads": 12435,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/22962/pg22962.cover.medium.jpg"
-  },
-  {
-    "id": "26274",
-    "title": "The Swiss Family Robinson",
-    "author": "Wyss, Johann David",
-    "subjects": [
-      "Family life -- Fiction",
-      "Islands -- Fiction",
-      "Survival -- Fiction"
-    ],
-    "downloads": 12375,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26274/pg26274.cover.medium.jpg"
   },
   {
     "id": "24141",
@@ -11736,20 +11530,6 @@
     "downloads": 12306,
     "epubUrl": "https://www.gutenberg.org/ebooks/62635.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/62635/pg62635.cover.medium.jpg"
-  },
-  {
-    "id": "19506",
-    "title": "A Connecticut Yankee in King Arthur's Court",
-    "author": "Twain, Mark",
-    "subjects": [
-      "Americans -- Great Britain -- Fiction",
-      "Arthurian romances -- Adaptations",
-      "Britons -- Fiction",
-      "Fantasy fiction",
-      "Kings and rulers -- Fiction"
-    ],
-    "downloads": 12297,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19506/pg19506.cover.medium.jpg"
   },
   {
     "id": "2638",
@@ -11814,20 +11594,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/65580/pg65580.cover.medium.jpg"
   },
   {
-    "id": "19839",
-    "title": "Emma",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Bildungsromans",
-      "England -- Fiction",
-      "Fathers and daughters -- Fiction",
-      "Female friendship -- Fiction",
-      "Humorous stories"
-    ],
-    "downloads": 12065,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19839/pg19839.cover.medium.jpg"
-  },
-  {
     "id": "22373",
     "title": "Russian Fairy Tales: A Choice Collection of Muscovite Folk-lore",
     "author": "Unknown Author",
@@ -11863,34 +11629,6 @@
     "downloads": 11630,
     "epubUrl": "https://www.gutenberg.org/ebooks/25997.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/25997/pg25997.cover.medium.jpg"
-  },
-  {
-    "id": "22964",
-    "title": "Sense and Sensibility",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Domestic fiction",
-      "England -- Fiction",
-      "England -- Social life and customs -- 19th century -- Fiction",
-      "Gentry -- England -- Fiction",
-      "Inheritance and succession -- Fiction"
-    ],
-    "downloads": 11624,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/22964/pg22964.cover.medium.jpg"
-  },
-  {
-    "id": "26297",
-    "title": "Little Women",
-    "author": "Alcott, Louisa May",
-    "subjects": [
-      "Autobiographical fiction",
-      "Bildungsromans",
-      "Domestic fiction",
-      "Family life -- New England -- Fiction",
-      "March family (Fictitious characters) -- Fiction"
-    ],
-    "downloads": 11584,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26297/pg26297.cover.medium.jpg"
   },
   {
     "id": "7370",
@@ -12036,59 +11774,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/25344/pg25344.cover.medium.jpg"
   },
   {
-    "id": "19636",
-    "title": "Bildergeschichten",
-    "author": "Busch, Wilhelm",
-    "subjects": [
-      "Children's poetry, German",
-      "German poetry -- 19th century"
-    ],
-    "downloads": 10889,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19636/pg19636.cover.medium.jpg"
-  },
-  {
-    "id": "21601",
-    "title": "The Vicar of Wakefield",
-    "author": "Goldsmith, Oliver",
-    "subjects": [
-      "Abduction -- Fiction",
-      "Children of clergy -- Fiction",
-      "Clergy -- Fiction",
-      "Domestic fiction",
-      "England -- Fiction"
-    ],
-    "downloads": 10845,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/21601/pg21601.cover.medium.jpg"
-  },
-  {
-    "id": "26272",
-    "title": "The Spy",
-    "author": "Cooper, James Fenimore",
-    "subjects": [
-      "Domestic fiction",
-      "Historical fiction",
-      "New York (State) -- History -- Revolution, 1775-1783 -- Fiction",
-      "Spy stories",
-      "United States -- History -- Revolution, 1775-1783 -- Fiction"
-    ],
-    "downloads": 10829,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26272/pg26272.cover.medium.jpg"
-  },
-  {
-    "id": "26469",
-    "title": "Rainbow Valley",
-    "author": "Montgomery, L. M. (Lucy Maud)",
-    "subjects": [
-      "Canada -- History -- 20th century -- Juvenile fiction",
-      "Family life -- Juvenile fiction",
-      "Foster home care -- Juvenile fiction",
-      "Friendship -- Juvenile fiction",
-      "Historical fiction"
-    ],
-    "downloads": 10706,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26469/pg26469.cover.medium.jpg"
-  },
-  {
     "id": "26",
     "title": "Paradise Lost",
     "author": "Milton, John",
@@ -12118,20 +11803,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/730/pg730.cover.medium.jpg"
   },
   {
-    "id": "21605",
-    "title": "Uncle Remus, his songs and his sayings",
-    "author": "Harris, Joel Chandler",
-    "subjects": [
-      "African American men -- Literary collections",
-      "African Americans -- Folklore -- Literary collections",
-      "African Americans -- Songs and music",
-      "Animals -- Folklore -- Literary collections",
-      "Georgia -- Literary collections"
-    ],
-    "downloads": 10669,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/21605/pg21605.cover.medium.jpg"
-  },
-  {
     "id": "4280",
     "title": "The Critique of Pure Reason",
     "author": "Kant, Immanuel",
@@ -12144,19 +11815,6 @@
     "downloads": 10594,
     "epubUrl": "https://www.gutenberg.org/ebooks/4280.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/4280/pg4280.cover.medium.jpg"
-  },
-  {
-    "id": "28811",
-    "title": "Barchester Towers",
-    "author": "Trollope, Anthony",
-    "subjects": [
-      "Barchester (England : Imaginary place) -- Fiction",
-      "Barsetshire (England : Imaginary place) -- Fiction",
-      "Clergy -- Fiction",
-      "Domestic fiction"
-    ],
-    "downloads": 10565,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28811/pg28811.cover.medium.jpg"
   },
   {
     "id": "36",
@@ -12185,31 +11843,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/2848/pg2848.cover.medium.jpg"
   },
   {
-    "id": "19640",
-    "title": "Adventures of Huckleberry Finn",
-    "author": "Twain, Mark",
-    "subjects": [
-      "Adventure stories",
-      "Bildungsromans",
-      "Boys -- Fiction",
-      "Finn, Huckleberry (Fictitious character) -- Fiction",
-      "Fugitive slaves -- Fiction"
-    ],
-    "downloads": 10463,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19640/pg19640.cover.medium.jpg"
-  },
-  {
-    "id": "28947",
-    "title": "Around the World in Eighty Days",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Adventure stories",
-      "Voyages around the world -- Fiction"
-    ],
-    "downloads": 10405,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28947/pg28947.cover.medium.jpg"
-  },
-  {
     "id": "25087",
     "title": "Twenty Years of Hus'ling",
     "author": "Johnston, J. P. (James Perry)",
@@ -12231,31 +11864,6 @@
     "downloads": 10346,
     "epubUrl": "https://www.gutenberg.org/ebooks/25178.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/25178/pg25178.cover.medium.jpg"
-  },
-  {
-    "id": "28761",
-    "title": "Life in Mexico",
-    "author": "Calderón de la Barca, Madame (Frances Erskine Inglis)",
-    "subjects": [
-      "Mexico -- Description and travel",
-      "Mexico -- Social life and customs"
-    ],
-    "downloads": 10317,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28761/pg28761.cover.medium.jpg"
-  },
-  {
-    "id": "28946",
-    "title": "Gulliver's Travels",
-    "author": "Swift, Jonathan",
-    "subjects": [
-      "Fantasy fiction",
-      "Gulliver, Lemuel (Fictitious character) -- Fiction",
-      "Satire",
-      "Travelers -- Fiction",
-      "Voyages, Imaginary -- Early works to 1800"
-    ],
-    "downloads": 10309,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28946/pg28946.cover.medium.jpg"
   },
   {
     "id": "26318",
@@ -12295,20 +11903,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/21006/pg21006.cover.medium.jpg"
   },
   {
-    "id": "19576",
-    "title": "Anne of Green Gables",
-    "author": "Montgomery, L. M. (Lucy Maud)",
-    "subjects": [
-      "Bildungsromans",
-      "Canada -- History -- 1867-1914 -- Fiction",
-      "Country life -- Prince Edward Island -- Fiction",
-      "Friendship -- Fiction",
-      "Girls -- Fiction"
-    ],
-    "downloads": 10208,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19576/pg19576.cover.medium.jpg"
-  },
-  {
     "id": "10007",
     "title": "Carmilla",
     "author": "Le Fanu, Joseph Sheridan",
@@ -12332,30 +11926,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/24898/pg24898.cover.medium.jpg"
   },
   {
-    "id": "28842",
-    "title": "Don Quixote, Volume 1",
-    "author": "Cervantes Saavedra, Miguel de",
-    "subjects": [
-      "Knights and knighthood -- Spain -- Fiction",
-      "Picaresque literature",
-      "Romances",
-      "Spain -- Social life and customs -- 16th century -- Fiction"
-    ],
-    "downloads": 10130,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28842/pg28842.cover.medium.jpg"
-  },
-  {
-    "id": "5740",
-    "title": "Tractatus Logico-Philosophicus",
-    "author": "Wittgenstein, Ludwig",
-    "subjects": [
-      "Language and languages -- Philosophy",
-      "Logic, Symbolic and mathematical"
-    ],
-    "downloads": 10091,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/5740/pg5740.cover.medium.jpg"
-  },
-  {
     "id": "3800",
     "title": "Ethics",
     "author": "Spinoza, Benedictus de",
@@ -12376,17 +11946,6 @@
     "downloads": 10080,
     "epubUrl": "https://www.gutenberg.org/ebooks/3600.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/3600/pg3600.cover.medium.jpg"
-  },
-  {
-    "id": "20973",
-    "title": "Le tour du monde en quatre-vingts jours",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Adventure stories",
-      "Voyages around the world -- Fiction"
-    ],
-    "downloads": 10056,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20973/pg20973.cover.medium.jpg"
   },
   {
     "id": "21190",
@@ -12424,46 +11983,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/16643/pg16643.cover.medium.jpg"
   },
   {
-    "id": "23077",
-    "title": "Jane Eyre",
-    "author": "Brontë, Charlotte",
-    "subjects": [
-      "Bildungsromans",
-      "Charity-schools -- Fiction",
-      "Country homes -- Fiction",
-      "England -- Fiction",
-      "Fathers and daughters -- Fiction"
-    ],
-    "downloads": 9970,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/23077/pg23077.cover.medium.jpg"
-  },
-  {
-    "id": "28944",
-    "title": "Captain Blood",
-    "author": "Sabatini, Rafael",
-    "subjects": [
-      "Adventure stories",
-      "British -- Caribbean Area -- Fiction",
-      "Caribbean Area -- Fiction",
-      "Historical fiction",
-      "Physicians -- Fiction"
-    ],
-    "downloads": 9955,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28944/pg28944.cover.medium.jpg"
-  },
-  {
-    "id": "19517",
-    "title": "Le avventure di Pinocchio",
-    "author": "Collodi, Carlo",
-    "subjects": [
-      "Fairy tales",
-      "Pinocchio (Fictitious character) -- Juvenile fiction",
-      "Puppets -- Juvenile fiction"
-    ],
-    "downloads": 9929,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19517/pg19517.cover.medium.jpg"
-  },
-  {
     "id": "105",
     "title": "Persuasion",
     "author": "Austen, Jane",
@@ -12477,20 +11996,6 @@
     "downloads": 9919,
     "epubUrl": "https://www.gutenberg.org/ebooks/105.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/105/pg105.cover.medium.jpg"
-  },
-  {
-    "id": "21181",
-    "title": "Villette",
-    "author": "Brontë, Charlotte",
-    "subjects": [
-      "Autobiographical fiction",
-      "British -- Belgium -- Fiction",
-      "Brussels (Belgium) -- Fiction",
-      "Love stories",
-      "Women teachers -- Fiction"
-    ],
-    "downloads": 9861,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/21181/pg21181.cover.medium.jpg"
   },
   {
     "id": "8438",
@@ -12539,20 +12044,6 @@
     "downloads": 9789,
     "epubUrl": "https://www.gutenberg.org/ebooks/21002.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/21002/pg21002.cover.medium.jpg"
-  },
-  {
-    "id": "26264",
-    "title": "The Return of the Native",
-    "author": "Hardy, Thomas",
-    "subjects": [
-      "Adultery -- Fiction",
-      "Didactic fiction",
-      "Heathlands -- Fiction",
-      "Love stories",
-      "Mate selection -- Fiction"
-    ],
-    "downloads": 9751,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26264/pg26264.cover.medium.jpg"
   },
   {
     "id": "44425",
@@ -12643,20 +12134,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/815/pg815.cover.medium.jpg"
   },
   {
-    "id": "23084",
-    "title": "Lady Audley's Secret",
-    "author": "Braddon, M. E. (Mary Elizabeth)",
-    "subjects": [
-      "Bigamy -- Fiction",
-      "Deception -- Fiction",
-      "Domestic fiction",
-      "England -- Fiction",
-      "Married women -- Fiction"
-    ],
-    "downloads": 9627,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/23084/pg23084.cover.medium.jpg"
-  },
-  {
     "id": "37134",
     "title": "The Elements of Style",
     "author": "Strunk, William",
@@ -12668,20 +12145,6 @@
     "downloads": 9627,
     "epubUrl": "https://www.gutenberg.org/ebooks/37134.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/37134/pg37134.cover.medium.jpg"
-  },
-  {
-    "id": "26584",
-    "title": "Night and Day",
-    "author": "Woolf, Virginia",
-    "subjects": [
-      "Biographers -- Fiction",
-      "Domestic fiction",
-      "London (England) -- Fiction",
-      "Love stories",
-      "Mothers and daughters -- Fiction"
-    ],
-    "downloads": 9621,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26584/pg26584.cover.medium.jpg"
   },
   {
     "id": "5827",
@@ -12719,16 +12182,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/52319/pg52319.cover.medium.jpg"
   },
   {
-    "id": "8809",
-    "title": "Aesop's Fables",
-    "author": "Aesop",
-    "subjects": [
-      "Fables, Greek -- Translations into English"
-    ],
-    "downloads": 9562,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/8809/pg8809.cover.medium.jpg"
-  },
-  {
     "id": "21012",
     "title": "The loyalists of America and their times : $b from 1620 to 1816, Vol. 1 of 2",
     "author": "Ryerson, Egerton",
@@ -12744,17 +12197,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/21012/pg21012.cover.medium.jpg"
   },
   {
-    "id": "26592",
-    "title": "The Yosemite",
-    "author": "Muir, John",
-    "subjects": [
-      "Yosemite National Park (Calif.)",
-      "Yosemite Valley (Calif.)"
-    ],
-    "downloads": 9521,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26592/pg26592.cover.medium.jpg"
-  },
-  {
     "id": "1946",
     "title": "On War",
     "author": "Clausewitz, Carl von",
@@ -12765,16 +12207,6 @@
     "downloads": 9490,
     "epubUrl": "https://www.gutenberg.org/ebooks/1946.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/1946/pg1946.cover.medium.jpg"
-  },
-  {
-    "id": "20604",
-    "title": "Christmas Poetry and Hymn Collection",
-    "author": "Various",
-    "subjects": [
-      "Christmas -- Poetry"
-    ],
-    "downloads": 9487,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20604/pg20604.cover.medium.jpg"
   },
   {
     "id": "22400",
@@ -12788,16 +12220,6 @@
     "downloads": 9487,
     "epubUrl": "https://www.gutenberg.org/ebooks/22400.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/22400/pg22400.cover.medium.jpg"
-  },
-  {
-    "id": "20050",
-    "title": "Märchen der Gebrüder Grimm 1",
-    "author": "Grimm, Jacob, Grimm, Wilhelm",
-    "subjects": [
-      "Fairy tales -- Germany"
-    ],
-    "downloads": 9467,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20050/pg20050.cover.medium.jpg"
   },
   {
     "id": "64414",
@@ -12849,30 +12271,6 @@
     "downloads": 9357,
     "epubUrl": "https://www.gutenberg.org/ebooks/19942.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/19942/pg19942.cover.medium.jpg"
-  },
-  {
-    "id": "26248",
-    "title": "Life: Poem XXI: A Book",
-    "author": "Dickinson, Emily",
-    "subjects": [
-      "American poetry"
-    ],
-    "downloads": 9319,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26248/pg26248.cover.medium.jpg"
-  },
-  {
-    "id": "28808",
-    "title": "The Scarlet Pimpernel",
-    "author": "Orczy, Emmuska Orczy, Baroness",
-    "subjects": [
-      "Adventure stories",
-      "Blakeney, Percy, Sir (Fictitious character) -- Fiction",
-      "British -- France -- Fiction",
-      "France -- History -- Revolution, 1789-1799 -- Fiction",
-      "Historical fiction"
-    ],
-    "downloads": 9309,
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28808/pg28808.cover.medium.jpg"
   },
   {
     "id": "22372",

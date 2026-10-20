@@ -46,6 +46,8 @@ export function getGutenbergCandidateUrls(bookId: string, customEpubUrl?: string
   // 3. Dynamic generation endpoints (fallback)
   candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub3.images`);
   candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub.images`);
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub3.noimages`);
+  candidates.push(`https://www.gutenberg.org/ebooks/${bookId}.epub.noimages`);
 
   return [...new Set(candidates)];
 }
