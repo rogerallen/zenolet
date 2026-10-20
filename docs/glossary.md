@@ -59,3 +59,11 @@ _Avoid_: Chapter break, page gap
 **State Handoff**:
 A compressed, URL-safe hash payload (`#s=...`) encoding point-in-time book coordinates (book ID, chapter, progress fraction, reader preferences) for one-shot cross-device transfer via QR code or link.
 _Avoid_: Sync, cloud sync, file transfer, share link, sync token, deep link
+
+**Curated Micro-Library**:
+A lightweight, distraction-free collection of literary classics focused on reading quality and sovereign offline portability, distinct from an all-in-one personal ebook archive.
+_Avoid_: Ebook archive, Calibre replacement, reader cloud, library database
+
+**Storage Durability**:
+The browser-governed persistence lifecycle of offline Cache API book assets and reading progress, protected against disk pressure eviction via persistent storage permissions (`navigator.storage.persist()`) and standalone PWA installation.
+_Avoid_: Permanent storage, cloud backup, guaranteed cache

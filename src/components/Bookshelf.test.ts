@@ -203,25 +203,27 @@ describe('Bookshelf Component', () => {
       const onRemoveBook = vi.fn();
       const onEmptySlotClick = vi.fn();
 
-      // Loading occupied slot
+      // Loading occupied slot with custom status
       render8SlotGrid(container, slots, 8, onOpenBook, onRemoveBook, onEmptySlotClick, {
         slotIndex: 0,
-        book: mockBook
+        book: mockBook,
+        status: 'Unpacking EPUB...'
       });
 
       const loadingCard = container.querySelector('.slot-loading') as HTMLElement;
       expect(loadingCard).not.toBeNull();
-      expect(loadingCard.querySelector('.slot-loading-text')?.textContent).toBe('Downloading...');
+      expect(loadingCard.querySelector('.slot-loading-text')?.textContent).toBe('Unpacking EPUB...');
 
       // Loading empty slot
       render8SlotGrid(container, slots, 8, onOpenBook, onRemoveBook, onEmptySlotClick, {
         slotIndex: 1,
-        book: null
+        book: null,
+        status: 'Saving to shelf...'
       });
 
       const loadingEmptyCard = container.querySelector('.slot-empty.slot-loading') as HTMLElement;
       expect(loadingEmptyCard).not.toBeNull();
-      expect(loadingEmptyCard.querySelector('.slot-empty-label')?.textContent).toBe('Downloading...');
+      expect(loadingEmptyCard.querySelector('.slot-empty-label')?.textContent).toBe('Saving to shelf...');
     });
   });
 });

@@ -141,4 +141,24 @@ describe('bookLoader service', () => {
 
     await expect(loadBookPipeline(testBook, 'https://proxy.example.com', 0)).rejects.toThrow('Network Error');
   });
+
+  it('notifies onProgress callback with phase status messages', async () => {
+    vi.mocked(storage.getStoredBookOffline).mockResolvedValue(null);
+    vi.mocked(corsProxy.getGutenbergCandidateUrls).mockReturnValue(['https://gutenberg.org/1234.epub']);
+    vi.mocked(corsProxy.fetchArrayBufferWithProxy).mockResolvedValue(new ArrayBuffer(500));
+    vi.mocked(epub.parseEpubArchive).mockReturnValue({
+      title: 'Pride and Prejudice',
+      author: 'Jane Austen',
+      htmlContent: '<p>EPUB content</p>',
+      chapters: [],
+      tocChapters: []
+    });
+
+    const progressStatuses: string[] = [];
+    await loadBookPipeline(testBook, 'https://proxy.example.com', 0, (status) => {
+      progressStatuses.push(status);
+    });
+
+    expect(progressStatuses).toEqual(['Downloading book...', 'Unpacking EPUB...', 'Saving to shelf...']);
+  });
 });

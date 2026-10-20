@@ -120,6 +120,13 @@ Whenever a feature, deploy, or version bump occurs:
 2. **Null-Safe String & HTML Escaping**:
    - All text formatting and HTML escaping utilities (`escapeHtml`) must be null-safe and tolerate `undefined` or `null` inputs without throwing exceptions.
 
+3. **Storage Persistence Request**:
+   - `requestPersistentStorage()` must be invoked upon app initialization and book downloads to request eviction immunity from the host browser via `navigator.storage.persist()`.
+
+4. **Plain-Language Network & Download Error Handling**:
+   - User-facing error notifications and dialogs must explain network and download failures in plain language (clarifying that an active internet connection is required for the initial download) and provide direct recovery actions ("Retry", "Cancel").
+   - Never surface internal technical jargon (such as "proxy settings" or "CORS proxy") to readers in user-facing alerts or error dialogs.
+
 ---
 
 ## ♿ Accessibility (a11y) Invariants
@@ -128,9 +135,9 @@ Whenever a feature, deploy, or version bump occurs:
    - All custom interactive elements (bookshelf slot cards, empty slot triggers, timeline jump dots, drawer triggers) must have `tabindex="0"`, `role="button"`, descriptive `aria-label` attributes, and `keydown` handlers for both `Enter` and `Space`.
 
 2. **Modal & Drawer Semantics and Focus Management**:
-   - All overlays, drawer panels, and popup menus (Settings, About, QR Modal, Discover panel, Chapter popup) must have `role="dialog"`, `aria-modal="true"`, and appropriate `aria-labelledby` or `aria-label` attributes. All close buttons must have explicit `aria-label` attributes.
-   - When opening modals or drawers, focus must be placed immediately into the primary input or dialog control (e.g. search input in Discover drawer, close button in About dialog, or selectable URL in QR modal).
-   - **Focus Trapping**: While any modal or drawer is open (`aboutModal`, `qrModal`, `discoverPanel`, `settingsPanel`), keyboard focus (`Tab` and `Shift + Tab`) must be strictly trapped within the active dialog's interactive controls, and `Escape` must close the dialog.
+   - All overlays, drawer panels, and popup menus (Settings, About, QR Modal, Discover panel, Delete Modal, Error Modal, Chapter popup) must have `role="dialog"`, `aria-modal="true"`, and appropriate `aria-labelledby` or `aria-label` attributes. All close buttons must have explicit `aria-label` attributes.
+   - When opening modals or drawers, focus must be placed immediately into the primary input or dialog control (e.g. search input in Discover drawer, close button in About dialog, retry button in Error dialog, or selectable URL in QR modal).
+   - **Focus Trapping**: While any modal or drawer is open (`aboutModal`, `qrModal`, `discoverPanel`, `settingsPanel`, `deleteModal`, `errorModal`), keyboard focus (`Tab` and `Shift + Tab`) must be strictly trapped within the active dialog's interactive controls, and `Escape` must close the dialog.
 
 ---
 

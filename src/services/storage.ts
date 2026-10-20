@@ -338,3 +338,22 @@ export function restoreBookProgressByFraction(fraction: number, viewport: HTMLDi
     viewport.style.scrollBehavior = originalStyle;
   }
 }
+
+/**
+ * Requests persistent storage from the browser to protect cached books and reading progress
+ * from eviction under disk space pressure or inactivity (e.g. iOS Safari ITP 7-day rule).
+ * Returns true if persistence is granted, false otherwise.
+ */
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.persist === 'function') {
+    try {
+      const isPersisted = await navigator.storage.persist();
+      console.log(`[Zenolet Storage] Persistent storage granted: ${isPersisted}`);
+      return isPersisted;
+    } catch (err) {
+      console.warn('[Zenolet Storage] Failed to request persistent storage:', err);
+      return false;
+    }
+  }
+  return false;
+}

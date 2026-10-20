@@ -404,6 +404,27 @@
         </div>
       </div>
 
+      <!-- Download & Connection Error Modal Overlay -->
+      <div id="error-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="error-modal-title">
+        <div class="modal-card error-modal-card">
+          <div class="modal-header">
+            <h3 id="error-modal-title" class="modal-title">Unable to Download Book</h3>
+            <button id="error-modal-close" class="btn-close" aria-label="Close Error Dialog">&times;</button>
+          </div>
+          <div class="error-modal-body">
+            <p id="error-modal-message" class="error-modal-message">Could not download book.</p>
+            <p class="error-modal-subtext">
+              An active internet connection is required to download books to your device for the first time. Please
+              check your connection and try again.
+            </p>
+          </div>
+          <div class="error-modal-actions">
+            <button id="error-modal-cancel" class="error-btn-cancel">Cancel</button>
+            <button id="error-modal-retry" class="error-btn-retry">Retry</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Search & Discover Modal Overlay -->
       <div id="discover-overlay" class="modal-overlay"></div>
       <aside

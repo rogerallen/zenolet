@@ -1097,6 +1097,68 @@ a:not([href]) {
   background-color: #b91c1c;
 }
 
+/* Download & Connection Error Modal Styling */
+.error-modal-card {
+  max-width: 440px;
+}
+
+.error-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.error-modal-message {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.error-modal-subtext {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.error-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.error-modal-actions button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.error-btn-cancel {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color) !important;
+}
+
+.error-btn-cancel:hover {
+  filter: brightness(0.95);
+}
+
+.error-btn-retry {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.error-btn-retry:hover {
+  background-color: var(--accent-hover);
+}
+
 /* Settings Dropdown Panel */
 .settings-panel {
   position: fixed;

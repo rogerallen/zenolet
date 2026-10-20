@@ -80,6 +80,7 @@ export function renderAboutLibrarySection(
 export interface LoadingSlotState {
   slotIndex: number;
   book?: BookMetadata | null;
+  status?: string;
 }
 
 export function render8SlotGrid(
@@ -128,7 +129,7 @@ export function render8SlotGrid(
           </div>
           <div class="slot-loading-indicator">
             <div class="slot-spinner"></div>
-            <span class="slot-loading-text">Downloading...</span>
+            <span class="slot-loading-text">${escapeHtml(loadingSlot.status || 'Downloading...')}</span>
           </div>
         </div>
       `;
@@ -220,7 +221,7 @@ export function render8SlotGrid(
           </div>
           <div class="slot-loading-indicator">
             <div class="slot-spinner"></div>
-            <span class="slot-loading-text">Downloading...</span>
+            <span class="slot-loading-text">${escapeHtml(loadingSlot.status || 'Downloading...')}</span>
           </div>
         </div>
       `;
@@ -229,7 +230,7 @@ export function render8SlotGrid(
         <div class="slot-card slot-empty slot-loading" data-slot-index="${nextSlotIndex}">
           <div class="slot-empty-body">
             <div class="slot-spinner"></div>
-            <span class="slot-empty-label">Downloading...</span>
+            <span class="slot-empty-label">${escapeHtml(loadingSlot.status || 'Downloading...')}</span>
           </div>
         </div>
       `;

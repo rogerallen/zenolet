@@ -425,4 +425,58 @@ describe('Storage and Progress Math for Zenolet', () => {
     Object.defineProperty(mockViewport, 'scrollWidth', { value: 500, configurable: true });
     expect(getStoredProgressFraction(mockViewport)).toBe(0);
   });
+
+  it('requests persistent storage via navigator.storage.persist when supported', async () => {
+    const { requestPersistentStorage } = await import('./storage.js');
+    const originalNavigatorStorage = navigator.storage;
+
+    try {
+      const persistMock = vi.fn().mockResolvedValue(true);
+      Object.defineProperty(navigator, 'storage', {
+        value: {
+          persist: persistMock
+        },
+        configurable: true
+      });
+
+      const result = await requestPersistentStorage();
+      expect(result).toBe(true);
+      expect(persistMock).toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(navigator, 'storage', {
+        value: originalNavigatorStorage,
+        configurable: true
+      });
+    }
+  });
+
+  it('handles persist rejection or absence gracefully', async () => {
+    const { requestPersistentStorage } = await import('./storage.js');
+    const originalNavigatorStorage = navigator.storage;
+
+    try {
+      const persistMock = vi.fn().mockRejectedValue(new Error('Permission denied'));
+      Object.defineProperty(navigator, 'storage', {
+        value: {
+          persist: persistMock
+        },
+        configurable: true
+      });
+
+      const result = await requestPersistentStorage();
+      expect(result).toBe(false);
+
+      // When navigator.storage.persist is undefined
+      Object.defineProperty(navigator, 'storage', {
+        value: {},
+        configurable: true
+      });
+      expect(await requestPersistentStorage()).toBe(false);
+    } finally {
+      Object.defineProperty(navigator, 'storage', {
+        value: originalNavigatorStorage,
+        configurable: true
+      });
+    }
+  });
 });

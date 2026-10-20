@@ -9,9 +9,11 @@ export interface ModalElements {
   discoverOverlay?: HTMLElement | null;
   settingsPanel?: HTMLElement | null;
   deleteModal?: HTMLElement | null;
+  errorModal?: HTMLElement | null;
   onCloseQR?: () => void;
   onCloseDiscover?: () => void;
   onCloseDelete?: () => void;
+  onCloseError?: () => void;
 }
 
 export interface NavigationOptions {
@@ -106,6 +108,7 @@ export function handleKeyboardEvent(e: KeyboardEvent, options: NavigationOptions
 
   const modalList = [
     modals.deleteModal,
+    modals.errorModal,
     modals.aboutModal,
     modals.qrModal,
     modals.discoverPanel,
@@ -119,6 +122,12 @@ export function handleKeyboardEvent(e: KeyboardEvent, options: NavigationOptions
       if (modals.deleteModal?.classList.contains('visible')) {
         if (modals.onCloseDelete) modals.onCloseDelete();
         else modals.deleteModal?.classList.remove('visible');
+        return;
+      }
+
+      if (modals.errorModal?.classList.contains('visible')) {
+        if (modals.onCloseError) modals.onCloseError();
+        else modals.errorModal?.classList.remove('visible');
         return;
       }
 

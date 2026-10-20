@@ -19,7 +19,8 @@ export interface BookLoadResult {
 export async function loadBookPipeline(
   book: BaseBook,
   proxyUrl?: string,
-  targetSlotIndex?: number | null
+  targetSlotIndex?: number | null,
+  onProgress?: (status: string) => void
 ): Promise<BookLoadResult> {
   // 1. Check if already stored offline in Cache API
   const offlineData = await getStoredBookOffline(book.id);
@@ -48,6 +49,7 @@ export async function loadBookPipeline(
   }
 
   // 2. Traversal of candidate EPUB URLs via CORS Proxy
+  onProgress?.('Downloading book...');
   const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
   let lastErr: Error | null = null;
   let epubBuffer: ArrayBuffer | null = null;
@@ -69,6 +71,7 @@ export async function loadBookPipeline(
   }
 
   // 3. Parse & stitch EPUB archive
+  onProgress?.('Unpacking EPUB...');
   const parsed = parseEpubArchive(epubBuffer);
   const content = parsed.htmlContent;
   const chapters = parsed.chapters;
@@ -87,6 +90,7 @@ export async function loadBookPipeline(
 
   // 4. Save offline to Cache API and slot storage if slot index is specified
   if (targetSlotIndex !== undefined) {
+    onProgress?.('Saving to shelf...');
     await saveBookOffline(metadata, { metadata, content, chapters, tocChapters }, targetSlotIndex);
   }
 

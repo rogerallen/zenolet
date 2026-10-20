@@ -30,6 +30,7 @@ describe('Zenolet Navigation Keyboard & Link Interception Integration', () => {
         <div id="discover-overlay" class="modal-overlay"></div>
         <aside id="discover-panel" class="discover-panel"></aside>
         <div id="qr-modal" class="modal-overlay"></div>
+        <div id="error-modal" class="modal-overlay"></div>
       </div>
     `;
 
@@ -40,6 +41,7 @@ describe('Zenolet Navigation Keyboard & Link Interception Integration', () => {
     discoverPanel = document.getElementById('discover-panel') as HTMLElement;
     discoverOverlay = document.getElementById('discover-overlay') as HTMLDivElement;
     qrModal = document.getElementById('qr-modal') as HTMLDivElement;
+    const errorModal = document.getElementById('error-modal') as HTMLDivElement;
 
     Object.defineProperty(readerViewport, 'clientWidth', { value: 500, configurable: true });
     readerViewport.scrollBy = vi.fn() as unknown as typeof readerViewport.scrollBy;
@@ -60,11 +62,13 @@ describe('Zenolet Navigation Keyboard & Link Interception Integration', () => {
         discoverPanel,
         discoverOverlay,
         qrModal,
+        errorModal,
         onCloseDiscover: () => {
           discoverPanel.classList.remove('visible');
           discoverOverlay.classList.remove('visible');
         },
-        onCloseQR: () => qrModal.classList.remove('visible')
+        onCloseQR: () => qrModal.classList.remove('visible'),
+        onCloseError: () => errorModal.classList.remove('visible')
       },
       readerViewport,
       readerState,
@@ -404,6 +408,37 @@ describe('App Lifecycle and Integration (main.ts initApp)', () => {
     searchInput.dispatchEvent(new Event('input'));
 
     expect(discoverResults.innerHTML).toContain('Pride and Prejudice');
+  });
+
+  it('opens error modal with retry option when book download fails', async () => {
+    await initApp();
+
+    const searchInput = document.getElementById('discover-search-input') as HTMLInputElement;
+    const discoverResults = document.getElementById('discover-results') as HTMLDivElement;
+    const errorModal = document.getElementById('error-modal') as HTMLDivElement;
+    const errorMessage = document.getElementById('error-modal-message') as HTMLElement;
+    const errorSubtext = document.querySelector('.error-modal-subtext') as HTMLElement;
+    const errorCancelBtn = document.getElementById('error-modal-cancel') as HTMLButtonElement;
+
+    searchInput.value = 'Pride';
+    searchInput.dispatchEvent(new Event('input'));
+
+    const addBtn = discoverResults.querySelector('.btn-discover-import') as HTMLButtonElement;
+    expect(addBtn).not.toBeNull();
+
+    // Trigger download which fails because fetch returns 404 for epub
+    addBtn.click();
+
+    await vi.waitFor(() => {
+      expect(errorModal.classList.contains('visible')).toBe(true);
+    });
+
+    expect(errorMessage.textContent).toContain('Pride and Prejudice');
+    expect(errorSubtext.textContent).toContain('active internet connection is required');
+
+    // Clicking cancel closes the modal
+    errorCancelBtn.click();
+    expect(errorModal.classList.contains('visible')).toBe(false);
   });
 
   it('handles hashchange to return to library when state hash is removed', async () => {

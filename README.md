@@ -21,6 +21,29 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 ---
 
+## Library Scope: Curated Micro-Library vs. Ebook Archive
+
+Zenolet is intentionally designed as a lightweight, distraction-free **curated micro-library**, not an all-in-one personal ebook management system or replacement for a full digital archive (such as Calibre). Its focus is on providing an immediate, high-quality reading experience for a hand-picked collection of timeless literary classics.
+
+If broader personal ebook management is a goal for future community extensions or forks, the most natural roadmap additions are:
+
+- **Custom EPUB Import**: Drag-and-drop or file picker import of arbitrary user-supplied EPUB archives.
+- **Library Data Export**: One-click JSON/archive backup and export of reading coordinates, bookmarks, and shelf state.
+
+---
+
+## Browser Storage Durability & Offline Reliability
+
+Zenolet caches book XHTML content, inlined illustrations, and reading coordinates locally in your browser using the Cache API (`caches`) and `localStorage`. When adding books, Zenolet requests persistent storage (`navigator.storage.persist()`) to protect your library from eviction under disk pressure.
+
+However, browser storage durability varies across platforms:
+
+- **iOS Safari Eviction Rules**: Safari tabs running in standard browser mode are subject to WebKit's Intelligent Tracking Prevention (ITP) policies, which can evict client-stored data after 7 days without user interaction under storage pressure.
+- **PWA Home Screen Installation (Recommended for iOS)**: Adding Zenolet to your iOS Home Screen (**Share → Add to Home Screen**) runs the app in standalone PWA mode, which grants dedicated, independent storage durability decoupled from standard Safari tab eviction.
+- **Testing "Offline for Months"**: If you plan to read offline for extended periods or while traveling off-grid, verify that your desired books open cleanly in airplane mode before departing.
+
+---
+
 ## Documentation
 
 - **[Curator's Guide (docs/curating.md)](./docs/curating.md)**: Step-by-step instructions for customizing and publishing your own sovereign library.

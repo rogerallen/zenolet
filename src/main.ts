@@ -9,7 +9,8 @@ import {
   getStoredProgressDetails,
   flushBookProgress,
   getActualStorageUsage,
-  formatStorageSummary
+  formatStorageSummary,
+  requestPersistentStorage
 } from './services/storage.ts';
 import {
   renderCuratorHeader,
@@ -31,6 +32,7 @@ import {
 import { setupSettingsModal } from './components/SettingsModal.ts';
 import { openQRModal, closeQRModal, copyReadingUrl } from './components/QRModal.ts';
 import { openDeleteModal, closeDeleteModal } from './components/DeleteModal.ts';
+import { openErrorModal, closeErrorModal, type ErrorModalElements } from './components/ErrorModal.ts';
 import { openDiscoverPanel, closeDiscoverPanel, renderLocalCatalogResults } from './components/DiscoverModal.ts';
 import {
   closeChapterPopup,
@@ -116,6 +118,13 @@ let DOM: {
   deleteModalTitleSpan: HTMLElement;
   deleteModalCancel: HTMLButtonElement;
   deleteModalConfirm: HTMLButtonElement;
+  errorModal: HTMLDivElement;
+  errorModalTitle: HTMLElement;
+  errorModalClose: HTMLButtonElement;
+  errorModalMessage: HTMLElement;
+  errorModalSubtext: HTMLElement;
+  errorModalCancel: HTMLButtonElement;
+  errorModalRetry: HTMLButtonElement;
 };
 
 // --- App Initialization ---
@@ -181,7 +190,14 @@ export async function initApp(): Promise<void> {
     deleteModalClose: document.getElementById('delete-modal-close') as HTMLButtonElement,
     deleteModalTitleSpan: document.getElementById('delete-modal-book-title') as HTMLElement,
     deleteModalCancel: document.getElementById('delete-modal-cancel') as HTMLButtonElement,
-    deleteModalConfirm: document.getElementById('delete-modal-confirm') as HTMLButtonElement
+    deleteModalConfirm: document.getElementById('delete-modal-confirm') as HTMLButtonElement,
+    errorModal: document.getElementById('error-modal') as HTMLDivElement,
+    errorModalTitle: document.getElementById('error-modal-title') as HTMLElement,
+    errorModalClose: document.getElementById('error-modal-close') as HTMLButtonElement,
+    errorModalMessage: document.getElementById('error-modal-message') as HTMLElement,
+    errorModalSubtext: document.querySelector('.error-modal-subtext') as HTMLElement,
+    errorModalCancel: document.getElementById('error-modal-cancel') as HTMLButtonElement,
+    errorModalRetry: document.getElementById('error-modal-retry') as HTMLButtonElement
   };
 
   // Load Curator Configuration (curator/config.json)
@@ -258,6 +274,21 @@ export async function initApp(): Promise<void> {
       console.warn('[Zenolet PWA] SW registration failed:', err);
     });
   }
+
+  // Request Persistent Storage to guard against browser eviction (iOS Safari 7-day rule, etc.)
+  void requestPersistentStorage();
+}
+
+function getErrorModalElements(): ErrorModalElements {
+  return {
+    overlay: DOM.errorModal,
+    titleElement: DOM.errorModalTitle,
+    messageElement: DOM.errorModalMessage,
+    subtextElement: DOM.errorModalSubtext,
+    retryBtn: DOM.errorModalRetry,
+    cancelBtn: DOM.errorModalCancel,
+    closeBtn: DOM.errorModalClose
+  };
 }
 
 function update8SlotShelfView() {
@@ -348,6 +379,7 @@ async function handleSelectBookForSlot(
 async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Promise<void> {
   loadingSlotState = {
     slotIndex: targetSlotIndex,
+    status: 'Downloading book...',
     book: {
       id: book.id,
       title: book.title,
@@ -359,10 +391,24 @@ async function loadBookIntoSlot(book: CatalogBook, targetSlotIndex: number): Pro
   update8SlotShelfView();
 
   try {
-    await loadBookPipeline(book, config.proxyUrl, targetSlotIndex);
+    await loadBookPipeline(book, config.proxyUrl, targetSlotIndex, (status) => {
+      if (loadingSlotState) {
+        loadingSlotState.status = status;
+        update8SlotShelfView();
+      }
+    });
+    void requestPersistentStorage();
   } catch (err) {
     console.error('[Zenolet] Failed to download book into slot:', err);
-    alert(`Could not download "${book.title}". Please check your internet connection or proxy settings.`);
+    openErrorModal(getErrorModalElements(), {
+      title: 'Unable to Download Book',
+      message: `Could not download "${book.title}".`,
+      subtext:
+        'An active internet connection is required to download books to your device for the first time. Please check your connection and try again.',
+      onRetry: () => {
+        void loadBookIntoSlot(book, targetSlotIndex);
+      }
+    });
   } finally {
     loadingSlotState = null;
     update8SlotShelfView();
@@ -515,6 +561,7 @@ async function openBook(
     if (typeof slotIndexToLoad === 'number') {
       loadingSlotState = {
         slotIndex: slotIndexToLoad,
+        status: 'Downloading book...',
         book: {
           id: book.id,
           title: book.title,
@@ -527,7 +574,12 @@ async function openBook(
     }
 
     try {
-      const result = await loadBookPipeline(book, config.proxyUrl, slotIndexToLoad);
+      const result = await loadBookPipeline(book, config.proxyUrl, slotIndexToLoad, (status) => {
+        if (loadingSlotState) {
+          loadingSlotState.status = status;
+          update8SlotShelfView();
+        }
+      });
       activeBookChapters = result.tocChapters || [];
       activeParsedChapters =
         result.chapters && result.chapters.length > 0
@@ -547,6 +599,7 @@ async function openBook(
       if (result.coverUrl) {
         book.coverUrl = result.coverUrl;
       }
+      void requestPersistentStorage();
     } finally {
       loadingSlotState = null;
     }
@@ -597,8 +650,16 @@ async function openBook(
     // Update URL state hash (push new entry if opening book, replace if restored)
     await updateUrlHashState(pushHistory);
   } catch (err) {
-    alert(`Failed to load book "${book.title}". Check your connection or CORS proxy settings.`);
     console.error('[Zenolet Reader] Load error:', err);
+    openErrorModal(getErrorModalElements(), {
+      title: 'Unable to Load Book',
+      message: `Failed to load "${book.title}".`,
+      subtext:
+        'An active internet connection is required to download books to your device for the first time. Please check your connection and try again.',
+      onRetry: () => {
+        void openBook(book, initialProgressFraction, pushHistory, targetSlotIndex, initialChapterIndex);
+      }
+    });
   }
 }
 
@@ -758,6 +819,7 @@ function setupEventListeners() {
   const navOptions: NavigationOptions = {
     modals: {
       deleteModal: DOM.deleteModal,
+      errorModal: DOM.errorModal,
       aboutModal: DOM.aboutModal,
       qrModal: DOM.qrModal,
       discoverPanel: DOM.discoverPanel,
@@ -769,6 +831,7 @@ function setupEventListeners() {
           confirmBtn: DOM.deleteModalConfirm,
           cancelBtn: DOM.deleteModalCancel
         }),
+      onCloseError: () => closeErrorModal(getErrorModalElements()),
       onCloseQR: () => closeQRModal(DOM.qrModal),
       onCloseDiscover: () => closeDiscoverPanel(DOM.discoverOverlay, DOM.discoverPanel)
     },
