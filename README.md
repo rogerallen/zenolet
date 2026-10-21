@@ -1,12 +1,12 @@
 # Zenolet (`zenolet` / `zenolet-reader`)
 
-> **The most convenient way to read a curated selection of ebooks.**
+> **The most convenient way to read a curated selection of free ebooks.**
 >
 > _A serverless, privacy-first, horizontal page-flowing Progressive Web Application (PWA) for reading online and offline._
 
 Named in honor of **Zenodotus of Ephesus** (the first chief librarian of Alexandria who invented alphabetical cataloging) combined with the **`-let`** suffix (a small, self-contained micro-library applet), **Zenolet** turns any static web host into an independent micro-library node running 100% client-side with zero user accounts, zero tracking, zero server databases, and zero subscription fees.
 
-This repository serves as both the **open-source Zenolet reader engine** and a live curated instance: **"The Most Popular 1,000 Gutenberg E-Books"** curated by **Roger Allen**.
+This repository serves as both the **open-source Zenolet reader engine** and a live curated instance: **"The Most Popular 1,000 Free Gutenberg E-Books"** curated by **Roger Allen**.
 
 ---
 
@@ -14,7 +14,7 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 - **100% Serverless & Sovereign**: All state lives in the user's browser or URL hash (`#s=...`). Zero tracking, logins, or remote databases.
 - **Dedicated Curator Directory (`curator/`)**: Cleanly separate your library configuration (`curator/config.json`), catalog (`curator/catalog.json`), and custom scripts from the core reader engine.
-- **Top 1,000 Gutenberg Catalog**: Pre-indexed `curator/catalog.json` featuring the 1,000 most popular Project Gutenberg titles with search and genre filtering.
+- **Top 1,000 Free Gutenberg Catalog**: Pre-indexed `curator/catalog.json` featuring the 1,000 most popular free Project Gutenberg titles with search and genre filtering.
 - **Dedicated Cloudflare Worker CORS Proxy**: Custom serverless proxy (`worker/index.js`) with origin security, OPTIONS preflight handling, streaming byte logging, and strict hard-fail enforcement.
 - **Single-Command Local Environment (`npm run dev:local`)**: Concurrently runs local Wrangler Worker proxy and Vite UI with zero need to modify production configuration files.
 - **Tactile Horizontal Flow Layout**: Book text flows horizontally in single-column (mobile) or double-column (desktop) spreads like a physical book, using CSS Multi-column layout and scroll snapping. Read the [Reader Engine Architecture (docs/reader-engine.md)](./docs/reader-engine.md) for full technical and algorithmic details.

@@ -1,6 +1,6 @@
 {
-  "title": "Read the Most Popular E-Books",
-  "blurb": "The most convenient way to read a curated selection of ebooks. Select from the most popular editions on Project Gutenberg, read in horizontal spreads, and keep books stored for offline reading.",
+  "title": "Read the Most Popular Free E-Books",
+  "blurb": "The most convenient way to read a curated selection of free ebooks. Select from the most popular free editions on Project Gutenberg, read in horizontal spreads, and keep books stored for offline reading.",
   "repoUrl": "https://github.com/rogerallen/zenolet",
   "curator": {
     "name": "Roger Allen",
