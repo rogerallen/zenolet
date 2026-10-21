@@ -487,6 +487,15 @@ export function showChapterPopup(
   document.body.appendChild(popup);
   activePopupElement = popup;
 
+  // Clear any accidental browser selection triggered before or during long-press on touch / Safari
+  if (typeof window !== 'undefined' && window.getSelection) {
+    try {
+      window.getSelection()?.removeAllRanges();
+    } catch {
+      // Ignore if getSelection is unavailable or unsupported in headless environments
+    }
+  }
+
   // Focus the current active chapter button or first item
   setTimeout(() => {
     const currentBtn =
@@ -682,6 +691,9 @@ export function renderTimeline(
 
     progressTrack.onmousedown = (e: MouseEvent) => {
       if (e.button !== 0) return;
+      if (e.cancelable) {
+        e.preventDefault();
+      }
       startPress(e.clientX, e.clientY);
     };
 
@@ -709,6 +721,9 @@ export function renderTimeline(
 
     progressTrack.ontouchstart = (e: TouchEvent) => {
       if (e.touches.length > 0) {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
         startPress(e.touches[0].clientX, e.touches[0].clientY);
       }
     };

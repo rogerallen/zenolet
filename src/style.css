@@ -247,6 +247,9 @@ a:not([href]) {
   top: 0;
   z-index: 100;
   gap: 12px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .reader-header-left {
@@ -623,6 +626,9 @@ a:not([href]) {
   position: sticky;
   bottom: 0;
   z-index: 100;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .timeline-meta-row {
@@ -631,6 +637,9 @@ a:not([href]) {
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .active-chapter-indicator {
@@ -641,6 +650,9 @@ a:not([href]) {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 70%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .page-indicator {
@@ -649,6 +661,9 @@ a:not([href]) {
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .progress-track {
@@ -658,7 +673,10 @@ a:not([href]) {
   border-radius: 4px;
   position: relative;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .progress-fill {
@@ -666,12 +684,17 @@ a:not([href]) {
   background-color: var(--accent-color);
   border-radius: 4px;
   transition: width 0.2s ease;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .timeline-ticks {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .timeline-dot {
@@ -687,6 +710,9 @@ a:not([href]) {
   cursor: pointer;
   transition: transform 0.2s ease;
   touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .timeline-dot.chapter-dot {
@@ -704,6 +730,9 @@ a:not([href]) {
   font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* Chapter Region Popup Menu */
@@ -720,6 +749,9 @@ a:not([href]) {
   flex-direction: column;
   overflow: hidden;
   animation: chapterPopupFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 @keyframes chapterPopupFadeIn {
@@ -776,6 +808,10 @@ a:not([href]) {
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;

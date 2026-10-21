@@ -5,7 +5,8 @@ import {
   resolveChapterElement,
   getElementSpreadIndex,
   invalidateChapterMarkers,
-  closeChapterPopup
+  closeChapterPopup,
+  type ChapterMarker
 } from './Timeline.js';
 import type { EpubChapter } from '../services/epub.js';
 
@@ -478,6 +479,54 @@ describe('Timeline Component & Chapter Navigation (Timeline.ts)', () => {
     endDot.click();
     expect(jumpChapterSpy).toHaveBeenCalledWith(1, 'last');
 
+    ticks.remove();
+  });
+
+  it('suppresses default browser text selection on mousedown and touchstart and clears selection on chapter popup (Safari/iPad fix)', async () => {
+    invalidateChapterMarkers();
+    const { renderTimeline, showChapterPopup, closeChapterPopup } = await import('./Timeline.js');
+
+    const track = document.createElement('div');
+    track.id = 'progress-track';
+    document.body.appendChild(track);
+
+    const ticks = document.createElement('div');
+    ticks.id = 'timeline-ticks';
+    document.body.appendChild(ticks);
+
+    const mockContent = document.createElement('div');
+    const mockViewport = document.createElement('div') as HTMLDivElement;
+    Object.defineProperty(mockViewport, 'clientWidth', { value: 500, configurable: true });
+
+    renderTimeline(mockContent, mockViewport, 10, vi.fn());
+
+    // Test cancelable mousedown triggers preventDefault to stop Safari text selection
+    const mousedownEvent = new MouseEvent('mousedown', { clientX: 200, clientY: 10, cancelable: true });
+    const preventDefaultSpy = vi.spyOn(mousedownEvent, 'preventDefault');
+    track.onmousedown?.(mousedownEvent);
+    expect(preventDefaultSpy).toHaveBeenCalled();
+
+    // Test cancelable touchstart triggers preventDefault to stop iPad/Safari text selection loupe
+    const touchstartEvent = {
+      touches: [{ clientX: 200, clientY: 10 }],
+      cancelable: true,
+      preventDefault: vi.fn()
+    } as unknown as TouchEvent;
+    track.ontouchstart?.(touchstartEvent);
+    expect(touchstartEvent.preventDefault).toHaveBeenCalled();
+
+    // Test selection clearing when chapter popup opens
+    const removeAllRangesSpy = vi.fn();
+    vi.spyOn(window, 'getSelection').mockReturnValue({
+      removeAllRanges: removeAllRangesSpy
+    } as unknown as Selection);
+
+    const markers: ChapterMarker[] = [{ id: 'ch1', title: 'Chapter 1', pageSpread: 0 }];
+    showChapterPopup(markers, 0, 0, 200, track.getBoundingClientRect(), 10, vi.fn());
+    expect(removeAllRangesSpy).toHaveBeenCalled();
+
+    closeChapterPopup();
+    track.remove();
     ticks.remove();
   });
 });
