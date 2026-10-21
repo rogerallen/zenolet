@@ -1,6 +1,8 @@
 # Zenolet (`zenolet` / `zenolet-reader`)
 
-> **A serverless, privacy-first, horizontal page-flowing Progressive Web Application (PWA) for reading timeless public domain literature online and offline.**
+> **The most convenient way to read a curated selection of ebooks.**
+>
+> _A serverless, privacy-first, horizontal page-flowing Progressive Web Application (PWA) for reading online and offline._
 
 Named in honor of **Zenodotus of Ephesus** (the first chief librarian of Alexandria who invented alphabetical cataloging) combined with the **`-let`** suffix (a small, self-contained micro-library applet), **Zenolet** turns any static web host into an independent micro-library node running 100% client-side with zero user accounts, zero tracking, zero server databases, and zero subscription fees.
 

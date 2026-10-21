@@ -1,6 +1,6 @@
 # Zenolet
 
-A serverless, privacy-first, horizontal page-flowing Progressive Web Application for reading public domain literature online and offline.
+The most convenient way to read a curated selection of ebooks: a serverless, privacy-first, horizontal page-flowing Progressive Web Application for reading online and offline.
 
 ## Language
 
