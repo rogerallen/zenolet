@@ -27,9 +27,12 @@ This repository serves as both the **open-source Zenolet reader engine** and a l
 
 Zenolet is intentionally designed as a lightweight, distraction-free **curated micro-library**, not an all-in-one personal ebook management system or replacement for a full digital archive (such as Calibre). Its focus is on providing an immediate, high-quality reading experience for a hand-picked collection of timeless literary classics.
 
-If broader personal ebook management is a goal for future community extensions or forks, the most natural roadmap additions are:
+If broader personal ebook management is a goal for future community extensions or forks, see the [Post-1.0 Roadmap Milestone](https://github.com/rogerallen/zenolet/milestone/1). The most natural roadmap additions include:
 
-- **Custom EPUB Import**: Drag-and-drop or file picker import of arbitrary user-supplied EPUB archives.
+- **Custom EPUB Import ([#11](https://github.com/rogerallen/zenolet/issues/11))**: Drag-and-drop or file picker import of arbitrary user-supplied EPUB archives.
+- **Dictionary Lookups ([#10](https://github.com/rogerallen/zenolet/issues/10))**: Built-in offline dictionary definition support.
+- **Full Gutenberg Directory ([#12](https://github.com/rogerallen/zenolet/issues/12))**: Search and download beyond the top curated catalog.
+- **Multiple Curated Libraries ([#8](https://github.com/rogerallen/zenolet/issues/8))**: Support for switching between different curated collections.
 - **Library Data Export**: One-click JSON/archive backup and export of reading coordinates, bookmarks, and shelf state.
 
 ---

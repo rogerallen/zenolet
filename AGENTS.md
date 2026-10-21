@@ -4,17 +4,15 @@
 
 Zenolet follows strict Semantic Versioning formatted as `MAJOR.MINOR.BUGFIX` (e.g., `0.1.0`).
 
-### 1. Pre-1.0 Versioning Rules
+### 1. Active Versioning Rules (Post-1.0)
 
-- **MAJOR**: Must equal `0` prior to official 1.0 release (e.g. `0.X.Y`).
-- **MINOR**: Starts at `1` (`0.1.0`) and increments when new features are added and a release/deployment is made (e.g. `0.1.0` -> `0.2.0` -> `0.3.0`).
-- **BUGFIX**: Stays `0` during pre-1.0 development, or increments for patch hotfixes.
-
-### 2. Post-1.0 Versioning Rules
-
-- **MAJOR**: Increments when breaking changes are introduced.
-- **MINOR**: Increments when backwards-compatible features are added.
+- **MAJOR**: Starts at `1` (`1.0.0`) and increments when breaking changes are introduced to schemas (localStorage `zenolet-slots`, Cache API `zenolet-books-v2`, or state handoff `#s=...`).
+- **MINOR**: Increments when backwards-compatible features or catalog updates are added.
 - **BUGFIX**: Increments for backwards-compatible bug fixes and patches.
+
+### 2. Historical Pre-1.0 Rules (Archived)
+
+- Prior to official 1.0 release, MAJOR remained `0` (e.g. `0.29.4`).
 
 ### 3. Version Update Workflow
 
