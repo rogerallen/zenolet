@@ -1,0 +1,543 @@
+{
+  "$schema": "https://zenolet.app/schemas/curation.v1.json",
+  "version": "1.0",
+  "rules": {
+    "language": "en",
+    "preferIllustrated": true,
+    "preferLaterEditions": true,
+    "preferUnabridged": true,
+    "aggregateWorkDownloads": true
+  },
+  "clusters": [
+    {
+      "key": "melville ::: moby dick",
+      "workTitle": "Moby Dick; Or, The Whale",
+      "author": "Melville, Herman",
+      "recommendedId": "2701",
+      "manualOverride": null,
+      "selectedId": "2701",
+      "totalWorkDownloads": 213791,
+      "reason": "Superior edition cited by Project Gutenberg note on #2489",
+      "candidates": [
+        {
+          "id": "2701",
+          "title": "Moby Dick; Or, The Whale",
+          "downloads": 188210,
+          "score": 127,
+          "isRecommended": true
+        },
+        {
+          "id": "2489",
+          "title": "Moby Dick; Or, The Whale",
+          "downloads": 25581,
+          "score": -58,
+          "note": "Secondary transcription superseded by standard edition #2701",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "austen ::: pride and prejudice",
+      "workTitle": "Pride and Prejudice",
+      "author": "Austen, Jane",
+      "recommendedId": "1342",
+      "manualOverride": null,
+      "selectedId": "1342",
+      "totalWorkDownloads": 273117,
+      "reason": "Superior edition cited by Project Gutenberg note on #42671; Iconic historical illustrations (164 plates)",
+      "candidates": [
+        {
+          "id": "1342",
+          "title": "Pride and Prejudice",
+          "downloads": 183505,
+          "score": 186,
+          "illustrations": 164,
+          "isRecommended": true
+        },
+        {
+          "id": "42671",
+          "title": "Pride and Prejudice",
+          "downloads": 89612,
+          "score": -46,
+          "note": "Secondary transcription superseded by 164-illustration Brock edition #1342",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "homer ::: odyssey",
+      "workTitle": "The Odyssey: Rendered into English prose for the use of those who cannot read the original",
+      "author": "Homer",
+      "recommendedId": "1727",
+      "manualOverride": null,
+      "selectedId": "1727",
+      "totalWorkDownloads": 152873,
+      "reason": "Standard edition (139,227 downloads)",
+      "candidates": [
+        {
+          "id": "1727",
+          "title": "The Odyssey: Rendered into English prose for the use of those who cannot read the original",
+          "downloads": 139227,
+          "score": 26,
+          "isRecommended": true
+        },
+        {
+          "id": "3160",
+          "title": "The Odyssey",
+          "downloads": 13646,
+          "score": 22,
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "shakespeare ::: romeo and juliet",
+      "workTitle": "Romeo and Juliet",
+      "author": "Shakespeare, William",
+      "recommendedId": "47960",
+      "manualOverride": null,
+      "selectedId": "47960",
+      "totalWorkDownloads": 219144,
+      "reason": "Iconic historical illustrations (9 plates)",
+      "candidates": [
+        {
+          "id": "1513",
+          "title": "Romeo and Juliet",
+          "downloads": 132311,
+          "score": 26,
+          "isRecommended": false
+        },
+        {
+          "id": "1112",
+          "title": "Romeo and Juliet",
+          "downloads": 68033,
+          "score": 24,
+          "isRecommended": false
+        },
+        {
+          "id": "47960",
+          "title": "Romeo and Juliet",
+          "downloads": 18800,
+          "score": 91,
+          "illustrations": 9,
+          "isRecommended": true
+        }
+      ]
+    },
+    {
+      "key": "austen ::: sense and sensibility",
+      "workTitle": "Sense and Sensibility",
+      "author": "Austen, Jane",
+      "recommendedId": "21839",
+      "manualOverride": null,
+      "selectedId": "21839",
+      "totalWorkDownloads": 174072,
+      "reason": "Superior edition cited by Project Gutenberg note on #161; Iconic historical illustrations (39 plates)",
+      "candidates": [
+        {
+          "id": "21839",
+          "title": "Sense and Sensibility",
+          "downloads": 107602,
+          "score": 189,
+          "illustrations": 39,
+          "isRecommended": true
+        },
+        {
+          "id": "161",
+          "title": "Sense and Sensibility",
+          "downloads": 66470,
+          "score": -56,
+          "note": "Project Gutenberg note: Improved edition is eBook #21839",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "doyle ::: adventures of sherlock holmes",
+      "workTitle": "Adventures of Sherlock Holmes: Illustrated",
+      "author": "Doyle, Arthur Conan",
+      "recommendedId": "48320",
+      "manualOverride": null,
+      "selectedId": "48320",
+      "totalWorkDownloads": 148398,
+      "reason": "Superior edition cited by Project Gutenberg note on #1661; Iconic historical illustrations (30 plates)",
+      "candidates": [
+        {
+          "id": "1661",
+          "title": "The Adventures of Sherlock Holmes",
+          "downloads": 105900,
+          "score": -55,
+          "note": "Project Gutenberg note: Improved edition is eBook #48320",
+          "isRecommended": false
+        },
+        {
+          "id": "48320",
+          "title": "Adventures of Sherlock Holmes: Illustrated",
+          "downloads": 42498,
+          "score": 193,
+          "illustrations": 30,
+          "isRecommended": true
+        }
+      ]
+    },
+    {
+      "key": "shakespeare ::: works of william shakespeare",
+      "workTitle": "The Complete Works of William Shakespeare",
+      "author": "Shakespeare, William",
+      "recommendedId": "100",
+      "manualOverride": null,
+      "selectedId": "100",
+      "totalWorkDownloads": 111587,
+      "reason": "Complete collection",
+      "candidates": [
+        {
+          "id": "100",
+          "title": "The Complete Works of William Shakespeare",
+          "downloads": 93902,
+          "score": 85,
+          "isRecommended": true
+        },
+        {
+          "id": "50559",
+          "title": "The Works of William Shakespeare [Cambridge Edition] [Vol. 3 of 9]",
+          "downloads": 17685,
+          "score": -49,
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "stoker ::: dracula",
+      "workTitle": "Dracula",
+      "author": "Stoker, Bram",
+      "recommendedId": "345",
+      "manualOverride": null,
+      "selectedId": "345",
+      "totalWorkDownloads": 148415,
+      "reason": "Superior edition cited by Project Gutenberg note on #45839",
+      "candidates": [
+        {
+          "id": "345",
+          "title": "Dracula",
+          "downloads": 89208,
+          "score": 125,
+          "isRecommended": true
+        },
+        {
+          "id": "45839",
+          "title": "Dracula",
+          "downloads": 59207,
+          "score": -47,
+          "note": "Secondary transcription superseded by classic edition #345",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "alcott ::: little women",
+      "workTitle": "Little Women; Or, Meg, Jo, Beth, and Amy",
+      "author": "Alcott, Louisa May",
+      "recommendedId": "37106",
+      "manualOverride": null,
+      "selectedId": "37106",
+      "totalWorkDownloads": 99226,
+      "reason": "Superior edition cited by Project Gutenberg note on #514; Iconic historical illustrations (205 plates)",
+      "candidates": [
+        {
+          "id": "37106",
+          "title": "Little Women; Or, Meg, Jo, Beth, and Amy",
+          "downloads": 86348,
+          "score": 192,
+          "illustrations": 205,
+          "isRecommended": true
+        },
+        {
+          "id": "514",
+          "title": "Little Women",
+          "downloads": 12878,
+          "score": -59,
+          "note": "Unillustrated 1996 text superseded by 205-illustration edition #37106",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "stevenson ::: strange case of dr jekyll and mr hyde",
+      "workTitle": "The strange case of Dr. Jekyll and Mr. Hyde",
+      "author": "Stevenson, Robert Louis",
+      "recommendedId": "43",
+      "manualOverride": null,
+      "selectedId": "43",
+      "totalWorkDownloads": 155644,
+      "reason": "Superior edition cited by Project Gutenberg note on #42",
+      "candidates": [
+        {
+          "id": "43",
+          "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+          "downloads": 79438,
+          "score": 125,
+          "isRecommended": true
+        },
+        {
+          "id": "42",
+          "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+          "downloads": 76206,
+          "score": -56,
+          "note": "Obsolete 1992 7-bit ASCII upload replaced by modern edition #43",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "doyle ::: hound of the baskervilles",
+      "workTitle": "The Hound of the Baskervilles",
+      "author": "Doyle, Arthur Conan",
+      "recommendedId": "2852",
+      "manualOverride": null,
+      "selectedId": "2852",
+      "totalWorkDownloads": 119044,
+      "reason": "Superior edition cited by Project Gutenberg note on #3070",
+      "candidates": [
+        {
+          "id": "2852",
+          "title": "The Hound of the Baskervilles",
+          "downloads": 65125,
+          "score": 125,
+          "isRecommended": true
+        },
+        {
+          "id": "3070",
+          "title": "The Hound of the Baskervilles",
+          "downloads": 53919,
+          "score": -55,
+          "note": "Secondary transcription superseded by standard edition #2852",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "doyle ::: return of sherlock holmes",
+      "workTitle": "The Return of Sherlock Holmes",
+      "author": "Doyle, Arthur Conan",
+      "recommendedId": "108",
+      "manualOverride": null,
+      "selectedId": "108",
+      "totalWorkDownloads": 114572,
+      "reason": "Superior edition cited by Project Gutenberg note on #221; Iconic historical illustrations (13 plates)",
+      "candidates": [
+        {
+          "id": "108",
+          "title": "The Return of Sherlock Holmes",
+          "downloads": 59188,
+          "score": 184,
+          "illustrations": 13,
+          "isRecommended": true
+        },
+        {
+          "id": "221",
+          "title": "The Return of Sherlock Holmes",
+          "downloads": 55384,
+          "score": -56,
+          "note": "Unillustrated text superseded by 13-illustration Paget edition #108",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "baum ::: wonderful wizard of oz",
+      "workTitle": "The Wonderful Wizard of Oz",
+      "author": "Baum, L. Frank (Lyman Frank)",
+      "recommendedId": "43936",
+      "manualOverride": null,
+      "selectedId": "43936",
+      "totalWorkDownloads": 75773,
+      "reason": "Superior edition cited by Project Gutenberg note on #55; Iconic historical illustrations (148 plates)",
+      "candidates": [
+        {
+          "id": "55",
+          "title": "The Wonderful Wizard of Oz",
+          "downloads": 49865,
+          "score": -57,
+          "note": "Single-cover 1993 text superseded by 148-color-illustration Denslow edition #43936",
+          "isRecommended": false
+        },
+        {
+          "id": "43936",
+          "title": "The Wonderful Wizard of Oz",
+          "downloads": 25908,
+          "score": 191,
+          "illustrations": 148,
+          "isRecommended": true
+        }
+      ]
+    },
+    {
+      "key": "homer ::: iliad",
+      "workTitle": "The Iliad",
+      "author": "Homer",
+      "recommendedId": "6130",
+      "manualOverride": null,
+      "selectedId": "6130",
+      "totalWorkDownloads": 83637,
+      "reason": "Superior edition cited by Project Gutenberg note on #2199; Iconic historical illustrations (71 plates)",
+      "candidates": [
+        {
+          "id": "6130",
+          "title": "The Iliad",
+          "downloads": 46103,
+          "score": 184,
+          "illustrations": 71,
+          "isRecommended": true
+        },
+        {
+          "id": "2199",
+          "title": "The Iliad",
+          "downloads": 37534,
+          "score": -57,
+          "note": "Unillustrated 2000 text superseded by 71-illustration Flaxman edition #6130",
+          "isRecommended": false
+        }
+      ]
+    },
+    {
+      "key": "burnett ::: secret garden",
+      "workTitle": "The Secret Garden",
+      "author": "Burnett, Frances Hodgson",
+      "recommendedId": "17396",
+      "manualOverride": null,
+      "selectedId": "17396",
+      "totalWorkDownloads": 43217,
+      "reason": "Superior edition cited by Project Gutenberg note on #113; Iconic historical illustrations (6 plates)",
+      "candidates": [
+        {
+          "id": "113",
+          "title": "The Secret Garden",
+          "downloads": 33855,
+          "score": -57,
+          "note": "Unillustrated text superseded by 6-color-plate Maria Kirk edition #17396",
+          "isRecommended": false
+        },
+        {
+          "id": "17396",
+          "title": "The Secret Garden",
+          "downloads": 9362,
+          "score": 183,
+          "illustrations": 6,
+          "isRecommended": true
+        }
+      ]
+    },
+    {
+      "key": "milton ::: paradise lost",
+      "workTitle": "Paradise Lost",
+      "author": "Milton, John",
+      "recommendedId": "26",
+      "manualOverride": null,
+      "selectedId": "26",
+      "totalWorkDownloads": 41123,
+      "reason": "Superior edition cited by Project Gutenberg note on #20",
+      "candidates": [
+        {
+          "id": "20",
+          "title": "Paradise Lost",
+          "downloads": 30425,
+          "score": -58,
+          "note": "1667 10-book edition superseded by 1674 12-book definitive edition #26",
+          "isRecommended": false
+        },
+        {
+          "id": "26",
+          "title": "Paradise Lost",
+          "downloads": 10698,
+          "score": 120,
+          "isRecommended": true
+        }
+      ]
+    }
+  ],
+  "excludedIds": {
+    "1012": "[Italian] La Divina Commedia di Dante",
+    "2229": "[German] Faust: Der Tragödie erster Teil by Goethe",
+    "2419": "[French] La dame aux camélias by Dumas",
+    "2650": "[French] Du côté de chez Swann by Marcel Proust",
+    "4791": "[French] Voyage au Centre de la Terre by Jules Verne",
+    "13951": "[French] Les trois mousquetaires by Dumas",
+    "14287": "[French] L'île mystérieuse by Jules Verne",
+    "15113": "[French] Vie de Jésus by Ernest Renan",
+    "17989": "[French] Le comte de Monte-Cristo, Tome I by Dumas",
+    "18143": "[French] Roméo et Juliette: Tragédie by Shakespeare",
+    "19919": "[French] Maman Léo: Les Habits Noirs Tome V by Paul Féval",
+    "24746": "[German] Reise in die Aequinoctial-Gegenden by Alexander von Humboldt",
+    "25946": "[Dutch] Gevoel en verstand by Jane Austen",
+    "28718": "[French] Les crimes de l'amour by Marquis de Sade",
+    "29049": "[French] Histoire amoureuse des Gaules by Roger de Rabutin",
+    "31284": "[German] Josefine Mutzenbacher by Felix Salten",
+    "32854": "[French] Arsène Lupin, gentleman-cambrioleur by Maurice Leblanc",
+    "36635": "[French] Amitié amoureuse by Hermine Oudinot",
+    "38674": "[French] De la terre à la lune by Jules Verne",
+    "40739": "[German] Die Traumdeutung by Sigmund Freud",
+    "47530": "Volume fragment: Oliver Twist, Vol. 2 (of 3) when complete novel #730 exists",
+    "48040": "[German] Das Bücher-Dekameron by Kasimir Edschmid",
+    "49501": "[German] Anzeiger für Kunde der deutschen Vorzeit",
+    "50285": "[German] Dr. Mabuse, der Spieler by Norbert Jacques",
+    "50528": "[German] Pitt und Fox by Friedrich Huch",
+    "52597": "[Spanish] Insolación y Morriña by Emilia Pardo Bazán",
+    "55487": "[German] Sämmtliche Werke 5: Dramatische Werke by Nikolai Gogol",
+    "57741": "[German] Der kleine Dämon by Fyodor Sologub",
+    "60353": "[German] Millionen; Der Tod des Iwan Lande by Mikhail Artsybashev",
+    "61851": "[Spanish] El crimen y el castigo by Fyodor Dostoyevsky",
+    "62215": "[French] Le Fantôme de l'Opéra by Gaston Leroux",
+    "62635": "[Swedish] Moloks leende: roman by Daniel Berg",
+    "63460": "[German] Die seltsamen Geschichten des Doktor Ulebuhle by Bruno Hans Bürgel",
+    "64414": "[German] Der Jäger von Fall by Ludwig Ganghofer",
+    "65580": "[Swedish] Carl Svenske by Gustaf Björlin",
+    "65661": "[German] Der Zauberberg. Erster Band by Thomas Mann",
+    "65662": "[German] Der Zauberberg. Zweiter Band by Thomas Mann",
+    "66452": "[German] Die Liebe: Novelle by Hans Kaltneker",
+    "68400": "[German] Der Marquis de Sade und seine Zeit by Iwan Bloch",
+    "69944": "[German] Jud Süß by Lion Feuchtwanger",
+    "75802": "[German] Der Steppenwolf by Hermann Hesse",
+    "76334": "[Finnish] Ikuinen rakastaja by Edgar Rice Burroughs",
+    "76360": "[German] Die Elixiere des Teufels by E.T.A. Hoffmann",
+    "76412": "[French] Le cas étrange du docteur Jekyll by R.L. Stevenson",
+    "76433": "[French] La marque des quatre by Arthur Conan Doyle",
+    "76501": "[Finnish] Ruhtinatar Aurore by Pierre Benoît",
+    "76520": "[Finnish] Hänen viimeinen tervehdyksensä by Arthur Conan Doyle",
+    "76540": "[French] Les Mémoires d'un Parapluie by Elisabeth Galos",
+    "76543": "[Finnish] Tuhatvuotinen valtakunta by Upton Sinclair",
+    "76662": "[German] Sämtliche Werke 20 by Fyodor Dostoyevsky",
+    "76724": "[French] La chasse au météore by Jules Verne",
+    "76729": "[Finnish] Palvelusväkeä by Roderich Benedix",
+    "76896": "[Finnish] Ikuinen salaisuus by Jack London",
+    "77009": "[Finnish] Ihmisten kapina by Lauri Haarla",
+    "77073": "[German] Die Flucht der Beate Hoyermann by Thea von Harbou",
+    "77086": "[French] Les cœurs les plus farouches by James Oliver Curwood",
+    "78007": "[Finnish] Vanhaa viinaa uudessa leilissä by Tatu Valkonen",
+    "78008": "[Finnish] Hauska tutustua by Tatu Pekkarinen",
+    "78026": "[German] Skizzen einer Fußreise durch Oesterreich by Josef Kyselak",
+    "78027": "[French] Les enchantements de la forêt by André Theuriet",
+    "78036": "[French] Quand le rideau s'est baissé by Pierre Mille",
+    "78037": "[French] Les trente-six vues de la Tour Eiffel",
+    "78042": "[Finnish] Ihmisvihaaja by Molière",
+    "78049": "[Finnish] Sointula by Arvid Järnefelt",
+    "78052": "[Spanish] Andanzas y visiones españolas by Miguel de Unamuno",
+    "78058": "[Finnish] Lintukoto by Joel Lehtonen",
+    "78063": "[French] Le jeune Européen by Pierre Drieu La Rochelle",
+    "78064": "[French] Lucifer by Maurice Magre",
+    "78068": "[Spanish] Los miserables - Tomo 2 by Victor Hugo",
+    "78069": "[French] Deux générations by Leo Tolstoy",
+    "78070": "[Finnish] Velisurmaaja by Lauri Haarla",
+    "78071": "[Finnish] Kaksi morsianta by Kaarlo Hemmo",
+    "78074": "[French] Chroniques de J. Froissart, tome 09/13 by Jean Froissart",
+    "78080": "[French] Journal de la société de 1789 by Condorcet",
+    "78081": "[Finnish] Huligaani by Arvid Järnefelt",
+    "78096": "[Finnish] Hajamuistelmia pakolaiselämästä by Aatto Sirén",
+    "78097": "[Finnish] Kevättuulahduksia by Niilo Mantere",
+    "78098": "[French] L'art d'aimer by Catulle Mendès",
+    "78100": "[Finnish] Läpi harmaan kiven by J.A. Lehtinen",
+    "78101": "[French] L'homme à l'Hispano by Pierre Frondaie",
+    "78113": "[Finnish] Elämän urpuja by Viljami Vuokoski",
+    "78123": "[Catalan] Un pis al ensanche by José Feliú y Codina",
+    "78125": "[German] Liebe ist ewig by Wilhelm von Polenz"
+  }
+}

@@ -11,10 +11,45 @@ Welcome to the **Curator Configuration** directory. This is the **only directory
   _(See `config.example.json` for a reference template)._
 
 - **`catalog.json`**:
-  Your library's book catalog. Each entry contains the book's Project Gutenberg ID, title, author, subjects/genres, download count, EPUB URL, and cover image URL. You can build, generate, or edit this file however you see fit.
+  Your library's active, curated book catalog. Each entry contains the book's Project Gutenberg ID, title, author, subjects/genres, download count, EPUB URL, and cover image URL.
+
+- **`catalog.raw.json`**:
+  The full candidate book pool fetched from Project Gutenberg / Gutendex prior to deduplication and filtering.
+
+- **`curation.json`**:
+  The curation decision file tracking duplicate clusters, scoring heuristics, selected editions, and curator manual overrides (`manualOverride`).
+
+- **`CURATION_REPORT.md`**:
+  Auto-generated report summarizing all duplicate clusters, selected vs rejected editions, illustration counts, and excluded non-English or audiobook items.
 
 - **`scripts/`**:
-  Any helper scripts you use to generate, fetch, or filter your catalog (e.g. `scripts/generate-catalog.ts`).
+  Helper scripts to generate and curate your catalog:
+  - `generate-catalog.ts`: Fetches top English text EPUBs from Gutendex and triggers curation.
+  - `curate.ts`: Evaluates duplicate clusters, applies curator overrides, filters audiobooks and non-English media, and regenerates `catalog.json` and `CURATION_REPORT.md`.
+
+---
+
+## 🎯 Catalog Curation Workflow
+
+1. **Generate or Refresh Catalog**:
+
+   ```bash
+   npm run generate-catalog
+   ```
+
+   Fetches top English EPUB books and automatically runs curation.
+
+2. **Review Curation Decisions**:
+   Inspect `curator/CURATION_REPORT.md` or `curator/curation.json`.
+   - The curation engine automatically scores competing editions, prioritizing **illustrated editions** (e.g. Sidney Paget's Sherlock Holmes `#48320`, Hugh Thomson's Sense & Sensibility `#21839`), Project Gutenberg **improved edition notices**, and complete texts.
+   - Non-English titles, audiobooks, and volume fragments are filtered out automatically.
+
+3. **Override Any Selection**:
+   If you prefer a different edition in a cluster, open `curator/curation.json`, set `"manualOverride": "<id>"` for that cluster, and run:
+   ```bash
+   npm run curate
+   ```
+   The engine will apply your override, regenerate `catalog.json`, and update `CURATION_REPORT.md`.
 
 - **`assets/`**:
   Optional directory for custom library branding, logos, or cover placeholder artwork.

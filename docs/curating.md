@@ -103,7 +103,10 @@ Using Zenolet to download book archives and images requires a Cross-Origin Resou
 #### Ways to Create Your Catalog:
 
 - **Option A: Edit manually or copy from Project Gutenberg**: Add JSON objects for your favorite books with their Gutenberg IDs and EPUB download URLs.
-- **Option B: Use the included catalog script**: Run `npm run generate-catalog` (which executes `curator/scripts/generate-catalog.ts`) or customize it to scrape books by subject/author.
+- **Option B: Use the automated curation toolchain**:
+  1. Run `npm run generate-catalog`: Scrapes the top English text EPUBs from Project Gutenberg and automatically triggers the curation engine.
+  2. Inspect `curator/CURATION_REPORT.md`: Review duplicate clusters, scores, and edition selections (e.g., illustrated editions like Sidney Paget's Sherlock Holmes `#48320` and Hugh Thomson's Sense & Sensibility `#21839` are prioritized).
+  3. Customize decisions: Edit `curator/curation.json` to set `"manualOverride": "<id>"` for any work where you prefer an alternative edition, then run `npm run curate` to apply your decisions.
 
 ---
 

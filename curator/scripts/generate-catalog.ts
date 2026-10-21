@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runCurateCli } from './curate.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,7 @@ export interface CatalogBook {
   downloads: number;
   epubUrl?: string;
   coverUrl?: string;
+  languages?: string[];
 }
 
 interface GutendexAuthor {
@@ -27,6 +29,7 @@ interface GutendexBook {
   download_count: number;
   formats: Record<string, string>;
   media_type?: string;
+  languages?: string[];
 }
 
 interface GutendexResponse {
@@ -48,7 +51,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function generateCatalog() {
   console.log('📚 [Zenolet] Starting catalog generator for top 1,000 Project Gutenberg titles...');
   const catalog: CatalogBook[] = [];
-  let nextUrl: string | null = 'https://gutendex.com/books/?sort=popular';
+  let nextUrl: string | null = 'https://gutendex.com/books/?languages=en&sort=popular';
   let page = 1;
   const targetCount = 1000;
 
@@ -66,9 +69,10 @@ async function generateCatalog() {
         const epubUrl = item.formats['application/epub+zip'];
         const coverUrl = item.formats['image/jpeg'];
 
-        // Only include textual books with a verified EPUB archive available
+        // Only include textual books with a verified EPUB archive available in English
         if (item.media_type && item.media_type !== 'Text') continue;
         if (!epubUrl) continue;
+        if (item.languages && item.languages.length > 0 && !item.languages.includes('en')) continue;
 
         catalog.push({
           id: String(item.id),
@@ -77,7 +81,8 @@ async function generateCatalog() {
           subjects: (item.subjects || []).slice(0, 5),
           downloads: item.download_count || 0,
           epubUrl,
-          coverUrl
+          coverUrl,
+          languages: item.languages || ['en']
         });
       }
 
@@ -91,11 +96,13 @@ async function generateCatalog() {
     }
   }
 
-  const outputPath = path.resolve(__dirname, '../catalog.json');
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await fs.writeFile(outputPath, JSON.stringify(catalog, null, 2), 'utf-8');
+  const rawPath = path.resolve(__dirname, '../catalog.raw.json');
+  await fs.mkdir(path.dirname(rawPath), { recursive: true });
+  await fs.writeFile(rawPath, JSON.stringify(catalog, null, 2), 'utf-8');
 
-  console.log(`✅ [Zenolet] Successfully generated catalog with ${catalog.length} books at: ${outputPath}`);
+  console.log(`✅ [Zenolet] Successfully fetched raw catalog with ${catalog.length} books at: ${rawPath}`);
+  console.log(`🧹 [Zenolet] Triggering curation post-processing...`);
+  runCurateCli();
 }
 
 generateCatalog().catch((err) => {

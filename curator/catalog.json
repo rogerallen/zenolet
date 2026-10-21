@@ -1,20 +1,5 @@
 [
   {
-    "id": "2701",
-    "title": "Moby Dick; Or, The Whale",
-    "author": "Melville, Herman",
-    "subjects": [
-      "Adventure stories",
-      "Ahab, Captain (Fictitious character) -- Fiction",
-      "Mentally ill -- Fiction",
-      "Psychological fiction",
-      "Sea stories"
-    ],
-    "downloads": 188210,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2701.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg"
-  },
-  {
     "id": "1342",
     "title": "Pride and Prejudice",
     "author": "Austen, Jane",
@@ -25,9 +10,110 @@
       "Love stories",
       "Sisters -- Fiction"
     ],
-    "downloads": 183505,
+    "downloads": 273117,
     "epubUrl": "https://www.gutenberg.org/ebooks/1342.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg"
+  },
+  {
+    "id": "47960",
+    "title": "Romeo and Juliet",
+    "author": "Shakespeare, William",
+    "subjects": [
+      "Conflict of generations -- Drama",
+      "Juliet (Fictitious character) -- Drama",
+      "Romeo (Fictitious character) -- Drama",
+      "Tragedies (Drama)",
+      "Vendetta -- Drama"
+    ],
+    "downloads": 219144,
+    "epubUrl": "https://www.gutenberg.org/ebooks/47960.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/47960/pg47960.cover.medium.jpg"
+  },
+  {
+    "id": "2701",
+    "title": "Moby Dick; Or, The Whale",
+    "author": "Melville, Herman",
+    "subjects": [
+      "Adventure stories",
+      "Ahab, Captain (Fictitious character) -- Fiction",
+      "Mentally ill -- Fiction",
+      "Psychological fiction",
+      "Sea stories"
+    ],
+    "downloads": 213791,
+    "epubUrl": "https://www.gutenberg.org/ebooks/2701.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg"
+  },
+  {
+    "id": "21839",
+    "title": "Sense and Sensibility",
+    "author": "Austen, Jane",
+    "subjects": [
+      "Domestic fiction",
+      "England -- Fiction",
+      "England -- Social life and customs -- 19th century -- Fiction",
+      "Gentry -- England -- Fiction",
+      "Inheritance and succession -- Fiction"
+    ],
+    "downloads": 174072,
+    "epubUrl": "https://www.gutenberg.org/ebooks/21839.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/21839/pg21839.cover.medium.jpg"
+  },
+  {
+    "id": "43",
+    "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+    "author": "Stevenson, Robert Louis",
+    "subjects": [
+      "Horror tales",
+      "London (England) -- Fiction",
+      "Multiple personality -- Fiction",
+      "Physicians -- Fiction",
+      "Psychological fiction"
+    ],
+    "downloads": 155644,
+    "epubUrl": "https://www.gutenberg.org/ebooks/43.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/43/pg43.cover.medium.jpg"
+  },
+  {
+    "id": "1727",
+    "title": "The Odyssey: Rendered into English prose for the use of those who cannot read the original",
+    "author": "Homer",
+    "subjects": [
+      "Epic poetry, Greek -- Translations into English",
+      "Homer -- Translations into English",
+      "Odysseus, King of Ithaca (Mythological character)"
+    ],
+    "downloads": 152873,
+    "epubUrl": "https://www.gutenberg.org/ebooks/1727.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/1727/pg1727.cover.medium.jpg"
+  },
+  {
+    "id": "345",
+    "title": "Dracula",
+    "author": "Stoker, Bram",
+    "subjects": [
+      "Dracula, Count (Fictitious character) -- Fiction",
+      "Epistolary fiction",
+      "Gothic fiction",
+      "Horror tales",
+      "Transylvania (Romania) -- Fiction"
+    ],
+    "downloads": 148415,
+    "epubUrl": "https://www.gutenberg.org/ebooks/345.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg"
+  },
+  {
+    "id": "48320",
+    "title": "Adventures of Sherlock Holmes: Illustrated",
+    "author": "Doyle, Arthur Conan",
+    "subjects": [
+      "Detective and mystery stories, English",
+      "Holmes, Sherlock (Fictitious character) -- Fiction",
+      "Private investigators -- England -- Fiction"
+    ],
+    "downloads": 148398,
+    "epubUrl": "https://www.gutenberg.org/ebooks/48320.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/48320/pg48320.cover.medium.jpg"
   },
   {
     "id": "2641",
@@ -43,34 +129,6 @@
     "downloads": 142569,
     "epubUrl": "https://www.gutenberg.org/ebooks/2641.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/2641/pg2641.cover.medium.jpg"
-  },
-  {
-    "id": "1727",
-    "title": "The Odyssey: Rendered into English prose for the use of those who cannot read the original",
-    "author": "Homer",
-    "subjects": [
-      "Epic poetry, Greek -- Translations into English",
-      "Homer -- Translations into English",
-      "Odysseus, King of Ithaca (Mythological character)"
-    ],
-    "downloads": 139227,
-    "epubUrl": "https://www.gutenberg.org/ebooks/1727.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/1727/pg1727.cover.medium.jpg"
-  },
-  {
-    "id": "1513",
-    "title": "Romeo and Juliet",
-    "author": "Shakespeare, William",
-    "subjects": [
-      "Conflict of generations -- Drama",
-      "Juliet (Fictitious character) -- Drama",
-      "Romeo (Fictitious character) -- Drama",
-      "Tragedies (Drama)",
-      "Vendetta -- Drama"
-    ],
-    "downloads": 132311,
-    "epubUrl": "https://www.gutenberg.org/ebooks/1513.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/1513/pg1513.cover.medium.jpg"
   },
   {
     "id": "34413",
@@ -103,6 +161,21 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/2554/pg2554.cover.medium.jpg"
   },
   {
+    "id": "2852",
+    "title": "The Hound of the Baskervilles",
+    "author": "Doyle, Arthur Conan",
+    "subjects": [
+      "Blessing and cursing -- Fiction",
+      "Dartmoor (England) -- Fiction",
+      "Detective and mystery stories",
+      "Dogs -- Fiction",
+      "Holmes, Sherlock (Fictitious character) -- Fiction"
+    ],
+    "downloads": 119044,
+    "epubUrl": "https://www.gutenberg.org/ebooks/2852.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/2852/pg2852.cover.medium.jpg"
+  },
+  {
     "id": "3268",
     "title": "The Mysteries of Udolpho",
     "author": "Radcliffe, Ann Ward",
@@ -116,6 +189,19 @@
     "downloads": 117670,
     "epubUrl": "https://www.gutenberg.org/ebooks/3268.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/3268/pg3268.cover.medium.jpg"
+  },
+  {
+    "id": "108",
+    "title": "The Return of Sherlock Holmes",
+    "author": "Doyle, Arthur Conan",
+    "subjects": [
+      "Detective and mystery stories, English",
+      "Holmes, Sherlock (Fictitious character) -- Fiction",
+      "Private investigators -- England -- Fiction"
+    ],
+    "downloads": 114572,
+    "epubUrl": "https://www.gutenberg.org/ebooks/108.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/108/pg108.cover.medium.jpg"
   },
   {
     "id": "2465",
@@ -143,19 +229,15 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/65238/pg65238.cover.medium.jpg"
   },
   {
-    "id": "21839",
-    "title": "Sense and Sensibility",
-    "author": "Austen, Jane",
+    "id": "100",
+    "title": "The Complete Works of William Shakespeare",
+    "author": "Shakespeare, William",
     "subjects": [
-      "Domestic fiction",
-      "England -- Fiction",
-      "England -- Social life and customs -- 19th century -- Fiction",
-      "Gentry -- England -- Fiction",
-      "Inheritance and succession -- Fiction"
+      "English drama -- Early modern and Elizabethan, 1500-1600"
     ],
-    "downloads": 107602,
-    "epubUrl": "https://www.gutenberg.org/ebooks/21839.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/21839/pg21839.cover.medium.jpg"
+    "downloads": 111587,
+    "epubUrl": "https://www.gutenberg.org/ebooks/100.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/100/pg100.cover.medium.jpg"
   },
   {
     "id": "2868",
@@ -168,19 +250,6 @@
     "downloads": 106137,
     "epubUrl": "https://www.gutenberg.org/ebooks/2868.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/2868/pg2868.cover.medium.jpg"
-  },
-  {
-    "id": "1661",
-    "title": "The Adventures of Sherlock Holmes",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories, English",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 105900,
-    "epubUrl": "https://www.gutenberg.org/ebooks/1661.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg"
   },
   {
     "id": "1260",
@@ -236,6 +305,21 @@
     "downloads": 99345,
     "epubUrl": "https://www.gutenberg.org/ebooks/22541.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/22541/pg22541.cover.medium.jpg"
+  },
+  {
+    "id": "37106",
+    "title": "Little Women; Or, Meg, Jo, Beth, and Amy",
+    "author": "Alcott, Louisa May",
+    "subjects": [
+      "Autobiographical fiction",
+      "Bildungsromans",
+      "Domestic fiction",
+      "Family life -- New England -- Fiction",
+      "March family (Fictitious characters) -- Fiction"
+    ],
+    "downloads": 99226,
+    "epubUrl": "https://www.gutenberg.org/ebooks/37106.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/37106/pg37106.cover.medium.jpg"
   },
   {
     "id": "831",
@@ -305,17 +389,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg"
   },
   {
-    "id": "100",
-    "title": "The Complete Works of William Shakespeare",
-    "author": "Shakespeare, William",
-    "subjects": [
-      "English drama -- Early modern and Elizabethan, 1500-1600"
-    ],
-    "downloads": 93902,
-    "epubUrl": "https://www.gutenberg.org/ebooks/100.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/100/pg100.cover.medium.jpg"
-  },
-  {
     "id": "601",
     "title": "The Monk: A Romance",
     "author": "Lewis, M. G. (Matthew Gregory)",
@@ -340,36 +413,6 @@
     "downloads": 89724,
     "epubUrl": "https://www.gutenberg.org/ebooks/3011.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/3011/pg3011.cover.medium.jpg"
-  },
-  {
-    "id": "42671",
-    "title": "Pride and Prejudice",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Courtship -- Fiction",
-      "Domestic fiction",
-      "England -- Fiction",
-      "Love stories",
-      "Sisters -- Fiction"
-    ],
-    "downloads": 89612,
-    "epubUrl": "https://www.gutenberg.org/ebooks/42671.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/42671/pg42671.cover.medium.jpg"
-  },
-  {
-    "id": "345",
-    "title": "Dracula",
-    "author": "Stoker, Bram",
-    "subjects": [
-      "Dracula, Count (Fictitious character) -- Fiction",
-      "Epistolary fiction",
-      "Gothic fiction",
-      "Horror tales",
-      "Transylvania (Romania) -- Fiction"
-    ],
-    "downloads": 89208,
-    "epubUrl": "https://www.gutenberg.org/ebooks/345.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg"
   },
   {
     "id": "1695",
@@ -441,36 +484,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/2680/pg2680.cover.medium.jpg"
   },
   {
-    "id": "62215",
-    "title": "Le Fantôme de l'Opéra",
-    "author": "Leroux, Gaston",
-    "subjects": [
-      "Composers -- Fiction",
-      "French fiction -- 20th century",
-      "Horror tales",
-      "Musical fiction",
-      "Opera -- Fiction"
-    ],
-    "downloads": 87013,
-    "epubUrl": "https://www.gutenberg.org/ebooks/62215.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/62215/pg62215.cover.medium.jpg"
-  },
-  {
-    "id": "37106",
-    "title": "Little Women; Or, Meg, Jo, Beth, and Amy",
-    "author": "Alcott, Louisa May",
-    "subjects": [
-      "Autobiographical fiction",
-      "Bildungsromans",
-      "Domestic fiction",
-      "Family life -- New England -- Fiction",
-      "March family (Fictitious characters) -- Fiction"
-    ],
-    "downloads": 86348,
-    "epubUrl": "https://www.gutenberg.org/ebooks/37106.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/37106/pg37106.cover.medium.jpg"
-  },
-  {
     "id": "24793",
     "title": "Blow The Man Down: A Romance Of The Coast",
     "author": "Day, Holman",
@@ -513,19 +526,18 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/145/pg145.cover.medium.jpg"
   },
   {
-    "id": "18143",
-    "title": "Roméo et Juliette: Tragédie",
-    "author": "Shakespeare, William",
+    "id": "6130",
+    "title": "The Iliad",
+    "author": "Homer",
     "subjects": [
-      "Conflict of generations -- Drama",
-      "Juliet (Fictitious character) -- Drama",
-      "Romeo (Fictitious character) -- Drama",
-      "Tragedies (Drama)",
-      "Vendetta -- Drama"
+      "Achilles (Mythological character) -- Poetry",
+      "Classical literature",
+      "Epic poetry, Greek -- Translations into English",
+      "Trojan War -- Poetry"
     ],
-    "downloads": 83550,
-    "epubUrl": "https://www.gutenberg.org/ebooks/18143.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/18143/pg18143.cover.medium.jpg"
+    "downloads": 83637,
+    "epubUrl": "https://www.gutenberg.org/ebooks/6130.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/6130/pg6130.cover.medium.jpg"
   },
   {
     "id": "40284",
@@ -579,21 +591,6 @@
     "downloads": 79893,
     "epubUrl": "https://www.gutenberg.org/ebooks/76639.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76639/pg76639.cover.medium.jpg"
-  },
-  {
-    "id": "43",
-    "title": "The strange case of Dr. Jekyll and Mr. Hyde",
-    "author": "Stevenson, Robert Louis",
-    "subjects": [
-      "Horror tales",
-      "London (England) -- Fiction",
-      "Multiple personality -- Fiction",
-      "Physicians -- Fiction",
-      "Psychological fiction"
-    ],
-    "downloads": 79438,
-    "epubUrl": "https://www.gutenberg.org/ebooks/43.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/43/pg43.cover.medium.jpg"
   },
   {
     "id": "31635",
@@ -758,21 +755,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/20203/pg20203.cover.medium.jpg"
   },
   {
-    "id": "42",
-    "title": "The strange case of Dr. Jekyll and Mr. Hyde",
-    "author": "Stevenson, Robert Louis",
-    "subjects": [
-      "Horror tales",
-      "London (England) -- Fiction",
-      "Multiple personality -- Fiction",
-      "Physicians -- Fiction",
-      "Psychological fiction"
-    ],
-    "downloads": 76206,
-    "epubUrl": "https://www.gutenberg.org/ebooks/42.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/42/pg42.cover.medium.jpg"
-  },
-  {
     "id": "33823",
     "title": "The Gay Adventure: A Romance",
     "author": "Bird, Richard",
@@ -797,6 +779,21 @@
     "downloads": 75993,
     "epubUrl": "https://www.gutenberg.org/ebooks/564.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/564/pg564.cover.medium.jpg"
+  },
+  {
+    "id": "43936",
+    "title": "The Wonderful Wizard of Oz",
+    "author": "Baum, L. Frank (Lyman Frank)",
+    "subjects": [
+      "Courage -- Juvenile fiction",
+      "Cowardly Lion (Fictitious character) -- Juvenile fiction",
+      "Cyclones -- Juvenile fiction",
+      "Dreams -- Juvenile fiction",
+      "Fantasy literature"
+    ],
+    "downloads": 75773,
+    "epubUrl": "https://www.gutenberg.org/ebooks/43936.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/43936/pg43936.cover.medium.jpg"
   },
   {
     "id": "18875",
@@ -1101,21 +1098,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/31469/pg31469.cover.medium.jpg"
   },
   {
-    "id": "32854",
-    "title": "Arsène Lupin, gentleman-cambrioleur",
-    "author": "Leblanc, Maurice",
-    "subjects": [
-      "Adventure stories, French",
-      "Burglars -- Fiction",
-      "Lupin, Arsène (Fictitious character) -- Fiction",
-      "Mystery and detective stories",
-      "Short stories"
-    ],
-    "downloads": 70857,
-    "epubUrl": "https://www.gutenberg.org/ebooks/32854.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/32854/pg32854.cover.medium.jpg"
-  },
-  {
     "id": "34323",
     "title": "The Samurai Strategy",
     "author": "Hoover, Thomas",
@@ -1125,21 +1107,6 @@
     "downloads": 70662,
     "epubUrl": "https://www.gutenberg.org/ebooks/34323.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/34323/pg34323.cover.medium.jpg"
-  },
-  {
-    "id": "17989",
-    "title": "Le comte de Monte-Cristo, Tome I",
-    "author": "Dumas, Alexandre, Maquet, Auguste",
-    "subjects": [
-      "Adventure stories",
-      "Dantès, Edmond (Fictitious character) -- Fiction",
-      "France -- History -- 19th century -- Fiction",
-      "Historical fiction",
-      "Pirates -- Fiction"
-    ],
-    "downloads": 70570,
-    "epubUrl": "https://www.gutenberg.org/ebooks/17989.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/17989/pg17989.cover.medium.jpg"
   },
   {
     "id": "30434",
@@ -1303,32 +1270,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/17157/pg17157.cover.medium.jpg"
   },
   {
-    "id": "28718",
-    "title": "Les crimes de l'amour: Précédé d'un avant-propos, suivi des idées sur les romans, de l'auteur des crimes de l'amour à Villeterque, d'une notice bio-bibliographique du marquis de Sade: l'homme et ses écrits et du discours prononcé par le marquis de Sade à la section des piques.",
-    "author": "Sade, marquis de",
-    "subjects": [
-      "Erotic literature, French"
-    ],
-    "downloads": 68201,
-    "epubUrl": "https://www.gutenberg.org/ebooks/28718.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/28718/pg28718.cover.medium.jpg"
-  },
-  {
-    "id": "1112",
-    "title": "Romeo and Juliet",
-    "author": "Shakespeare, William",
-    "subjects": [
-      "Conflict of generations -- Drama",
-      "Juliet (Fictitious character) -- Drama",
-      "Romeo (Fictitious character) -- Drama",
-      "Vendetta -- Drama",
-      "Verona (Italy) -- Drama"
-    ],
-    "downloads": 68033,
-    "epubUrl": "https://www.gutenberg.org/ebooks/1112.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/files/1112/cover.jpg"
-  },
-  {
     "id": "10441",
     "title": "The Green Mouse",
     "author": "Chambers, Robert W. (Robert William)",
@@ -1381,20 +1322,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/20546/pg20546.cover.medium.jpg"
   },
   {
-    "id": "13951",
-    "title": "Les trois mousquetaires",
-    "author": "Dumas, Alexandre, Maquet, Auguste",
-    "subjects": [
-      "Adventure and adventurers -- Fiction",
-      "France -- History -- Louis XIII, 1610-1643 -- Fiction",
-      "Historical fiction",
-      "Swordsmen -- Fiction"
-    ],
-    "downloads": 66748,
-    "epubUrl": "https://www.gutenberg.org/ebooks/13951.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/13951/pg13951.cover.medium.jpg"
-  },
-  {
     "id": "244",
     "title": "A Study in Scarlet",
     "author": "Doyle, Arthur Conan",
@@ -1407,32 +1334,6 @@
     "downloads": 66652,
     "epubUrl": "https://www.gutenberg.org/ebooks/244.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/244/pg244.cover.medium.jpg"
-  },
-  {
-    "id": "19919",
-    "title": "Maman Léo: Les Habits Noirs Tome V",
-    "author": "Féval, Paul",
-    "subjects": [
-      "French fiction -- 19th century"
-    ],
-    "downloads": 66558,
-    "epubUrl": "https://www.gutenberg.org/ebooks/19919.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/19919/pg19919.cover.medium.jpg"
-  },
-  {
-    "id": "161",
-    "title": "Sense and Sensibility",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Domestic fiction",
-      "England -- Fiction",
-      "England -- Social life and customs -- 19th century -- Fiction",
-      "Gentry -- England -- Fiction",
-      "Inheritance and succession -- Fiction"
-    ],
-    "downloads": 66470,
-    "epubUrl": "https://www.gutenberg.org/ebooks/161.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/161/pg161.cover.medium.jpg"
   },
   {
     "id": "26315",
@@ -1557,21 +1458,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/16433/pg16433.cover.medium.jpg"
   },
   {
-    "id": "2852",
-    "title": "The Hound of the Baskervilles",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Blessing and cursing -- Fiction",
-      "Dartmoor (England) -- Fiction",
-      "Detective and mystery stories",
-      "Dogs -- Fiction",
-      "Holmes, Sherlock (Fictitious character) -- Fiction"
-    ],
-    "downloads": 65125,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2852.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2852/pg2852.cover.medium.jpg"
-  },
-  {
     "id": "23172",
     "title": "The Damned Thing: 1898, From \"In the Midst of Life\"",
     "author": "Bierce, Ambrose",
@@ -1662,20 +1548,6 @@
     "downloads": 64490,
     "epubUrl": "https://www.gutenberg.org/ebooks/12758.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/12758/pg12758.cover.medium.jpg"
-  },
-  {
-    "id": "14287",
-    "title": "L'île mystérieuse",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Adventure stories",
-      "Castaways -- Fiction",
-      "Islands of the Pacific -- Fiction",
-      "Science fiction"
-    ],
-    "downloads": 64084,
-    "epubUrl": "https://www.gutenberg.org/ebooks/14287.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/14287/pg14287.cover.medium.jpg"
   },
   {
     "id": "11982",
@@ -2161,34 +2033,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/10102/pg10102.cover.medium.jpg"
   },
   {
-    "id": "45839",
-    "title": "Dracula",
-    "author": "Stoker, Bram",
-    "subjects": [
-      "Dracula, Count (Fictitious character) -- Fiction",
-      "Epistolary fiction",
-      "Gothic fiction",
-      "Horror tales",
-      "Transylvania (Romania) -- Fiction"
-    ],
-    "downloads": 59207,
-    "epubUrl": "https://www.gutenberg.org/ebooks/45839.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/45839/pg45839.cover.medium.jpg"
-  },
-  {
-    "id": "108",
-    "title": "The Return of Sherlock Holmes",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories, English",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 59188,
-    "epubUrl": "https://www.gutenberg.org/ebooks/108.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/108/pg108.cover.medium.jpg"
-  },
-  {
     "id": "33118",
     "title": "Just Around the Corner: Romance en casserole",
     "author": "Hurst, Fannie",
@@ -2478,21 +2322,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/2760/pg2760.cover.medium.jpg"
   },
   {
-    "id": "47530",
-    "title": "Oliver Twist, Vol. 2 (of 3)",
-    "author": "Dickens, Charles",
-    "subjects": [
-      "Bildungsromans",
-      "Boys -- Fiction",
-      "Criminals -- Fiction",
-      "Kidnapping victims -- Fiction",
-      "London (England) -- Fiction"
-    ],
-    "downloads": 56085,
-    "epubUrl": "https://www.gutenberg.org/ebooks/47530.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/47530/pg47530.cover.medium.jpg"
-  },
-  {
     "id": "2162",
     "title": "Anarchism and Other Essays",
     "author": "Goldman, Emma",
@@ -2556,19 +2385,6 @@
     "downloads": 55734,
     "epubUrl": "https://www.gutenberg.org/ebooks/2087.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/2087/pg2087.cover.medium.jpg"
-  },
-  {
-    "id": "221",
-    "title": "The Return of Sherlock Holmes",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories, English",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 55384,
-    "epubUrl": "https://www.gutenberg.org/ebooks/221.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/221/pg221.cover.medium.jpg"
   },
   {
     "id": "8486",
@@ -2705,21 +2521,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/79/pg79.cover.medium.jpg"
   },
   {
-    "id": "61851",
-    "title": "El crimen y el castigo",
-    "author": "Dostoyevsky, Fyodor",
-    "subjects": [
-      "Crime -- Psychological aspects -- Fiction",
-      "Detective and mystery stories",
-      "Murder -- Fiction",
-      "Psychological fiction",
-      "Saint Petersburg (Russia) -- Fiction"
-    ],
-    "downloads": 54696,
-    "epubUrl": "https://www.gutenberg.org/ebooks/61851.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/61851/pg61851.cover.medium.jpg"
-  },
-  {
     "id": "1063",
     "title": "The Cask of Amontillado",
     "author": "Poe, Edgar Allan",
@@ -2742,20 +2543,6 @@
     "downloads": 54631,
     "epubUrl": "https://www.gutenberg.org/ebooks/389.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/389/pg389.cover.medium.jpg"
-  },
-  {
-    "id": "4791",
-    "title": "Voyage au Centre de la Terre",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Adventure stories",
-      "Earth (Planet) -- Core -- Fiction",
-      "Science fiction",
-      "Voyages, Imaginary -- Fiction"
-    ],
-    "downloads": 54560,
-    "epubUrl": "https://www.gutenberg.org/ebooks/4791.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/4791/pg4791.cover.medium.jpg"
   },
   {
     "id": "3321",
@@ -2871,21 +2658,6 @@
     "downloads": 54063,
     "epubUrl": "https://www.gutenberg.org/ebooks/524.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/524/pg524.cover.medium.jpg"
-  },
-  {
-    "id": "3070",
-    "title": "The Hound of the Baskervilles",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Blessing and cursing -- Fiction",
-      "Dartmoor (England) -- Fiction",
-      "Detective and mystery stories",
-      "Dogs -- Fiction",
-      "Holmes, Sherlock (Fictitious character) -- Fiction"
-    ],
-    "downloads": 53919,
-    "epubUrl": "https://www.gutenberg.org/ebooks/3070.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/3070/pg3070.cover.medium.jpg"
   },
   {
     "id": "1510",
@@ -3215,21 +2987,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/120/pg120.cover.medium.jpg"
   },
   {
-    "id": "50285",
-    "title": "Dr. Mabuse, der Spieler : $b Roman",
-    "author": "Jacques, Norbert",
-    "subjects": [
-      "Criminals -- Fiction",
-      "Gamblers -- Fiction",
-      "Germany -- Fiction",
-      "Hypnotism and crime -- Fiction",
-      "Murderers -- Fiction"
-    ],
-    "downloads": 50371,
-    "epubUrl": "https://www.gutenberg.org/ebooks/50285.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/50285/pg50285.cover.medium.jpg"
-  },
-  {
     "id": "70200",
     "title": "Pen-portraits of literary women : $b by themselves and others, Volume 2 (of 2)",
     "author": "Unknown Author",
@@ -3255,21 +3012,6 @@
     "downloads": 49985,
     "epubUrl": "https://www.gutenberg.org/ebooks/76.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76/pg76.cover.medium.jpg"
-  },
-  {
-    "id": "55",
-    "title": "The Wonderful Wizard of Oz",
-    "author": "Baum, L. Frank (Lyman Frank)",
-    "subjects": [
-      "Courage -- Juvenile fiction",
-      "Cowardly Lion (Fictitious character) -- Juvenile fiction",
-      "Cyclones -- Juvenile fiction",
-      "Dreams -- Juvenile fiction",
-      "Fantasy literature"
-    ],
-    "downloads": 49865,
-    "epubUrl": "https://www.gutenberg.org/ebooks/55.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/55/pg55.cover.medium.jpg"
   },
   {
     "id": "16389",
@@ -3422,20 +3164,6 @@
     "downloads": 46244,
     "epubUrl": "https://www.gutenberg.org/ebooks/46976.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/46976/pg46976.cover.medium.jpg"
-  },
-  {
-    "id": "6130",
-    "title": "The Iliad",
-    "author": "Homer",
-    "subjects": [
-      "Achilles (Mythological character) -- Poetry",
-      "Classical literature",
-      "Epic poetry, Greek -- Translations into English",
-      "Trojan War -- Poetry"
-    ],
-    "downloads": 46103,
-    "epubUrl": "https://www.gutenberg.org/ebooks/6130.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/6130/pg6130.cover.medium.jpg"
   },
   {
     "id": "64317",
@@ -3695,17 +3423,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/53419/pg53419.cover.medium.jpg"
   },
   {
-    "id": "78027",
-    "title": "Les enchantements de la forêt",
-    "author": "Theuriet, André",
-    "subjects": [
-      "Natural history -- Outdoor books"
-    ],
-    "downloads": 43689,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78027.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78027/pg78027.cover.medium.jpg"
-  },
-  {
     "id": "77092",
     "title": "She who sleeps : $b A romance of New York and the Nile",
     "author": "Rohmer, Sax",
@@ -3760,19 +3477,18 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/27673/pg27673.cover.medium.jpg"
   },
   {
-    "id": "76412",
-    "title": "Le cas étrange du docteur Jekyll; Un logement pour la nuit",
-    "author": "Stevenson, Robert Louis",
+    "id": "17396",
+    "title": "The Secret Garden",
+    "author": "Burnett, Frances Hodgson",
     "subjects": [
-      "Horror tales",
-      "London (England) -- Fiction",
-      "Multiple personality -- Fiction",
-      "Physicians -- Fiction",
-      "Psychological fiction"
+      "Gardens -- Juvenile fiction",
+      "Orphans -- Juvenile fiction",
+      "People with disabilities -- Juvenile fiction",
+      "Yorkshire (England) -- Juvenile fiction"
     ],
-    "downloads": 43366,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76412.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76412/pg76412.cover.medium.jpg"
+    "downloads": 43217,
+    "epubUrl": "https://www.gutenberg.org/ebooks/17396.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/17396/pg17396.cover.medium.jpg"
   },
   {
     "id": "55059",
@@ -3811,19 +3527,6 @@
     "downloads": 42723,
     "epubUrl": "https://www.gutenberg.org/ebooks/4085.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/4085/pg4085.cover.medium.jpg"
-  },
-  {
-    "id": "48320",
-    "title": "Adventures of Sherlock Holmes: Illustrated",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories, English",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 42498,
-    "epubUrl": "https://www.gutenberg.org/ebooks/48320.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/48320/pg48320.cover.medium.jpg"
   },
   {
     "id": "48438",
@@ -3875,18 +3578,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/51143/pg51143.cover.medium.jpg"
   },
   {
-    "id": "29049",
-    "title": "Histoire amoureuse des Gaules; suivie des Romans historico-satiriques du XVIIe siècle, Tome I",
-    "author": "Bussy, Roger de Rabutin, comte de",
-    "subjects": [
-      "Erotic literature",
-      "France -- Court and courtiers"
-    ],
-    "downloads": 41477,
-    "epubUrl": "https://www.gutenberg.org/ebooks/29049.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/29049/pg29049.cover.medium.jpg"
-  },
-  {
     "id": "21765",
     "title": "The Metamorphoses of Ovid, Books I-VII",
     "author": "Ovid",
@@ -3915,6 +3606,20 @@
     "downloads": 41246,
     "epubUrl": "https://www.gutenberg.org/ebooks/32562.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/32562/pg32562.cover.medium.jpg"
+  },
+  {
+    "id": "26",
+    "title": "Paradise Lost",
+    "author": "Milton, John",
+    "subjects": [
+      "Adam (Biblical figure) -- Poetry",
+      "Bible. Genesis -- History of Biblical events -- Poetry",
+      "Eve (Biblical figure) -- Poetry",
+      "Fall of man -- Poetry"
+    ],
+    "downloads": 41123,
+    "epubUrl": "https://www.gutenberg.org/ebooks/26.epub3.images",
+    "coverUrl": "https://www.gutenberg.org/cache/epub/26/pg26.cover.medium.jpg"
   },
   {
     "id": "43098",
@@ -4497,20 +4202,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/521/pg521.cover.medium.jpg"
   },
   {
-    "id": "2199",
-    "title": "The Iliad",
-    "author": "Homer",
-    "subjects": [
-      "Achilles (Mythological character)",
-      "Classical literature",
-      "Epic poetry, Greek -- Translations into English",
-      "Trojan War"
-    ],
-    "downloads": 37534,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2199.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2199/pg2199.cover.medium.jpg"
-  },
-  {
     "id": "33644",
     "title": "The Secret of the Ninth Planet",
     "author": "Wollheim, Donald A.",
@@ -4782,21 +4473,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/25326/pg25326.cover.medium.jpg"
   },
   {
-    "id": "38674",
-    "title": "De la terre à la lune, trajet direct en 97 heures 20 minutes",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Manned space flight -- Fiction",
-      "Moon -- Fiction",
-      "Science fiction",
-      "Space flight to the moon -- Fiction",
-      "Space ships -- Fiction"
-    ],
-    "downloads": 35189,
-    "epubUrl": "https://www.gutenberg.org/ebooks/38674.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/38674/pg38674.cover.medium.jpg"
-  },
-  {
     "id": "44833",
     "title": "Chaucer's Works, Volume 2 — Boethius and Troilus",
     "author": "Chaucer, Geoffrey",
@@ -4977,20 +4653,6 @@
     "downloads": 33931,
     "epubUrl": "https://www.gutenberg.org/ebooks/11339.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/11339/pg11339.cover.medium.jpg"
-  },
-  {
-    "id": "113",
-    "title": "The Secret Garden",
-    "author": "Burnett, Frances Hodgson",
-    "subjects": [
-      "Gardens -- Juvenile fiction",
-      "Orphans -- Juvenile fiction",
-      "People with disabilities -- Juvenile fiction",
-      "Yorkshire (England) -- Juvenile fiction"
-    ],
-    "downloads": 33855,
-    "epubUrl": "https://www.gutenberg.org/ebooks/113.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/113/pg113.cover.medium.jpg"
   },
   {
     "id": "40059",
@@ -5259,21 +4921,6 @@
     "downloads": 32352,
     "epubUrl": "https://www.gutenberg.org/ebooks/36375.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/36375/pg36375.cover.medium.jpg"
-  },
-  {
-    "id": "25946",
-    "title": "Gevoel en verstand",
-    "author": "Austen, Jane",
-    "subjects": [
-      "Domestic fiction",
-      "England -- Fiction",
-      "England -- Social life and customs -- 19th century -- Fiction",
-      "Inheritance and succession -- Fiction",
-      "Love stories"
-    ],
-    "downloads": 32275,
-    "epubUrl": "https://www.gutenberg.org/ebooks/25946.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/25946/pg25946.cover.medium.jpg"
   },
   {
     "id": "4300",
@@ -5604,17 +5251,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/20158/pg20158.cover.medium.jpg"
   },
   {
-    "id": "66452",
-    "title": "Die Liebe: Novelle",
-    "author": "Kaltneker, Hans",
-    "subjects": [
-      "Austrian fiction -- 20th century"
-    ],
-    "downloads": 30752,
-    "epubUrl": "https://www.gutenberg.org/ebooks/66452.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/66452/pg66452.cover.medium.jpg"
-  },
-  {
     "id": "34181",
     "title": "Irene Iddesleigh",
     "author": "Ros, Amanda McKittrick",
@@ -5732,20 +5368,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/1636/pg1636.cover.medium.jpg"
   },
   {
-    "id": "20",
-    "title": "Paradise Lost",
-    "author": "Milton, John",
-    "subjects": [
-      "Adam (Biblical figure) -- Poetry",
-      "Bible. Genesis -- History of Biblical events -- Poetry",
-      "Eve (Biblical figure) -- Poetry",
-      "Fall of man -- Poetry"
-    ],
-    "downloads": 30425,
-    "epubUrl": "https://www.gutenberg.org/ebooks/20.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/20/pg20.cover.medium.jpg"
-  },
-  {
     "id": "19441",
     "title": "My Friend the Chauffeur",
     "author": "Williamson, C. N. (Charles Norris), Williamson, A. M. (Alice Muriel)",
@@ -5779,17 +5401,6 @@
     "downloads": 30348,
     "epubUrl": "https://www.gutenberg.org/ebooks/5000.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/5000/pg5000.cover.medium.jpg"
-  },
-  {
-    "id": "36635",
-    "title": "Amitié amoureuse",
-    "author": "Lecomte du Noüy, Hermine Oudinot",
-    "subjects": [
-      "French fiction -- 19th century"
-    ],
-    "downloads": 30287,
-    "epubUrl": "https://www.gutenberg.org/ebooks/36635.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/36635/pg36635.cover.medium.jpg"
   },
   {
     "id": "36346",
@@ -5826,18 +5437,6 @@
     "downloads": 30157,
     "epubUrl": "https://www.gutenberg.org/ebooks/14860.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/14860/pg14860.cover.medium.jpg"
-  },
-  {
-    "id": "68400",
-    "title": "Der Marquis de Sade und seine Zeit.",
-    "author": "Bloch, Iwan",
-    "subjects": [
-      "Paraphilias",
-      "Sade, marquis de, 1740-1814"
-    ],
-    "downloads": 30135,
-    "epubUrl": "https://www.gutenberg.org/ebooks/68400.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/68400/pg68400.cover.medium.jpg"
   },
   {
     "id": "38720",
@@ -5977,18 +5576,6 @@
     "downloads": 29662,
     "epubUrl": "https://www.gutenberg.org/ebooks/35249.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/35249/pg35249.cover.medium.jpg"
-  },
-  {
-    "id": "15113",
-    "title": "Vie de Jésus",
-    "author": "Renan, Ernest",
-    "subjects": [
-      "Christian biography -- Palestine",
-      "Jesus Christ -- Biography"
-    ],
-    "downloads": 29659,
-    "epubUrl": "https://www.gutenberg.org/ebooks/15113.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/15113/pg15113.cover.medium.jpg"
   },
   {
     "id": "228",
@@ -6601,18 +6188,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/73/pg73.cover.medium.jpg"
   },
   {
-    "id": "65661",
-    "title": "Der Zauberberg. Erster Band",
-    "author": "Mann, Thomas",
-    "subjects": [
-      "Germany -- Fiction",
-      "Sanatoriums -- Fiction"
-    ],
-    "downloads": 27075,
-    "epubUrl": "https://www.gutenberg.org/ebooks/65661.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/65661/pg65661.cover.medium.jpg"
-  },
-  {
     "id": "57426",
     "title": "Baron Trump's Marvellous Underground Journey",
     "author": "Lockwood, Ingersoll",
@@ -6666,20 +6241,6 @@
     "downloads": 26844,
     "epubUrl": "https://www.gutenberg.org/ebooks/45109.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/45109/pg45109.cover.medium.jpg"
-  },
-  {
-    "id": "2229",
-    "title": "Faust: Der Tragödie erster Teil",
-    "author": "Goethe, Johann Wolfgang von",
-    "subjects": [
-      "Faust, -approximately 1540 -- Drama",
-      "German poetry",
-      "Legends -- Germany -- Drama",
-      "Magicians -- Drama"
-    ],
-    "downloads": 26814,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2229.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2229/pg2229.cover.medium.jpg"
   },
   {
     "id": "11618",
@@ -6778,18 +6339,6 @@
     "downloads": 26633,
     "epubUrl": "https://www.gutenberg.org/ebooks/9774.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/9774/pg9774.cover.medium.jpg"
-  },
-  {
-    "id": "1012",
-    "title": "La Divina Commedia di Dante",
-    "author": "Dante Alighieri",
-    "subjects": [
-      "Epic poetry, Italian",
-      "Italian poetry -- To 1400"
-    ],
-    "downloads": 26626,
-    "epubUrl": "https://www.gutenberg.org/ebooks/1012.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/1012/pg1012.cover.medium.jpg"
   },
   {
     "id": "5225",
@@ -6895,21 +6444,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/3891/pg3891.cover.medium.jpg"
   },
   {
-    "id": "43936",
-    "title": "The Wonderful Wizard of Oz",
-    "author": "Baum, L. Frank (Lyman Frank)",
-    "subjects": [
-      "Courage -- Juvenile fiction",
-      "Cowardly Lion (Fictitious character) -- Juvenile fiction",
-      "Cyclones -- Juvenile fiction",
-      "Dreams -- Juvenile fiction",
-      "Fantasy literature"
-    ],
-    "downloads": 25908,
-    "epubUrl": "https://www.gutenberg.org/ebooks/43936.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/43936/pg43936.cover.medium.jpg"
-  },
-  {
     "id": "6867",
     "title": "Lineage, Life and Labors of José Rizal, Philippine Patriot",
     "author": "Craig, Austin",
@@ -6960,21 +6494,6 @@
     "downloads": 25693,
     "epubUrl": "https://www.gutenberg.org/ebooks/83.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/83/pg83.cover.medium.jpg"
-  },
-  {
-    "id": "2489",
-    "title": "Moby Dick; Or, The Whale",
-    "author": "Melville, Herman",
-    "subjects": [
-      "Adventure stories",
-      "Ahab, Captain (Fictitious character) -- Fiction",
-      "Mentally ill -- Fiction",
-      "Psychological fiction",
-      "Sea stories"
-    ],
-    "downloads": 25581,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2489.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2489/pg2489.cover.medium.jpg"
   },
   {
     "id": "57821",
@@ -7037,21 +6556,6 @@
     "downloads": 24851,
     "epubUrl": "https://www.gutenberg.org/ebooks/3526.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/3526/pg3526.cover.medium.jpg"
-  },
-  {
-    "id": "2419",
-    "title": "La dame aux camélias",
-    "author": "Dumas, Alexandre",
-    "subjects": [
-      "Courtesans -- Fiction",
-      "Fathers and sons -- Fiction",
-      "Love stories",
-      "Paris (France) -- Fiction",
-      "Tuberculosis -- Patients -- Fiction"
-    ],
-    "downloads": 24735,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2419.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2419/pg2419.cover.medium.jpg"
   },
   {
     "id": "4206",
@@ -7117,17 +6621,6 @@
     "downloads": 24467,
     "epubUrl": "https://www.gutenberg.org/ebooks/3823.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/3823/pg3823.cover.medium.jpg"
-  },
-  {
-    "id": "69944",
-    "title": "Jud Süß",
-    "author": "Feuchtwanger, Lion",
-    "subjects": [
-      "Süss-Oppenheimer, Joseph, 1698 or 1699-1738 -- Fiction"
-    ],
-    "downloads": 24414,
-    "epubUrl": "https://www.gutenberg.org/ebooks/69944.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/69944/pg69944.cover.medium.jpg"
   },
   {
     "id": "55300",
@@ -7273,17 +6766,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78017/pg78017.cover.medium.jpg"
   },
   {
-    "id": "78052",
-    "title": "Andanzas y visiones españolas",
-    "author": "Unamuno, Miguel de",
-    "subjects": [
-      "Spain -- Description and travel"
-    ],
-    "downloads": 23485,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78052.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78052/pg78052.cover.medium.jpg"
-  },
-  {
     "id": "5222",
     "title": "The Satyricon — Volume 05: Crotona Affairs",
     "author": "Petronius Arbiter",
@@ -7394,32 +6876,6 @@
     "downloads": 23279,
     "epubUrl": "https://www.gutenberg.org/ebooks/78105.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78105/pg78105.cover.medium.jpg"
-  },
-  {
-    "id": "78068",
-    "title": "Los miserables - Tomo 2 (de 2)",
-    "author": "Hugo, Victor",
-    "subjects": [
-      "Epic literature",
-      "Ex-convicts -- Fiction",
-      "Historical fiction",
-      "Orphans -- Fiction",
-      "Paris (France) -- Fiction"
-    ],
-    "downloads": 23276,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78068.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78068/pg78068.cover.medium.jpg"
-  },
-  {
-    "id": "78064",
-    "title": "Lucifer : $b roman moderne",
-    "author": "Magre, Maurice",
-    "subjects": [
-      "French fiction -- 20th century"
-    ],
-    "downloads": 23242,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78064.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78064/pg78064.cover.medium.jpg"
   },
   {
     "id": "78013",
@@ -7671,29 +7127,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/77056/pg77056.cover.medium.jpg"
   },
   {
-    "id": "78058",
-    "title": "Lintukoto : $b Muutamia päiväkirjan lehtiä",
-    "author": "Lehtonen, Joel",
-    "subjects": [
-      "Finnish fiction -- 20th century",
-      "Short stories, Finnish"
-    ],
-    "downloads": 23013,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78058.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78058/pg78058.cover.medium.jpg"
-  },
-  {
-    "id": "78101",
-    "title": "L'homme à l'Hispano : $b roman",
-    "author": "Frondaie, Pierre",
-    "subjects": [
-      "French fiction -- 20th century"
-    ],
-    "downloads": 23012,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78101.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78101/pg78101.cover.medium.jpg"
-  },
-  {
     "id": "78053",
     "title": "Field Artillery Training. 1914",
     "author": "Great Britain. War Office",
@@ -7746,17 +7179,6 @@
     "downloads": 22992,
     "epubUrl": "https://www.gutenberg.org/ebooks/78043.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78043/pg78043.cover.medium.jpg"
-  },
-  {
-    "id": "78125",
-    "title": "Liebe ist ewig : $b Roman",
-    "author": "Polenz, Wilhelm von",
-    "subjects": [
-      "German fiction -- 20th century"
-    ],
-    "downloads": 22991,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78125.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78125/pg78125.cover.medium.jpg"
   },
   {
     "id": "78014",
@@ -7892,21 +7314,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78126/pg78126.cover.medium.jpg"
   },
   {
-    "id": "78074",
-    "title": "Chroniques de J. Froissart, tome 09/13 : $b 1377-1380 (Depuis la prise de Bergerac jusqu'à la mort de Charles V)",
-    "author": "Froissart, Jean",
-    "subjects": [
-      "Burgundy (France) -- History",
-      "Europe -- History -- 476-1492",
-      "Flanders -- History",
-      "France -- History -- House of Valois, 1328-1589",
-      "Great Britain -- History -- 14th century"
-    ],
-    "downloads": 22923,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78074.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78074/pg78074.cover.medium.jpg"
-  },
-  {
     "id": "78092",
     "title": "Records of Captain Clapperton's last expedition to Africa, Vol. 2 (of 2)",
     "author": "Lander, Richard",
@@ -7986,17 +7393,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78012/pg78012.cover.medium.jpg"
   },
   {
-    "id": "78096",
-    "title": "Hajamuistelmia pakolaiselämästä",
-    "author": "Sirén, Aatto",
-    "subjects": [
-      "Finland -- History -- Civil War, 1918 -- Refugees"
-    ],
-    "downloads": 22910,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78096.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78096/pg78096.cover.medium.jpg"
-  },
-  {
     "id": "78112",
     "title": "Astronomy for beginners",
     "author": "Carrington, Hereward",
@@ -8033,18 +7429,6 @@
     "downloads": 22887,
     "epubUrl": "https://www.gutenberg.org/ebooks/78106.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78106/pg78106.cover.medium.jpg"
-  },
-  {
-    "id": "78036",
-    "title": "Quand le rideau s'est baissé",
-    "author": "Mille, Pierre",
-    "subjects": [
-      "French fiction -- 20th century",
-      "Short stories, French"
-    ],
-    "downloads": 22885,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78036.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78036/pg78036.cover.medium.jpg"
   },
   {
     "id": "78116",
@@ -8368,30 +7752,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78073/pg78073.cover.medium.jpg"
   },
   {
-    "id": "78042",
-    "title": "Ihmisvihaaja : $b Viisinäytöksinen huvinäytelmä",
-    "author": "Molière",
-    "subjects": [
-      "Comedy plays",
-      "France -- Social life and customs -- 17th century -- Drama",
-      "Man-woman relationships -- Drama"
-    ],
-    "downloads": 22790,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78042.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78042/pg78042.cover.medium.jpg"
-  },
-  {
-    "id": "78100",
-    "title": "Läpi harmaan kiven : $b Kaksinäytöksinen näytelmä",
-    "author": "Lehtinen, J. A.",
-    "subjects": [
-      "Finnish drama -- 20th century"
-    ],
-    "downloads": 22789,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78100.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78100/pg78100.cover.medium.jpg"
-  },
-  {
     "id": "78110",
     "title": "Verses",
     "author": "Jacob, Violet",
@@ -8481,17 +7841,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78082/pg78082.cover.medium.jpg"
   },
   {
-    "id": "78049",
-    "title": "Sointula : $b Kolminäytöksinen näytelmä",
-    "author": "Järnefelt, Arvid",
-    "subjects": [
-      "Finnish drama -- 20th century"
-    ],
-    "downloads": 22758,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78049.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78049/pg78049.cover.medium.jpg"
-  },
-  {
     "id": "78035",
     "title": "The Old Lady flies",
     "author": "Whitfield, Raoul",
@@ -8530,42 +7879,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/77097/pg77097.cover.medium.jpg"
   },
   {
-    "id": "78098",
-    "title": "L'art d'aimer: ou conseils à un jeune homme qui se destine à l'amour",
-    "author": "Mendès, Catulle",
-    "subjects": [
-      "Love"
-    ],
-    "downloads": 22748,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78098.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78098/pg78098.cover.medium.jpg"
-  },
-  {
-    "id": "76360",
-    "title": "Die Elixiere des Teufels : $b Nachgelassene Papiere des Bruders Medardus, eines Kapuziners",
-    "author": "Hoffmann, E. T. A. (Ernst Theodor Amadeus)",
-    "subjects": [
-      "Devil -- Fiction",
-      "Fantasy fiction, German",
-      "Gothic fiction",
-      "Monks -- Fiction"
-    ],
-    "downloads": 22743,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76360.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76360/pg76360.cover.medium.jpg"
-  },
-  {
-    "id": "78097",
-    "title": "Kevättuulahduksia : $b Runokokoelma",
-    "author": "Mantere, Niilo",
-    "subjects": [
-      "Finnish poetry -- 19th century"
-    ],
-    "downloads": 22741,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78097.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78097/pg78097.cover.medium.jpg"
-  },
-  {
     "id": "78051",
     "title": "Borrowed feathers",
     "author": "Lamb, Ruth",
@@ -8600,18 +7913,6 @@
     "downloads": 22726,
     "epubUrl": "https://www.gutenberg.org/ebooks/78104.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78104/pg78104.cover.medium.jpg"
-  },
-  {
-    "id": "78037",
-    "title": "Les trente-six vues de la Tour Eiffel",
-    "author": "Unknown Author",
-    "subjects": [
-      "Artists' books -- France",
-      "Tour Eiffel (Paris, France) in art"
-    ],
-    "downloads": 22712,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78037.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78037/pg78037.cover.medium.jpg"
   },
   {
     "id": "78114",
@@ -8674,21 +7975,6 @@
     "downloads": 22690,
     "epubUrl": "https://www.gutenberg.org/ebooks/78011.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78011/pg78011.cover.medium.jpg"
-  },
-  {
-    "id": "78069",
-    "title": "Deux générations",
-    "author": "Tolstoy, Leo, graf",
-    "subjects": [
-      "Country life -- Russia -- Fiction",
-      "Fathers and sons -- Fiction",
-      "Hussars -- Fiction",
-      "Russia -- Social life and customs -- 19th century -- Fiction",
-      "Russian fiction -- Translations into French"
-    ],
-    "downloads": 22690,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78069.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78069/pg78069.cover.medium.jpg"
   },
   {
     "id": "78115",
@@ -8822,30 +8108,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78060/pg78060.cover.medium.jpg"
   },
   {
-    "id": "78007",
-    "title": "Vanhaa viinaa uudessa leilissä : $b Pakinoita",
-    "author": "Valkonen, Tatu",
-    "subjects": [
-      "Finnish wit and humor"
-    ],
-    "downloads": 22649,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78007.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78007/pg78007.cover.medium.jpg"
-  },
-  {
-    "id": "78071",
-    "title": "Kaksi morsianta : $b Yksinäytöksinen pila",
-    "author": "Hemmo, Kaarlo",
-    "subjects": [
-      "Comedy plays",
-      "Finnish drama -- 20th century",
-      "One-act plays"
-    ],
-    "downloads": 22648,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78071.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78071/pg78071.cover.medium.jpg"
-  },
-  {
     "id": "78083",
     "title": "Fawn in the wood",
     "author": "Unknown",
@@ -8855,29 +8117,6 @@
     "downloads": 22641,
     "epubUrl": "https://www.gutenberg.org/ebooks/78083.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/78083/pg78083.cover.medium.jpg"
-  },
-  {
-    "id": "78063",
-    "title": "Le jeune Européen",
-    "author": "Drieu La Rochelle, Pierre",
-    "subjects": [
-      "French essays"
-    ],
-    "downloads": 22638,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78063.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78063/pg78063.cover.medium.jpg"
-  },
-  {
-    "id": "78081",
-    "title": "Huligaani : $b ynnä muita kertoelmia",
-    "author": "Järnefelt, Arvid",
-    "subjects": [
-      "Finnish fiction -- 20th century",
-      "Short stories, Finnish"
-    ],
-    "downloads": 22636,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78081.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78081/pg78081.cover.medium.jpg"
   },
   {
     "id": "77016",
@@ -8910,18 +8149,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/78044/pg78044.cover.medium.jpg"
   },
   {
-    "id": "65662",
-    "title": "Der Zauberberg. Zweiter Band",
-    "author": "Mann, Thomas",
-    "subjects": [
-      "Germany -- Fiction",
-      "Sanatoriums -- Fiction"
-    ],
-    "downloads": 22624,
-    "epubUrl": "https://www.gutenberg.org/ebooks/65662.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/65662/pg65662.cover.medium.jpg"
-  },
-  {
     "id": "76280",
     "title": "Mathias Sandorf [1] : $b Een verijdelde samenzwering; Dokter Antekirrt",
     "author": "Verne, Jules",
@@ -8949,28 +8176,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76418/pg76418.cover.medium.jpg"
   },
   {
-    "id": "55487",
-    "title": "Sämmtliche Werke 5: Dramatische Werke",
-    "author": "Gogol, Nikolai Vasilevich",
-    "subjects": [
-      "Russian drama -- Translations into German"
-    ],
-    "downloads": 22616,
-    "epubUrl": "https://www.gutenberg.org/ebooks/55487.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/55487/pg55487.cover.medium.jpg"
-  },
-  {
-    "id": "78080",
-    "title": "Journal de la société de 1789 - Nº II",
-    "author": "Condorcet, Jean-Antoine-Nicolas de Caritat, marquis de, Grouvelle, Philippe-Antoine, Hassenfratz, J. H. (Jean-Henri), Pressac de la Chagnaye, Louis-François-Dominique-Norbert",
-    "subjects": [
-      "France -- History -- Revolution, 1789-1799 -- Periodicals"
-    ],
-    "downloads": 22594,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78080.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78080/pg78080.cover.medium.jpg"
-  },
-  {
     "id": "75922",
     "title": "The amazing adventures of Letitia Carberry",
     "author": "Rinehart, Mary Roberts",
@@ -8984,44 +8189,6 @@
     "downloads": 22586,
     "epubUrl": "https://www.gutenberg.org/ebooks/75922.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/75922/pg75922.cover.medium.jpg"
-  },
-  {
-    "id": "76724",
-    "title": "La chasse au météore",
-    "author": "Verne, Jules",
-    "subjects": [
-      "Amateur astronomy -- Fiction",
-      "Fantasy fiction",
-      "Greed -- Fiction",
-      "Meteors -- Fiction",
-      "National characteristics, American -- Fiction"
-    ],
-    "downloads": 22583,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76724.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76724/pg76724.cover.medium.jpg"
-  },
-  {
-    "id": "78026",
-    "title": "Skizzen einer Fußreise durch Oesterreich, Steiermark, Kärnthen, Salzburg, Berchtesgaden, Tirol und Baiern nach Wien, : $b nebst einer romantisch pittoresken Darstellung mehrerer Ritterburgen und ihrer Volkssagen, Gebirgsgegenden und Eisglätscher auf dieser Wanderung, unternommen im Jahre 1825 von Joseph Kyselak. (2/2)",
-    "author": "Kyselak, Josef",
-    "subjects": [
-      "Austria -- Description and travel",
-      "Berchtesgaden (Germany) -- Description and travel"
-    ],
-    "downloads": 22581,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78026.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78026/pg78026.cover.medium.jpg"
-  },
-  {
-    "id": "78008",
-    "title": "\"Hauska tutustua!\" : $b Viisunikkarin elämyksiä Lännen kultamaassa",
-    "author": "Pekkarinen, Tatu",
-    "subjects": [
-      "Finnish fiction -- 20th century"
-    ],
-    "downloads": 22579,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78008.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78008/pg78008.cover.medium.jpg"
   },
   {
     "id": "76919",
@@ -9133,20 +8300,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76116/pg76116.cover.medium.jpg"
   },
   {
-    "id": "76501",
-    "title": "Ruhtinatar Aurore : $b (»Königsmark»)",
-    "author": "Benoît, Pierre",
-    "subjects": [
-      "French -- Germany -- Fiction",
-      "French fiction -- Translations into Finnish",
-      "Mystery fiction",
-      "Nobility -- Germany -- Fiction"
-    ],
-    "downloads": 22544,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76501.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76501/pg76501.cover.medium.jpg"
-  },
-  {
     "id": "76689",
     "title": "Snow-blind",
     "author": "Treynor, Albert M. (Albert McKune)",
@@ -9236,19 +8389,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/77098/pg77098.cover.medium.jpg"
   },
   {
-    "id": "76540",
-    "title": "Les Mémoires d'un Parapluie",
-    "author": "Houdetot, Elisabeth Galos, comtesse de",
-    "subjects": [
-      "Children's stories, French",
-      "Picture books for children",
-      "Umbrellas -- Juvenile fiction"
-    ],
-    "downloads": 22524,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76540.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76540/pg76540.cover.medium.jpg"
-  },
-  {
     "id": "77109",
     "title": "A journey to the world under-ground",
     "author": "Holberg, Ludvig",
@@ -9273,19 +8413,6 @@
     "downloads": 22503,
     "epubUrl": "https://www.gutenberg.org/ebooks/76796.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76796/pg76796.cover.medium.jpg"
-  },
-  {
-    "id": "78123",
-    "title": "Un pis al ensanche : $b Comedia en un acte y en prosa",
-    "author": "Feliú y Codina, José",
-    "subjects": [
-      "Catalan drama",
-      "Comedy plays",
-      "One-act plays"
-    ],
-    "downloads": 22502,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78123.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78123/pg78123.cover.medium.jpg"
   },
   {
     "id": "76059",
@@ -9337,17 +8464,6 @@
     "downloads": 22495,
     "epubUrl": "https://www.gutenberg.org/ebooks/76358.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76358/pg76358.cover.medium.jpg"
-  },
-  {
-    "id": "77086",
-    "title": "Les cœurs les plus farouches",
-    "author": "Curwood, James Oliver",
-    "subjects": [
-      "Northwest, Canadian -- Fiction"
-    ],
-    "downloads": 22493,
-    "epubUrl": "https://www.gutenberg.org/ebooks/77086.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/77086/pg77086.cover.medium.jpg"
   },
   {
     "id": "75967",
@@ -9405,18 +8521,6 @@
     "downloads": 22475,
     "epubUrl": "https://www.gutenberg.org/ebooks/55317.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/55317/pg55317.cover.medium.jpg"
-  },
-  {
-    "id": "76896",
-    "title": "Ikuinen salaisuus : $b Rakkaus- ja jännityskertomuksia",
-    "author": "London, Jack",
-    "subjects": [
-      "American fiction -- Translations into Finnish",
-      "Short stories, American -- Translations into Finnish"
-    ],
-    "downloads": 22471,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76896.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76896/pg76896.cover.medium.jpg"
   },
   {
     "id": "78093",
@@ -9481,19 +8585,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76849/pg76849.cover.medium.jpg"
   },
   {
-    "id": "76433",
-    "title": "La marque des quatre",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 22440,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76433.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76433/pg76433.cover.medium.jpg"
-  },
-  {
     "id": "77022",
     "title": "The porcelain mask : $b A detective story",
     "author": "Chichester, John Jay",
@@ -9506,18 +8597,6 @@
     "downloads": 22440,
     "epubUrl": "https://www.gutenberg.org/ebooks/77022.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/77022/pg77022.cover.medium.jpg"
-  },
-  {
-    "id": "78070",
-    "title": "Velisurmaaja : $b Kolmenäytöksinen murhenäytelmä",
-    "author": "Haarla, Lauri",
-    "subjects": [
-      "Finnish drama -- 20th century",
-      "Tragedies (Drama)"
-    ],
-    "downloads": 22430,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78070.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78070/pg78070.cover.medium.jpg"
   },
   {
     "id": "76442",
@@ -9780,19 +8859,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76413/pg76413.cover.medium.jpg"
   },
   {
-    "id": "76520",
-    "title": "Hänen viimeinen tervehdyksensä : $b Muutamia muistelmia Sherlock Holmesista",
-    "author": "Doyle, Arthur Conan",
-    "subjects": [
-      "Detective and mystery stories, English -- Translations into Finnish",
-      "Holmes, Sherlock (Fictitious character) -- Fiction",
-      "Private investigators -- England -- Fiction"
-    ],
-    "downloads": 22331,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76520.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76520/pg76520.cover.medium.jpg"
-  },
-  {
     "id": "75877",
     "title": "Lucius Davoren; or, Publicans and sinners, vol. 3",
     "author": "Braddon, M. E. (Mary Elizabeth)",
@@ -9994,21 +9060,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76496/pg76496.cover.medium.jpg"
   },
   {
-    "id": "76334",
-    "title": "Ikuinen rakastaja",
-    "author": "Burroughs, Edgar Rice",
-    "subjects": [
-      "Africa -- Fiction",
-      "Americans -- Africa -- Fiction",
-      "Fantasy fiction",
-      "Immortalism -- Fiction",
-      "Love stories"
-    ],
-    "downloads": 22235,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76334.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76334/pg76334.cover.medium.jpg"
-  },
-  {
     "id": "76541",
     "title": "Red aces : $b Being three cases of Mr. Reeder",
     "author": "Wallace, Edgar",
@@ -10019,39 +9070,6 @@
     "downloads": 22230,
     "epubUrl": "https://www.gutenberg.org/ebooks/76541.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/76541/pg76541.cover.medium.jpg"
-  },
-  {
-    "id": "77009",
-    "title": "Ihmisten kapina : $b Kolminäytöksinen draama",
-    "author": "Haarla, Lauri",
-    "subjects": [
-      "Finnish drama -- 20th century"
-    ],
-    "downloads": 22229,
-    "epubUrl": "https://www.gutenberg.org/ebooks/77009.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/77009/pg77009.cover.medium.jpg"
-  },
-  {
-    "id": "77073",
-    "title": "Die Flucht der Beate Hoyermann : $b Roman",
-    "author": "Harbou, Thea von",
-    "subjects": [
-      "German fiction -- 20th century"
-    ],
-    "downloads": 22228,
-    "epubUrl": "https://www.gutenberg.org/ebooks/77073.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/77073/pg77073.cover.medium.jpg"
-  },
-  {
-    "id": "78113",
-    "title": "Elämän urpuja",
-    "author": "Vuokoski, Viljami",
-    "subjects": [
-      "Finnish poetry -- 20th century"
-    ],
-    "downloads": 22228,
-    "epubUrl": "https://www.gutenberg.org/ebooks/78113.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/78113/pg78113.cover.medium.jpg"
   },
   {
     "id": "76634",
@@ -10115,21 +9133,6 @@
     "downloads": 22215,
     "epubUrl": "https://www.gutenberg.org/ebooks/75858.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/75858/pg75858.cover.medium.jpg"
-  },
-  {
-    "id": "76543",
-    "title": "Tuhatvuotinen valtakunta : $b Nelinäytöksinen näytelmä Upton Sinclairin romaanin mukaan",
-    "author": "Sinclair, Upton, Välisalmi, Heikki",
-    "subjects": [
-      "End of the world -- Drama",
-      "Millennium (Eschatology) -- Drama",
-      "Science fiction plays",
-      "Two thousand, A.D. -- Drama",
-      "Utopian plays"
-    ],
-    "downloads": 22194,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76543.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76543/pg76543.cover.medium.jpg"
   },
   {
     "id": "76082",
@@ -10504,18 +9507,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/1952/pg1952.cover.medium.jpg"
   },
   {
-    "id": "60353",
-    "title": "Millionen; Der Tod des Iwan Lande: Zwei Novellen",
-    "author": "Artsybashev, M. (Mikhail)",
-    "subjects": [
-      "Russia -- Social life and customs -- Fiction",
-      "Russian fiction -- Translations into German"
-    ],
-    "downloads": 19895,
-    "epubUrl": "https://www.gutenberg.org/ebooks/60353.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/60353/pg60353.cover.medium.jpg"
-  },
-  {
     "id": "44608",
     "title": "The Bābur-nāma in English (Memoirs of Bābur)",
     "author": "Babur, Emperor of Hindustan",
@@ -10564,20 +9555,6 @@
     "downloads": 19203,
     "epubUrl": "https://www.gutenberg.org/ebooks/26184.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/26184/pg26184.cover.medium.jpg"
-  },
-  {
-    "id": "24746",
-    "title": "Reise in die Aequinoctial-Gegenden des neuen Continents. Band 2.",
-    "author": "Humboldt, Alexander von",
-    "subjects": [
-      "Geology -- South America",
-      "Natural history -- South America",
-      "South America -- Description and travel",
-      "South America -- History"
-    ],
-    "downloads": 19194,
-    "epubUrl": "https://www.gutenberg.org/ebooks/24746.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/24746/pg24746.cover.medium.jpg"
   },
   {
     "id": "205",
@@ -10630,21 +9607,6 @@
     "downloads": 18942,
     "epubUrl": "https://www.gutenberg.org/ebooks/54879.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/54879/pg54879.cover.medium.jpg"
-  },
-  {
-    "id": "47960",
-    "title": "Romeo and Juliet",
-    "author": "Shakespeare, William",
-    "subjects": [
-      "Conflict of generations -- Drama",
-      "Juliet (Fictitious character) -- Drama",
-      "Romeo (Fictitious character) -- Drama",
-      "Tragedies (Drama)",
-      "Vendetta -- Drama"
-    ],
-    "downloads": 18800,
-    "epubUrl": "https://www.gutenberg.org/ebooks/47960.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/47960/pg47960.cover.medium.jpg"
   },
   {
     "id": "1400",
@@ -10851,18 +9813,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/1023/pg1023.cover.medium.jpg"
   },
   {
-    "id": "49501",
-    "title": "Anzeiger für Kunde der deutschen Vorzeit (Jg. 26, 1879): Neue Folge",
-    "author": "Various",
-    "subjects": [
-      "Germany -- Antiquities -- Periodicals",
-      "Germany -- History -- Periodicals"
-    ],
-    "downloads": 17952,
-    "epubUrl": "https://www.gutenberg.org/ebooks/49501.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/49501/pg49501.cover.medium.jpg"
-  },
-  {
     "id": "8800",
     "title": "The divine comedy",
     "author": "Dante Alighieri",
@@ -10952,29 +9902,6 @@
     "downloads": 17686,
     "epubUrl": "https://www.gutenberg.org/ebooks/135.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/135/pg135.cover.medium.jpg"
-  },
-  {
-    "id": "50559",
-    "title": "The Works of William Shakespeare [Cambridge Edition] [Vol. 3 of 9]",
-    "author": "Shakespeare, William",
-    "subjects": [
-      "English drama"
-    ],
-    "downloads": 17685,
-    "epubUrl": "https://www.gutenberg.org/ebooks/50559.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/50559/pg50559.cover.medium.jpg"
-  },
-  {
-    "id": "52597",
-    "title": "Insolación y Morriña (Dos historias amorosas)",
-    "author": "Pardo Bazán, Emilia, condesa de",
-    "subjects": [
-      "Romance fiction, Spanish",
-      "Spanish fiction -- 19th century"
-    ],
-    "downloads": 17669,
-    "epubUrl": "https://www.gutenberg.org/ebooks/52597.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/52597/pg52597.cover.medium.jpg"
   },
   {
     "id": "48963",
@@ -11141,17 +10068,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/76732/pg76732.cover.medium.jpg"
   },
   {
-    "id": "50528",
-    "title": "Pitt und Fox, die Liebeswege der Brüder Sintrup: Roman",
-    "author": "Huch, Friedrich",
-    "subjects": [
-      "German fiction"
-    ],
-    "downloads": 15314,
-    "epubUrl": "https://www.gutenberg.org/ebooks/50528.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/50528/pg50528.cover.medium.jpg"
-  },
-  {
     "id": "26849",
     "title": "The Works of Mr. George Gillespie (Vol. 1 of 2)",
     "author": "Gillespie, George",
@@ -11162,19 +10078,6 @@
     "downloads": 15310,
     "epubUrl": "https://www.gutenberg.org/ebooks/26849.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/26849/pg26849.cover.medium.jpg"
-  },
-  {
-    "id": "76729",
-    "title": "Palvelusväkeä : $b Yksinäytöksinen huvinäytelmä",
-    "author": "Benedix, Roderich",
-    "subjects": [
-      "Comedy plays",
-      "German drama (Comedy) -- Translations into Finnish",
-      "One-act plays"
-    ],
-    "downloads": 15273,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76729.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76729/pg76729.cover.medium.jpg"
   },
   {
     "id": "3177",
@@ -11299,19 +10202,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/10676/pg10676.cover.medium.jpg"
   },
   {
-    "id": "3160",
-    "title": "The Odyssey",
-    "author": "Homer",
-    "subjects": [
-      "Epic poetry, Greek -- Translations into English",
-      "Homer -- Translations into English",
-      "Odysseus, King of Ithaca (Mythological character) -- Poetry"
-    ],
-    "downloads": 13646,
-    "epubUrl": "https://www.gutenberg.org/ebooks/3160.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/3160/pg3160.cover.medium.jpg"
-  },
-  {
     "id": "42486",
     "title": "The Two Magics: The Turn of the Screw, Covering End",
     "author": "James, Henry",
@@ -11337,19 +10227,6 @@
     "downloads": 13570,
     "epubUrl": "https://www.gutenberg.org/ebooks/132.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/132/pg132.cover.medium.jpg"
-  },
-  {
-    "id": "48040",
-    "title": "Das Bücher-Dekameron: Eine Zehn-Nächte-Tour durch die europäische Gesellschaft und Literatur",
-    "author": "Edschmid, Kasimir",
-    "subjects": [
-      "Europe -- Social life and customs",
-      "European literature -- History and criticism",
-      "Literature, Modern -- History and criticism"
-    ],
-    "downloads": 13345,
-    "epubUrl": "https://www.gutenberg.org/ebooks/48040.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/48040/pg48040.cover.medium.jpg"
   },
   {
     "id": "35",
@@ -11391,21 +10268,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/25359/pg25359.cover.medium.jpg"
   },
   {
-    "id": "514",
-    "title": "Little Women",
-    "author": "Alcott, Louisa May",
-    "subjects": [
-      "Autobiographical fiction",
-      "Bildungsromans",
-      "Domestic fiction",
-      "Family life -- New England -- Fiction",
-      "March family (Fictitious characters) -- Fiction"
-    ],
-    "downloads": 12878,
-    "epubUrl": "https://www.gutenberg.org/ebooks/514.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/514/pg514.cover.medium.jpg"
-  },
-  {
     "id": "67098",
     "title": "Winnie-the-Pooh",
     "author": "Milne, A. A. (Alan Alexander)",
@@ -11419,31 +10281,6 @@
     "downloads": 12835,
     "epubUrl": "https://www.gutenberg.org/ebooks/67098.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/67098/pg67098.cover.medium.jpg"
-  },
-  {
-    "id": "40739",
-    "title": "Die Traumdeutung",
-    "author": "Freud, Sigmund",
-    "subjects": [
-      "Dream interpretation",
-      "Dreams",
-      "Psychoanalysis"
-    ],
-    "downloads": 12825,
-    "epubUrl": "https://www.gutenberg.org/ebooks/40739.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/40739/pg40739.cover.medium.jpg"
-  },
-  {
-    "id": "63460",
-    "title": "Die seltsamen Geschichten des Doktor Ulebuhle",
-    "author": "Bürgel, Bruno Hans",
-    "subjects": [
-      "German fiction -- 20th century",
-      "Short stories, German"
-    ],
-    "downloads": 12784,
-    "epubUrl": "https://www.gutenberg.org/ebooks/63460.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/63460/pg63460.cover.medium.jpg"
   },
   {
     "id": "26009",
@@ -11497,18 +10334,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/22091/pg22091.cover.medium.jpg"
   },
   {
-    "id": "76662",
-    "title": "Sämtliche Werke 20 : $b Aus dem Dunkel der Großstadt : Acht Novellen",
-    "author": "Dostoyevsky, Fyodor",
-    "subjects": [
-      "Russian fiction -- Translations into German",
-      "Short stories, Russian -- Translations into German"
-    ],
-    "downloads": 12454,
-    "epubUrl": "https://www.gutenberg.org/ebooks/76662.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/76662/pg76662.cover.medium.jpg"
-  },
-  {
     "id": "24141",
     "title": "警世通言",
     "author": "Feng, Menglong",
@@ -11519,17 +10344,6 @@
     "downloads": 12353,
     "epubUrl": "https://www.gutenberg.org/ebooks/24141.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/24141/pg24141.cover.medium.jpg"
-  },
-  {
-    "id": "62635",
-    "title": "Moloks leende: roman",
-    "author": "Berg, Daniel",
-    "subjects": [
-      "Swedish fiction"
-    ],
-    "downloads": 12306,
-    "epubUrl": "https://www.gutenberg.org/ebooks/62635.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/62635/pg62635.cover.medium.jpg"
   },
   {
     "id": "2638",
@@ -11558,18 +10372,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/12/pg12.cover.medium.jpg"
   },
   {
-    "id": "31284",
-    "title": "Josefine Mutzenbacher: oder Die Geschichte einer Wienerischen Dirne von ihr selbst erzählt",
-    "author": "Salten, Felix",
-    "subjects": [
-      "Austrian fiction",
-      "Erotic fiction"
-    ],
-    "downloads": 12169,
-    "epubUrl": "https://www.gutenberg.org/ebooks/31284.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/31284/pg31284.cover.medium.jpg"
-  },
-  {
     "id": "1228",
     "title": "On the Origin of Species By Means of Natural Selection: Or, the Preservation of Favoured Races in the Struggle for Life",
     "author": "Darwin, Charles",
@@ -11580,18 +10382,6 @@
     "downloads": 12095,
     "epubUrl": "https://www.gutenberg.org/ebooks/1228.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/1228/pg1228.cover.medium.jpg"
-  },
-  {
-    "id": "65580",
-    "title": "Carl Svenske: Historisk berättelse från frihetstiden",
-    "author": "Björlin, Gustaf",
-    "subjects": [
-      "Historical fiction",
-      "Sweden -- Fiction"
-    ],
-    "downloads": 12091,
-    "epubUrl": "https://www.gutenberg.org/ebooks/65580.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/65580/pg65580.cover.medium.jpg"
   },
   {
     "id": "22373",
@@ -11642,33 +10432,6 @@
     "downloads": 11581,
     "epubUrl": "https://www.gutenberg.org/ebooks/7370.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/7370/pg7370.cover.medium.jpg"
-  },
-  {
-    "id": "57741",
-    "title": "Der kleine Dämon",
-    "author": "Sologub, Fyodor",
-    "subjects": [
-      "Mental illness -- Fiction",
-      "Russia -- Fiction",
-      "Russian fiction -- Translations into German",
-      "Teachers -- Fiction"
-    ],
-    "downloads": 11504,
-    "epubUrl": "https://www.gutenberg.org/ebooks/57741.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/57741/pg57741.cover.medium.jpg"
-  },
-  {
-    "id": "2650",
-    "title": "Du côté de chez Swann",
-    "author": "Proust, Marcel",
-    "subjects": [
-      "Autobiographical fiction",
-      "France -- Social life and customs -- 19th century -- Fiction",
-      "Villages -- France -- Fiction"
-    ],
-    "downloads": 11332,
-    "epubUrl": "https://www.gutenberg.org/ebooks/2650.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/2650/pg2650.cover.medium.jpg"
   },
   {
     "id": "600",
@@ -11772,20 +10535,6 @@
     "downloads": 10899,
     "epubUrl": "https://www.gutenberg.org/ebooks/25344.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/25344/pg25344.cover.medium.jpg"
-  },
-  {
-    "id": "26",
-    "title": "Paradise Lost",
-    "author": "Milton, John",
-    "subjects": [
-      "Adam (Biblical figure) -- Poetry",
-      "Bible. Genesis -- History of Biblical events -- Poetry",
-      "Eve (Biblical figure) -- Poetry",
-      "Fall of man -- Poetry"
-    ],
-    "downloads": 10698,
-    "epubUrl": "https://www.gutenberg.org/ebooks/26.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/26/pg26.cover.medium.jpg"
   },
   {
     "id": "730",
@@ -12222,18 +10971,6 @@
     "coverUrl": "https://www.gutenberg.org/cache/epub/22400/pg22400.cover.medium.jpg"
   },
   {
-    "id": "64414",
-    "title": "Der Jäger von Fall : $b Hochlandsroman",
-    "author": "Ganghofer, Ludwig",
-    "subjects": [
-      "Bavaria (Germany) -- Fiction",
-      "Mountains -- Fiction"
-    ],
-    "downloads": 9408,
-    "epubUrl": "https://www.gutenberg.org/ebooks/64414.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/64414/pg64414.cover.medium.jpg"
-  },
-  {
     "id": "18575",
     "title": "One Hundred Merrie And Delightsome Stories: Right Pleasaunte To Relate In All Goodly Companie By Way Of Joyance And Jollity",
     "author": "Unknown Author",
@@ -12245,20 +10982,6 @@
     "downloads": 9405,
     "epubUrl": "https://www.gutenberg.org/ebooks/18575.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/18575/pg18575.cover.medium.jpg"
-  },
-  {
-    "id": "17396",
-    "title": "The Secret Garden",
-    "author": "Burnett, Frances Hodgson",
-    "subjects": [
-      "Gardens -- Juvenile fiction",
-      "Orphans -- Juvenile fiction",
-      "People with disabilities -- Juvenile fiction",
-      "Yorkshire (England) -- Juvenile fiction"
-    ],
-    "downloads": 9362,
-    "epubUrl": "https://www.gutenberg.org/ebooks/17396.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/17396/pg17396.cover.medium.jpg"
   },
   {
     "id": "19942",
@@ -12283,21 +11006,6 @@
     "downloads": 9296,
     "epubUrl": "https://www.gutenberg.org/ebooks/22372.epub3.images",
     "coverUrl": "https://www.gutenberg.org/cache/epub/22372/pg22372.cover.medium.jpg"
-  },
-  {
-    "id": "75802",
-    "title": "Der Steppenwolf",
-    "author": "Hesse, Hermann",
-    "subjects": [
-      "Civilization, Western -- Fiction",
-      "Germany -- Social life and customs -- 20th century -- Fiction",
-      "Intellectuals -- Germany -- Fiction",
-      "Life -- Fiction",
-      "Men -- Germany -- Psychology -- Fiction"
-    ],
-    "downloads": 9196,
-    "epubUrl": "https://www.gutenberg.org/ebooks/75802.epub3.images",
-    "coverUrl": "https://www.gutenberg.org/cache/epub/75802/pg75802.cover.medium.jpg"
   },
   {
     "id": "4507",
