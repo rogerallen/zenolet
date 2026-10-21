@@ -1,5 +1,13 @@
 {
   "name": "zenolet-cors-proxy",
   "compatibility_date": "2026-07-27",
-  "main": "worker/index.js"
+  "main": "worker/index.js",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
 }

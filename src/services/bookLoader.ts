@@ -53,26 +53,32 @@ export async function loadBookPipeline(
   const candidateUrls = getGutenbergCandidateUrls(book.id, book.epubUrl);
   let lastErr: Error | null = null;
   let epubBuffer: ArrayBuffer | null = null;
+  let parsed: ReturnType<typeof parseEpubArchive> | null = null;
 
   for (const candidate of candidateUrls) {
     try {
       const buffer = await fetchArrayBufferWithProxy(candidate, proxyUrl);
       if (buffer && buffer.byteLength > 100) {
+        // Validate and unpack EPUB archive inside candidate loop
+        // to guarantee corrupted or truncated downloads trigger candidate fallback
+        parsed = parseEpubArchive(buffer);
         epubBuffer = buffer;
         break;
       }
     } catch (err) {
+      console.warn(
+        `[Zenolet] Candidate download/unpack failed for "${candidate}": ${err instanceof Error ? err.message : String(err)}`
+      );
       lastErr = err as Error;
     }
   }
 
-  if (!epubBuffer) {
+  if (!epubBuffer || !parsed) {
     throw lastErr || new Error(`Could not load EPUB for book #${book.id}`);
   }
 
-  // 3. Parse & stitch EPUB archive
+  // 3. Extract content & metadata from parsed EPUB archive
   onProgress?.('Unpacking EPUB...');
-  const parsed = parseEpubArchive(epubBuffer);
   const content = parsed.htmlContent;
   const chapters = parsed.chapters;
   const tocChapters = parsed.tocChapters;

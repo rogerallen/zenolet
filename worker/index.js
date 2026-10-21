@@ -43,7 +43,7 @@ function getCorsHeaders(origin, env) {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, User-Agent, Range',
-    'Access-Control-Expose-Headers': 'Content-Length, Content-Type, Content-Range',
+    'Access-Control-Expose-Headers': 'Content-Length, Content-Type, Content-Range, X-Content-Length',
     'Access-Control-Max-Age': '86400'
   };
 }
@@ -130,6 +130,9 @@ export default {
       }
 
       const contentLength = response.headers.get('content-length');
+      if (contentLength) {
+        responseHeaders.set('X-Content-Length', contentLength);
+      }
       console.log(
         `[Zenolet Proxy] Target response received for "${targetUrl}" | ` +
           `Status: ${response.status} | Content-Type: ${response.headers.get('content-type') || 'unknown'} | ` +
@@ -144,25 +147,9 @@ export default {
         });
       }
 
-      // 5. Wrap stream with byte counter to verify full delivery
-      let totalBytes = 0;
-      const loggingStream = new TransformStream({
-        transform(chunk, controller) {
-          totalBytes += chunk.byteLength;
-          controller.enqueue(chunk);
-        },
-        flush() {
-          const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2);
-          console.log(
-            `[Zenolet Proxy] Download complete for "${targetUrl}" | ` +
-              `Total Bytes Transferred: ${totalBytes} bytes (${sizeMB} MB)`
-          );
-        }
-      });
-
-      const bodyStream = response.body.pipeThrough(loggingStream);
-
-      return new Response(bodyStream, {
+      // Stream response directly using native C++ edge streaming rather than
+      // TransformStream, preventing Free Plan CPU timeouts and premature socket termination.
+      return new Response(response.body, {
         status: response.status,
         headers: responseHeaders
       });

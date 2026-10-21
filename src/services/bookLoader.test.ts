@@ -134,6 +134,36 @@ describe('bookLoader service', () => {
     expect(corsProxy.fetchArrayBufferWithProxy).toHaveBeenCalledTimes(3);
   });
 
+  it('falls back to next candidate when an earlier candidate yields corrupted or invalid ZIP data', async () => {
+    vi.mocked(storage.getStoredBookOffline).mockResolvedValue(null);
+    vi.mocked(corsProxy.getGutenbergCandidateUrls).mockReturnValue([
+      'https://gutenberg.org/corrupt.epub',
+      'https://gutenberg.org/valid.epub'
+    ]);
+
+    vi.mocked(corsProxy.fetchArrayBufferWithProxy)
+      .mockResolvedValueOnce(new ArrayBuffer(206756))
+      .mockResolvedValueOnce(new ArrayBuffer(814023));
+
+    vi.mocked(epub.parseEpubArchive)
+      .mockImplementationOnce(() => {
+        throw new Error('invalid zip data');
+      })
+      .mockReturnValueOnce({
+        title: 'Moby Dick',
+        author: 'Herman Melville',
+        htmlContent: '<p>Call me Ishmael</p>',
+        chapters: [],
+        tocChapters: []
+      });
+
+    const result = await loadBookPipeline(testBook, 'https://proxy.example.com', 0);
+
+    expect(result.content).toBe('<p>Call me Ishmael</p>');
+    expect(corsProxy.fetchArrayBufferWithProxy).toHaveBeenCalledTimes(2);
+    expect(epub.parseEpubArchive).toHaveBeenCalledTimes(2);
+  });
+
   it('throws an error when all candidate URLs fail to download', async () => {
     vi.mocked(storage.getStoredBookOffline).mockResolvedValue(null);
     vi.mocked(corsProxy.getGutenbergCandidateUrls).mockReturnValue(['https://gutenberg.org/bad.epub']);

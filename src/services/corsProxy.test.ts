@@ -128,6 +128,8 @@ describe('Worker Proxy Security & CORS Preflight', () => {
       const res = await worker.fetch(req);
       expect(res.status).toBe(200);
       expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://rogerallen.github.io');
+      expect(res.headers.get('X-Content-Length')).toBe(String(mockTargetContent.length));
+      expect(res.headers.get('Access-Control-Expose-Headers')).toContain('X-Content-Length');
 
       const bodyText = await res.text();
       expect(bodyText).toBe(mockTargetContent);
@@ -228,5 +230,64 @@ describe('getGutenbergCandidateUrls & fetchArrayBufferWithProxy', () => {
     });
 
     await expect(fetchArrayBufferWithProxy(targetUrl, customProxy)).rejects.toThrow('Hard fail');
+  });
+
+  it('rejects incomplete downloads when buffer size is less than Content-Length header', async () => {
+    const customProxy = 'https://custom-worker.workers.dev';
+    const targetUrl = 'https://www.gutenberg.org/ebooks/2701.epub3.images';
+
+    const truncatedBinary = new Uint8Array([80, 75, 3, 4, ...new Array(50).fill(1)]);
+
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(truncatedBinary.buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/epub+zip',
+          'Content-Length': '814023'
+        }
+      })
+    );
+
+    await expect(fetchArrayBufferWithProxy(targetUrl, customProxy)).rejects.toThrow(
+      'Incomplete binary download: expected 814023 bytes, received 54 bytes'
+    );
+  });
+
+  it('rejects incomplete downloads when buffer size is less than X-Content-Length header', async () => {
+    const customProxy = 'https://custom-worker.workers.dev';
+    const targetUrl = 'https://www.gutenberg.org/ebooks/2701.epub3.images';
+
+    const truncatedBinary = new Uint8Array([80, 75, 3, 4, ...new Array(50).fill(1)]);
+
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(truncatedBinary.buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/epub+zip',
+          'X-Content-Length': '814023'
+        }
+      })
+    );
+
+    await expect(fetchArrayBufferWithProxy(targetUrl, customProxy)).rejects.toThrow(
+      'Incomplete binary download: expected 814023 bytes, received 54 bytes'
+    );
+  });
+
+  it('rejects responses that do not start with a valid ZIP magic header', async () => {
+    const customProxy = 'https://custom-worker.workers.dev';
+    const targetUrl = 'https://www.gutenberg.org/ebooks/2701.epub3.images';
+
+    // 60 bytes of plain text / HTML error page
+    const htmlBinary = new TextEncoder().encode('<html><body>Error: An upstream error occurred</body></html>');
+
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(htmlBinary.buffer, {
+        status: 200,
+        headers: { 'Content-Type': 'text/html' }
+      })
+    );
+
+    await expect(fetchArrayBufferWithProxy(targetUrl, customProxy)).rejects.toThrow('Received non-ZIP binary data');
   });
 });
